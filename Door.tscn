@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://bqi7jxa50tfga"]
+[gd_scene load_steps=13 format=3 uid="uid://bqi7jxa50tfga"]
 
 [ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="1_hmau6"]
 [ext_resource type="Script" path="res://door.gd" id="1_k3u3e"]
 [ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="3_0wmaq"]
+[ext_resource type="Script" path="res://tooltip.gd" id="4_16pc7"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
 atlas = ExtResource("1_hmau6")
@@ -102,6 +103,7 @@ patch_margin_left = 4
 patch_margin_top = 4
 patch_margin_right = 4
 patch_margin_bottom = 4
+script = ExtResource("4_16pc7")
 metadata/_edit_group_ = true
 
 [node name="TooltipLabel" type="Label" parent="TooltipBackground"]

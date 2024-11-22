@@ -1,388 +1,996 @@
-{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang2057{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
-{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
-\pard\sa200\sl276\slmult1\f0\fs22\lang7 ## **1. Structured Scene and Node Hierarchy Documentation**\par
-\par
-### **Hierarchical Overview**\par
-\par
-- **Main Scene** (`Node2D`)\par
-  - **Building Scene** (`Node2D`)\par
-    - *Attached Script:* `building.gd` (extends `Node2D`)\par
-    - **Floor Scenes** *(instantiated at runtime by `building.gd`)*\par
-      - **Floor_X** (`Area2D`)\par
-        - **FloorSprite** (`Sprite2D`)\par
-        - **CollisionShape2D** (`RectangleShape2D`)\par
-        - **Marker2D**\par
-        - **Doors** *(instantiated at runtime by `building.gd`)*\par
-          - **Door** (`Area2D`)\par
-            - *Attached Script:* `door.gd` (extends `Area2D`)\par
-            - **AnimatedSprite2D**\par
-            - **CollisionShape2D**\par
-            - **TooltipBackground** (`NinePatchRect`)\par
-              - **TooltipLabel** (`Label`)\par
-  - **Sprite Scene**\par
-\par
-### **Brief Descriptions**\par
-\par
-- **Main Scene** (`Node2D`):\par
-  - **Purpose**: Serves as the root of the game and the entry point when the game starts.\par
-  - **Contains**: The `Building Scene` and possibly other UI or game elements.\par
-\par
-- **Building Scene** (`Node2D`):\par
-  - **Purpose**: Manages the generation and configuration of the building's floors and doors.\par
-  - **Script**: Attached script `building.gd` (extends `Node2D`).\par
-  - **Functionality**: Uses `building.gd` to preload floor scenes and door data, generate the building structure, and add doors to the floors based on `DoorData.gd`.\par
-\par
-- **Floor Scenes**:\par
-  - **Description**: A collection of floor instances (`floor_0`, `floor_1`, etc.) dynamically instantiated during runtime by `building.gd`.\par
-\par
-- **Floor_X** (`Area2D`):\par
-  - **Purpose**: Represents an individual floor within the building.\par
-  - **Contains**:\par
-    - **FloorSprite** (`Sprite2D`): Displays the visual representation of the floor.\par
-    - **CollisionShape2D** (`RectangleShape2D`): Defines the collision area for physics interactions on the floor.\par
-    - **Marker2D**: Serves as a reference point for positioning doors and other elements on the floor.\par
-    - **Doors**: Instantiated at runtime based on data from `DoorData.gd`.\par
-\par
-- **Door** (`Area2D`):\par
-  - **Purpose**: Represents an individual door on a floor.\par
-  - **Script**: Attached script `door.gd` (extends `Area2D`).\par
-  - **Contains**:\par
-    - **AnimatedSprite2D**: Displays door animations.\par
-    - **CollisionShape2D**: Defines the collision area for interaction detection.\par
-    - **TooltipBackground** (`NinePatchRect`): Background image for the tooltip that scales with the text.\par
-      - **TooltipLabel** (`Label`): Displays tooltip text when interacting with the door.\par
-\par
-- **Sprite Scene**:\par
-  - **Purpose**: [To be defined; likely contains additional sprites or UI elements used in the game.]\par
-\par
-### **Explicit Relationships**\par
-\par
-- **Main Scene** includes **Building Scene** as a child node.\par
-- **Building Scene** uses the `building.gd` script to manage building generation.\par
-- **building.gd** extends `Node2D` and is attached to **Building Scene**.\par
-- **building.gd** instantiates **Floor Scenes** and **Door** nodes during runtime.\par
-- **Door** nodes are managed by the `door.gd` script, which extends `Area2D`.\par
-- **`door.gd`** relies on its child nodes:\par
-  - **AnimatedSprite2D** for displaying door animations.\par
-  - **CollisionShape2D** for interaction detection.\par
-  - **TooltipBackground** and **TooltipLabel** for displaying tooltips.\par
-- **DoorData.gd** provides configuration data used by `building.gd` to instantiate and configure doors, including tooltip text.\par
-\par
----\par
-\par
-## **2. Script Summaries and Responsibilities**\par
-\par
-### **High-Level Overviews**\par
-\par
-#### **`building.gd`**\par
-\par
-- **Extends**: `Node2D`.\par
-- **Attached to**: **Building Scene** node.\par
-- **Purpose**: Manages the procedural generation of the building.\par
-- **Responsibilities**:\par
-  - Preloads floor scenes and door data (`DoorData.gd`).\par
-  - Instantiates and positions floors within the building.\par
-  - Configures collision shapes and markers for floors.\par
-  - Adds doors to each floor based on data from `DoorData.gd`.\par
-\par
-#### **`door.gd`**\par
-\par
-- **Extends**: `Area2D`.\par
-- **Attached to**: **Door** nodes.\par
-- **Purpose**: Controls the behavior, appearance, and interaction of individual doors.\par
-- **Responsibilities**:\par
-  - Configures doors based on provided data from `DoorData.gd`, including tooltip text.\par
-  - Manages door states (open or closed).\par
-  - Updates door animations accordingly.\par
-  - Sets up collision shapes for interaction detection.\par
-  - Handles tooltip display when the player interacts with the door.\par
-\par
-#### **`DoorData.gd`**\par
-\par
-- **Extends**: `Resource`.\par
-- **Class Name**: `DoorData`.\par
-- **Purpose**: Provides door configuration data for the building generation process.\par
-- **Structure**:\par
-  - Contains an exported array `doors`, which holds dictionaries with door properties, including tooltip text.\par
-\par
-### **Function Descriptions**\par
-\par
-#### **`building.gd`**\par
-\par
-- **`_ready()`**:\par
-  - **Description**: Initializes the building generation process when the `Building Scene` is ready.\par
-  - **Actions**:\par
-    - Loads door data resource (`DoorData.gd`).\par
-    - Calls `generate_building()` to start building generation.\par
-\par
-- **`generate_building()`**:\par
-  - **Description**: Generates the building structure by instantiating floors and adding doors.\par
-  - **Actions**:\par
-    - Iterates through preloaded floor scenes.\par
-    - Instantiates each floor using `instantiate_floor()`.\par
-    - Positions floors with `position_floor()`.\par
-    - Configures collision shapes and markers.\par
-    - Calls `add_doors_to_floor()` for each floor.\par
-\par
-- **`add_doors_to_floor(floor_instance, floor_index)`**:\par
-  - **Description**: Adds doors to a specific floor based on door data.\par
-  - **Actions**:\par
-    - Filters doors from `DoorData.gd` for the current floor.\par
-    - For each door data:\par
-      - Calculates door position with `get_door_slot_position()`.\par
-      - Instantiates a `Door` node.\par
-      - Configures the door with `configure_door()`.\par
-\par
-- **`configure_door(door_instance, door_data)`**:\par
-  - **Description**: Configures a door instance with specific data.\par
-  - **Actions**:\par
-    - Calls `door_instance.configure(door_data)` to apply settings, including tooltip text.\par
-\par
-- **`get_door_slot_position(floor_instance, slot_index)`**:\par
-  - **Description**: Calculates the position of a door on a floor.\par
-  - **Actions**:\par
-    - Determines horizontal position based on slot index and floor width.\par
-    - Aligns door vertically with the floor's marker.\par
-\par
-#### **`door.gd`**\par
-\par
-- **`_ready()`**:\par
-  - **Description**: Initializes the door when the node is ready.\par
-  - **Actions**:\par
-    - Calls `setup_door()` to set initial state.\par
-    - Initializes tooltip nodes (`TooltipBackground` and `TooltipLabel`).\par
-    - Connects mouse signals for displaying the tooltip.\par
-    - Updates tooltip size based on the text.\par
-\par
-- **`setup_door()`**:\par
-  - **Description**: Sets up the door's nodes and initial state.\par
-  - **Actions**:\par
-    - Checks for required child nodes (`AnimatedSprite2D`, `CollisionShape2D`).\par
-    - Sets door to initial closed state using `set_door_state()`.\par
-\par
-- **`configure(door_data)`**:\par
-  - **Description**: Configures the door based on provided data.\par
-  - **Actions**:\par
-    - Sets `door_type` from `door_data`.\par
-    - Calls `setup_door()` to apply changes.\par
-    - Updates collision shape with `update_collision_shape()`.\par
-    - Sets the tooltip text from `door_data.tooltip`.\par
-    - Updates the tooltip size to match the text.\par
-\par
-- **`_on_mouse_entered()`**:\par
-  - **Description**: Handles mouse entering the door area.\par
-  - **Actions**:\par
-    - Displays the tooltip by setting `TooltipBackground` visibility to true.\par
-\par
-- **`_on_mouse_exited()`**:\par
-  - **Description**: Handles mouse exiting the door area.\par
-  - **Actions**:\par
-    - Hides the tooltip by setting `TooltipBackground` visibility to false.\par
-\par
-- **`_update_tooltip_size()`**:\par
-  - **Description**: Adjusts the tooltip background size to fit the tooltip text.\par
-  - **Actions**:\par
-    - Calculates the size of `TooltipLabel`.\par
-    - Adds padding to determine the total size.\par
-    - Updates `TooltipBackground` size and position.\par
-    - Positions `TooltipLabel` within `TooltipBackground`.\par
-\par
-- **`set_door_state(new_state)`**:\par
-  - **Description**: Changes the door's state (open or closed).\par
-  - **Actions**:\par
-    - Updates `current_state`.\par
-    - Changes animation on `AnimatedSprite2D`.\par
-\par
-- **`update_collision_shape()`**:\par
-  - **Description**: Adjusts collision shape to match door's visual representation.\par
-  - **Actions**:\par
-    - Calculates dimensions based on current sprite.\par
-    - Updates `CollisionShape2D` extents.\par
-\par
-### **Explicit Relationships**\par
-\par
-- **`building.gd`**:\par
-  - Attached to **Building Scene** (`Node2D`).\par
-  - Manages **Floor_X** nodes (`Area2D`) and instantiates **Door** nodes.\par
-  - Uses data from `DoorData.gd` to configure doors, including tooltips.\par
-\par
-- **`door.gd`**:\par
-  - Attached to **Door** nodes (`Area2D`).\par
-  - Relies on child nodes:\par
-    - **AnimatedSprite2D** for door animations.\par
-    - **CollisionShape2D** for interaction detection.\par
-    - **TooltipBackground** and **TooltipLabel** for displaying tooltips.\par
-  - Uses `door_data` to configure door appearance, behavior, and tooltip text.\par
-\par
-- **`DoorData.gd`**:\par
-  - Provides door configuration data to `building.gd`.\par
-  - Contains properties used by `door.gd` for individual door setup, including `tooltip`.\par
-\par
----\par
-\par
-## **3. Resource and Data Structures Documentation**\par
-\par
-### **Custom Resources**\par
-\par
-#### **`DoorData.gd`**\par
-\par
-- **Extends**: `Resource`.\par
-- **Class Name**: `DoorData`.\par
-- **Purpose**: Stores an array of door data dictionaries for building generation.\par
-- **Structure**:\par
-  - **`doors`**: Exported array containing door data dictionaries.\par
-\par
-### **Data Field Definitions**\par
-\par
-Each door in the `doors` array is a dictionary with the following fields:\par
-\par
-- **`index`** (`int`):\par
-  - **Description**: Unique identifier for the door.\par
-\par
-- **`floor_number`** (`int`):\par
-  - **Description**: Specifies the floor where the door is located.\par
-\par
-- **`door_slot`** (`int`):\par
-  - **Description**: Determines the door's position on the floor.\par
-\par
-- **`door_type`** (`int`):\par
-  - **Description**: Indicates the visual style or type of the door.\par
-\par
-- **`owner`** (`String`):\par
-  - **Description**: Name of the owner or entity associated with the door.\par
-\par
-- **`tooltip`** (`String`):\par
-  - **Description**: Additional information displayed when interacting with the door.\par
-\par
-### **Integration with Scripts**\par
-\par
-- **`building.gd`**:\par
-  - Preloads `DoorData.gd` to access door configuration data.\par
-  - Uses the `doors` array to instantiate and configure doors on each floor, including passing tooltip text.\par
-\par
-- **`door.gd`**:\par
-  - Receives individual `door_data` dictionaries during configuration.\par
-  - Uses `door_data` fields to set door properties, animations, and tooltip text.\par
-  - Adjusts tooltip display based on player interaction.\par
-\par
----\par
-\par
-## **4. Flow of Execution and Interaction**\par
-\par
-### **Process Overview**\par
-\par
-1. **Game Start**:\par
-   - The **Main Scene** (`Node2D`) is loaded as the game's entry point.\par
-   - **Building Scene** (`Node2D`) is instantiated within the Main Scene.\par
-\par
-2. **Building Generation**:\par
-   - `building.gd` script runs `_ready()` function.\par
-   - Loads `DoorData.gd` and preloads floor scenes.\par
-   - Calls `generate_building()` to start building creation.\par
-\par
-3. **Floor Instantiation**:\par
-   - Iterates through floor scenes in `FLOOR_SCENES`.\par
-   - For each floor:\par
-     - Instantiates floor using `instantiate_floor()`.\par
-     - Positions floor with `position_floor()`.\par
-     - Configures collision shapes and markers.\par
-\par
-4. **Door Placement**:\par
-   - Calls `add_doors_to_floor()` for each floor.\par
-   - Filters doors for the current floor from `DoorData.gd`.\par
-   - For each door:\par
-     - Calculates position with `get_door_slot_position()`.\par
-     - Instantiates a **Door** node.\par
-     - Configures the door using `configure_door()`.\par
-\par
-5. **Door Configuration**:\par
-   - Each **Door** node runs the `door.gd` script.\par
-   - `configure(door_data)` applies specific settings to the door, including tooltip text.\par
-   - Door animations, collision shapes, and tooltip sizes are updated accordingly.\par
-\par
-6. **Player Interaction**:\par
-   - When the player moves the cursor over a door:\par
-     - The `mouse_entered` signal is emitted.\par
-     - `_on_mouse_entered()` function displays the tooltip.\par
-   - When the cursor leaves the door area:\par
-     - The `mouse_exited` signal is emitted.\par
-     - `_on_mouse_exited()` function hides the tooltip.\par
-\par
-7. **Completion**:\par
-   - The building is fully generated with all floors and doors properly configured.\par
-   - Tooltips enhance player interaction by providing additional information.\par
-\par
-### **Interaction Points**\par
-\par
-- **Doors**:\par
-  - **Collision Detection**: Doors are `Area2D` nodes with `CollisionShape2D`, enabling interaction detection.\par
-  - **Tooltip Display**: Tooltips appear when the player's cursor hovers over a door.\par
-    - **TooltipBackground** and **TooltipLabel** nodes manage the visual display.\par
-    - Tooltip text is sourced from `DoorData.gd`.\par
-  - **State Management**: Doors can change states (open/closed) using `set_door_state()`.\par
-  - **Animations**: Visual feedback provided through `AnimatedSprite2D`.\par
-\par
-- **Potential User Interactions**:\par
-  - **Viewing Tooltips**: Players receive additional information about doors when hovering over them.\par
-  - **Opening/Closing Doors**: (Implementation pending) Players may interact with doors to change their state.\par
-\par
----\par
-\par
-## **5. Summary of Additions Made**\par
-\par
-### **Integration of Tooltip Feature**\par
-\par
-- **Node Hierarchy Updates**:\par
-  - **Added**:\par
-    - **TooltipBackground** (`NinePatchRect`): Serves as a scalable background for the tooltip.\par
-    - **TooltipLabel** (`Label`): Displays the tooltip text.\par
-  - **Placement**:\par
-    - Both nodes are children of the **Door** node (`Area2D`), with `TooltipLabel` as a child of `TooltipBackground`.\par
-\par
-- **Script Enhancements in `door.gd`**:\par
-  - **Variables Added**:\par
-    - `tooltip_background`: References the `TooltipBackground` node.\par
-    - `tooltip_label`: References the `TooltipLabel` node.\par
-  - **Functions Added/Modified**:\par
-    - **`_ready()`**:\par
-      - Initialized tooltip nodes.\par
-      - Connected `mouse_entered` and `mouse_exited` signals to handle tooltip display.\par
-      - Called `_update_tooltip_size()` to adjust tooltip dimensions.\par
-    - **`configure(door_data)`**:\par
-      - Sets the tooltip text from `door_data.tooltip`.\par
-      - Calls `_update_tooltip_size()` after setting the text.\par
-    - **`_on_mouse_entered()` and `_on_mouse_exited()`**:\par
-      - Control the visibility of the tooltip based on player interaction.\par
-    - **`_update_tooltip_size()`**:\par
-      - Calculates the size of the tooltip background to match the tooltip text.\par
-      - Adjusts positions and sizes of `TooltipBackground` and `TooltipLabel`.\par
-  - **Signal Connections**:\par
-    - Connected `mouse_entered` and `mouse_exited` signals to their respective handler functions.\par
-\par
-- **Data Structure Updates in `DoorData.gd`**:\par
-  - **Field**:\par
-    - **`tooltip`** (`String`): Added to door data dictionaries to provide tooltip text.\par
-  - **Usage**:\par
-    - Each door's `tooltip` field is accessed by `door.gd` to display the appropriate text.\par
-\par
-- **Flow of Execution Adjustments**:\par
-  - **During Door Configuration**:\par
-    - Tooltip text is now set when doors are configured.\par
-    - Tooltip size adjustments ensure that the background scales with the text.\par
-  - **Player Interaction**:\par
-    - Added handling for displaying and hiding tooltips based on mouse hover events.\par
-\par
-- **User Experience Enhancements**:\par
-  - **Visual Feedback**:\par
-    - Tooltips provide immediate information about doors, such as owner names or descriptions.\par
-    - Enhances immersion and provides context within the game world.\par
-\par
-- **Additional Code Improvements**:\par
-  - **Enumerations**:\par
-    - Used `enum DoorState` for better code readability and state management.\par
-  - **Type Annotations**:\par
-    - Added type annotations for variables and function returns to improve code clarity.\par
-  - **Deferred Calls**:\par
-    - Used `call_deferred("_update_tooltip_size")` to ensure the tooltip size updates after the text change.\par
-}
- 
+{\rtf1\ansi\deff3\adeflang1025
+{\fonttbl{\f0\froman\fprq2\fcharset0 Times New Roman;}{\f1\froman\fprq2\fcharset2 Symbol;}{\f2\fswiss\fprq2\fcharset0 Arial;}{\f3\froman\fprq2\fcharset0 Liberation Serif{\*\falt Times New Roman};}{\f4\froman\fprq2\fcharset0 Calibri;}{\f5\fswiss\fprq2\fcharset0 Liberation Sans{\*\falt Arial};}{\f6\fnil\fprq2\fcharset0 Microsoft YaHei;}{\f7\fswiss\fprq0\fcharset128 Arial;}{\f8\fnil\fprq2\fcharset0 Arial;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red0\green255\blue255;\red0\green255\blue0;\red255\green0\blue255;\red255\green0\blue0;\red255\green255\blue0;\red255\green255\blue255;\red0\green0\blue128;\red0\green128\blue128;\red0\green128\blue0;\red128\green0\blue128;\red128\green0\blue0;\red128\green128\blue0;\red128\green128\blue128;\red192\green192\blue192;}
+{\stylesheet{\s0\snext0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052 Normal;}
+{\s15\sbasedon0\snext16\rtlch\af8\afs28 \ltrch\hich\af5\loch\sb240\sa120\keepn\f5\fs28\dbch\af6 Heading;}
+{\s16\sbasedon0\snext16\loch\sl276\slmult1\sb0\sa140 Body Text;}
+{\s17\sbasedon16\snext17\rtlch\af7 \ltrch\loch\sl276\slmult1\sb0\sa140 List;}
+{\s18\sbasedon0\snext18\rtlch\af7\afs24\ai \ltrch\loch\sb120\sa120\noline\fs24\i Caption;}
+{\s19\sbasedon0\snext19\rtlch\af7 \ltrch\loch\noline Index;}
+}{\*\generator LibreOffice/7.6.1.2$Windows_X86_64 LibreOffice_project/f5defcebd022c5bc36bbb79be232cb6926d8f674}{\info{\creatim\yr0\mo0\dy0\hr0\min0}{\revtim\yr2024\mo11\dy22\hr15\min53}{\printim\yr0\mo0\dy0\hr0\min0}}{\*\userprops}\deftab720
+\hyphauto1\viewscale100
+{\*\pgdsctbl
+{\pgdsc0\pgdscuse451\pgwsxn12240\pghsxn15840\marglsxn1440\margrsxn1440\margtsxn1440\margbsxn1440\pgdscnxt0 Default Page Style;}}
+\formshade\paperh15840\paperw12240\margl1440\margr1440\margt1440\margb1440\sectd\sbknone\pgndec\sftnnar\saftnnrlc\sectunlocked1\pgwsxn12240\pghsxn15840\marglsxn1440\margrsxn1440\margtsxn1440\margbsxn1440\ftnbj\ftnstart1\ftnrstcont\ftnnar\aenddoc\aftnrstcont\aftnstart1\aftnnrlc
+{\*\ftnsep\chftnsep}\pgndec\pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+Godot 4 \u8211\'96 2D game documentation}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+## **1. Structured Scene and Node Hierarchy Documentation**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Hierarchical Overview**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Main Scene** (`Node2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Building Scene** (`Node2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- *Attached Script:* `building.gd` (extends `Node2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Floor Scenes** *(instantiated at runtime by `building.gd`)*}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Floor_X** (`Area2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+        }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **FloorSprite** (`Sprite2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+        }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **CollisionShape2D** (`RectangleShape2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+        }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Marker2D**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+        }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Doors** *(instantiated at runtime by `building.gd`)*}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+          }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Door** (`Area2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+            }{\hich\af4\loch\fs22\lang1031\f4\loch
+- *Attached Script:* `door.gd` (extends `Area2D`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+            }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **AnimatedSprite2D**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+            }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **CollisionShape2D**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+            }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipBackground** (`NinePatchRect`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+              }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipLabel** (`Label`)}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Sprite Scene**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Brief Descriptions**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Main Scene** (`Node2D`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Serves as the root of the game and the entry point when the game starts.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Contains**: The `Building Scene` and possibly other UI or game elements.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Building Scene** (`Node2D`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Manages the generation and configuration of the building's floors and doors.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Script**: Attached script `building.gd` (extends `Node2D`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Functionality**: Uses `building.gd` to preload floor scenes and door data, generate the building structure, and add doors to the floors based on `DoorData.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Floor Scenes**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: A collection of floor instances (`floor_0`, `floor_1`, etc.) dynamically instantiated during runtime by `building.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Floor_X** (`Area2D`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Represents an individual floor within the building.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Contains**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **FloorSprite** (`Sprite2D`): Displays the visual representation of the floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **CollisionShape2D** (`RectangleShape2D`): Defines the collision area for physics interactions on the floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Marker2D**: Serves as a reference point for positioning doors and other elements on the floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Doors**: Instantiated at runtime based on data from `DoorData.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Door** (`Area2D`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Represents an individual door on a floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Script**: Attached script `door.gd` (extends `Area2D`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Contains**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **AnimatedSprite2D**: Displays door animations.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **CollisionShape2D**: Defines the collision area for interaction detection.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipBackground** (`NinePatchRect`): Background image for the tooltip that scales with the text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipLabel** (`Label`): Displays tooltip text when interacting with the door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Sprite Scene**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: [To be defined; likely contains additional sprites or UI elements used in the game.]}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Explicit Relationships**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Main Scene** includes **Building Scene** as a child node.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Building Scene** uses the `building.gd` script to manage building generation.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **building.gd** extends `Node2D` and is attached to **Building Scene**.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **building.gd** instantiates **Floor Scenes** and **Door** nodes during runtime.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Door** nodes are managed by the `door.gd` script, which extends `Area2D`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`door.gd`** relies on its child nodes:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **AnimatedSprite2D** for displaying door animations.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **CollisionShape2D** for interaction detection.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipBackground** and **TooltipLabel** for displaying tooltips.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **DoorData.gd** provides configuration data used by `building.gd` to instantiate and configure doors, including tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+---}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+## **2. Script Summaries and Responsibilities**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **High-Level Overviews**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+#### **`building.gd`**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Extends**: `Node2D`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Attached to**: **Building Scene** node.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Manages the procedural generation of the building.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Responsibilities**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Preloads floor scenes and door data (`DoorData.gd`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Instantiates and positions floors within the building.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Configures collision shapes and markers for floors.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Adds doors to each floor based on data from `DoorData.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+#### **`door.gd`**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Extends**: `Area2D`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Attached to**: **Door** nodes.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Controls the behavior, appearance, and interaction of individual doors.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Responsibilities**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Configures doors based on provided data from `DoorData.gd`, including tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Manages door states (open or closed).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates door animations accordingly.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Sets up collision shapes for interaction detection.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Handles tooltip display when the player interacts with the door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+#### **`DoorData.gd`**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Extends**: `Resource`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Class Name**: `DoorData`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Provides door configuration data for the building generation process.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Structure**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Contains an exported array `doors`, which holds dictionaries with door properties, including tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Function Descriptions**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+#### **`building.gd`**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_ready()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Initializes the building generation process when the `Building Scene` is ready.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Loads door data resource (`DoorData.gd`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `generate_building()` to start building generation.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`generate_building()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Generates the building structure by instantiating floors and adding doors.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Iterates through preloaded floor scenes.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Instantiates each floor using `instantiate_floor()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Positions floors with `position_floor()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Configures collision shapes and markers.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `add_doors_to_floor()` for each floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`add_doors_to_floor(floor_instance, floor_index)`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Adds doors to a specific floor based on door data.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Filters doors from `DoorData.gd` for the current floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- For each door data:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calculates door position with `get_door_slot_position()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Instantiates a `Door` node.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Configures the door with `configure_door()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`configure_door(door_instance, door_data)`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Configures a door instance with specific data.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `door_instance.configure(door_data)` to apply settings, including tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`get_door_slot_position(floor_instance, slot_index)`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Calculates the position of a door on a floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Determines horizontal position based on slot index and floor width.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Aligns door vertically with the floor's marker.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+#### **`door.gd`**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_ready()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Initializes the door when the node is ready.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `setup_door()` to set initial state.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Initializes tooltip nodes (`TooltipBackground` and `TooltipLabel`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Connects mouse signals for displaying the tooltip.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates tooltip size based on the text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`setup_door()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Sets up the door's nodes and initial state.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Checks for required child nodes (`AnimatedSprite2D`, `CollisionShape2D`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Sets door to initial closed state using `set_door_state()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`configure(door_data)`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Configures the door based on provided data.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Sets `door_type` from `door_data`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `setup_door()` to apply changes.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates collision shape with `update_collision_shape()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Sets the tooltip text from `door_data.tooltip`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates the tooltip size to match the text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_on_mouse_entered()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Handles mouse entering the door area.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Displays the tooltip by setting `TooltipBackground` visibility to true.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_on_mouse_exited()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Handles mouse exiting the door area.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Hides the tooltip by setting `TooltipBackground` visibility to false.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_update_tooltip_size()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Adjusts the tooltip background size to fit the tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calculates the size of `TooltipLabel`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Adds padding to determine the total size.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates `TooltipBackground` size and position.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Positions `TooltipLabel` within `TooltipBackground`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`set_door_state(new_state)`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Changes the door's state (open or closed).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates `current_state`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Changes animation on `AnimatedSprite2D`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`update_collision_shape()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Adjusts collision shape to match door's visual representation.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Actions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calculates dimensions based on current sprite.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Updates `CollisionShape2D` extents.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Explicit Relationships**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`building.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Attached to **Building Scene** (`Node2D`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Manages **Floor_X** nodes (`Area2D`) and instantiates **Door** nodes.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Uses data from `DoorData.gd` to configure doors, including tooltips.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`door.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Attached to **Door** nodes (`Area2D`).}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Relies on child nodes:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **AnimatedSprite2D** for door animations.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **CollisionShape2D** for interaction detection.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipBackground** and **TooltipLabel** for displaying tooltips.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Uses `door_data` to configure door appearance, behavior, and tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`DoorData.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Provides door configuration data to `building.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Contains properties used by `door.gd` for individual door setup, including `tooltip`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+---}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+## **3. Resource and Data Structures Documentation**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Custom Resources**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+#### **`DoorData.gd`**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Extends**: `Resource`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Class Name**: `DoorData`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Purpose**: Stores an array of door data dictionaries for building generation.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Structure**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`doors`**: Exported array containing door data dictionaries.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Data Field Definitions**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+Each door in the `doors` array is a dictionary with the following fields:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`index`** (`int`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Unique identifier for the door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`floor_number`** (`int`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Specifies the floor where the door is located.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`door_slot`** (`int`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Determines the door's position on the floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`door_type`** (`int`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Indicates the visual style or type of the door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`owner`** (`String`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Name of the owner or entity associated with the door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`tooltip`** (`String`):}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Description**: Additional information displayed when interacting with the door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Integration with Scripts**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`building.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Preloads `DoorData.gd` to access door configuration data.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Uses the `doors` array to instantiate and configure doors on each floor, including passing tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`door.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Receives individual `door_data` dictionaries during configuration.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Uses `door_data` fields to set door properties, animations, and tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Adjusts tooltip display based on player interaction.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+---}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+## **4. Flow of Execution and Interaction**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Process Overview**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+1. **Game Start**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- The **Main Scene** (`Node2D`) is loaded as the game's entry point.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Building Scene** (`Node2D`) is instantiated within the Main Scene.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+2. **Building Generation**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- `building.gd` script runs `_ready()` function.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Loads `DoorData.gd` and preloads floor scenes.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `generate_building()` to start building creation.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+3. **Floor Instantiation**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Iterates through floor scenes in `FLOOR_SCENES`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- For each floor:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Instantiates floor using `instantiate_floor()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Positions floor with `position_floor()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Configures collision shapes and markers.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+4. **Door Placement**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `add_doors_to_floor()` for each floor.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Filters doors for the current floor from `DoorData.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- For each door:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calculates position with `get_door_slot_position()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Instantiates a **Door** node.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Configures the door using `configure_door()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+5. **Door Configuration**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Each **Door** node runs the `door.gd` script.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- `configure(door_data)` applies specific settings to the door, including tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Door animations, collision shapes, and tooltip sizes are updated accordingly.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+6. **Player Interaction**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- When the player moves the cursor over a door:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- The `mouse_entered` signal is emitted.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- `_on_mouse_entered()` function displays the tooltip.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- When the cursor leaves the door area:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- The `mouse_exited` signal is emitted.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+     }{\hich\af4\loch\fs22\lang1031\f4\loch
+- `_on_mouse_exited()` function hides the tooltip.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+7. **Completion**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- The building is fully generated with all floors and doors properly configured.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+   }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Tooltips enhance player interaction by providing additional information.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Interaction Points**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Doors**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Collision Detection**: Doors are `Area2D` nodes with `CollisionShape2D`, enabling interaction detection.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Tooltip Display**: Tooltips appear when the player's cursor hovers over a door.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipBackground** and **TooltipLabel** nodes manage the visual display.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Tooltip text is sourced from `DoorData.gd`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **State Management**: Doors can change states (open/closed) using `set_door_state()`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Animations**: Visual feedback provided through `AnimatedSprite2D`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Potential User Interactions**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Viewing Tooltips**: Players receive additional information about doors when hovering over them.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Opening/Closing Doors**: (Implementation pending) Players may interact with doors to change their state.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+---}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+## **5. Summary of Additions Made**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+### **Integration of Tooltip Feature**}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Node Hierarchy Updates**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Added**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipBackground** (`NinePatchRect`): Serves as a scalable background for the tooltip.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **TooltipLabel** (`Label`): Displays the tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Placement**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Both nodes are children of the **Door** node (`Area2D`), with `TooltipLabel` as a child of `TooltipBackground`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Script Enhancements in `door.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Variables Added**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- `tooltip_background`: References the `TooltipBackground` node.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- `tooltip_label`: References the `TooltipLabel` node.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Functions Added/Modified**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_ready()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Initialized tooltip nodes.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Connected `mouse_entered` and `mouse_exited` signals to handle tooltip display.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Called `_update_tooltip_size()` to adjust tooltip dimensions.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`configure(door_data)`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Sets the tooltip text from `door_data.tooltip`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calls `_update_tooltip_size()` after setting the text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_on_mouse_entered()` and `_on_mouse_exited()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Control the visibility of the tooltip based on player interaction.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`_update_tooltip_size()`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Calculates the size of the tooltip background to match the tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+      }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Adjusts positions and sizes of `TooltipBackground` and `TooltipLabel`.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Signal Connections**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Connected `mouse_entered` and `mouse_exited` signals to their respective handler functions.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Data Structure Updates in `DoorData.gd`**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Field**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **`tooltip`** (`String`): Added to door data dictionaries to provide tooltip text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Usage**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Each door's `tooltip` field is accessed by `door.gd` to display the appropriate text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Flow of Execution Adjustments**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **During Door Configuration**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Tooltip text is now set when doors are configured.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Tooltip size adjustments ensure that the background scales with the text.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Player Interaction**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Added handling for displaying and hiding tooltips based on mouse hover events.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **User Experience Enhancements**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Visual Feedback**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Tooltips provide immediate information about doors, such as owner names or descriptions.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Enhances immersion and provides context within the game world.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar\hich\af4\loch\fs22\lang1031\f4\loch
+
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Additional Code Improvements**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Enumerations**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Used `enum DoorState` for better code readability and state management.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Type Annotations**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Added type annotations for variables and function returns to improve code clarity.}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+  }{\hich\af4\loch\fs22\lang1031\f4\loch
+- **Deferred Calls**:}
+\par \pard\plain \s0\rtlch\af8\afs24\alang1081 \ltrch\lang8192\langfe2052\hich\af3\loch\nowidctlpar\hyphpar0\ltrpar\cf0\f3\fs24\lang8192\kerning1\dbch\af9\langfe2052\sl276\slmult1\ql\sb0\sa200\ltrpar{\hich\af4\loch\fs22\lang1031\f4
+    }{\hich\af4\loch\fs22\lang1031\f4\loch
+- Used `call_deferred("_update_tooltip_size")` to ensure the tooltip size updates after the text change.}
+\par }
