@@ -1,0 +1,119 @@
+[gd_scene load_steps=12 format=3 uid="uid://bqi7jxa50tfga"]
+
+[ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="1_hmau6"]
+[ext_resource type="Script" path="res://door.gd" id="1_k3u3e"]
+[ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="3_0wmaq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
+atlas = ExtResource("1_hmau6")
+region = Rect2(440, 0, 88, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h1xad"]
+atlas = ExtResource("1_hmau6")
+region = Rect2(0, 0, 88, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aylow"]
+atlas = ExtResource("1_hmau6")
+region = Rect2(88, 0, 88, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lgjqv"]
+atlas = ExtResource("1_hmau6")
+region = Rect2(176, 0, 88, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fomxb"]
+atlas = ExtResource("1_hmau6")
+region = Rect2(264, 0, 88, 126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0wijg"]
+atlas = ExtResource("1_hmau6")
+region = Rect2(352, 0, 88, 126)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_b0j2u"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0cb3p")
+}],
+"loop": true,
+"name": &"door_open",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h1xad")
+}],
+"loop": true,
+"name": &"door_type_0",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aylow")
+}],
+"loop": true,
+"name": &"door_type_1",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lgjqv")
+}],
+"loop": true,
+"name": &"door_type_2",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fomxb")
+}],
+"loop": true,
+"name": &"door_type_3",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0wijg")
+}],
+"loop": true,
+"name": &"door_type_4",
+"speed": 1.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_py5ck"]
+
+[node name="Door" type="Area2D"]
+script = ExtResource("1_k3u3e")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_b0j2u")
+animation = &"door_open"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_py5ck")
+
+[node name="TooltipBackground" type="NinePatchRect" parent="."]
+offset_left = 16.0
+offset_top = -37.0
+offset_right = 56.0
+offset_bottom = 3.0
+texture = ExtResource("3_0wmaq")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+metadata/_edit_group_ = true
+
+[node name="TooltipLabel" type="Label" parent="TooltipBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 4.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20

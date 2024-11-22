@@ -1,0 +1,91 @@
+[gd_resource type="Resource" script_class="DoorData" load_steps=2 format=3 uid="uid://novorky384y7"]
+
+[ext_resource type="Script" path="res://DoorData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+doors = Array[Dictionary]([{
+"door_slot": 0,
+"door_type": 1,
+"floor_number": 1,
+"index": 0,
+"owner": "Player 1",
+"tooltip": "This is your office."
+}, {
+"door_slot": 1,
+"door_type": 2,
+"floor_number": 1,
+"index": 1,
+"owner": "Player 1",
+"tooltip": "This is your newsroom."
+}, {
+"door_slot": 2,
+"door_type": 3,
+"floor_number": 1,
+"index": 2,
+"owner": "Player 1",
+"tooltip": "This is your boss' office."
+}, {
+"door_slot": 3,
+"door_type": 4,
+"floor_number": 1,
+"index": 3,
+"owner": "Player 1",
+"tooltip": "This is your media archive."
+}, {
+"door_slot": 0,
+"door_type": 1,
+"floor_number": 2,
+"index": 4,
+"owner": "Player 2",
+"tooltip": "This is Player 2's office."
+}, {
+"door_slot": 1,
+"door_type": 2,
+"floor_number": 2,
+"index": 5,
+"owner": "Player 2",
+"tooltip": "This is Player 2's newsroom."
+}, {
+"door_slot": 2,
+"door_type": 3,
+"floor_number": 2,
+"index": 6,
+"owner": "Player 2",
+"tooltip": "This is the boss' office from Player 2."
+}, {
+"door_slot": 3,
+"door_type": 4,
+"floor_number": 2,
+"index": 7,
+"owner": "Player 2",
+"tooltip": "This is the media archive from Player 2."
+}, {
+"door_slot": 0,
+"door_type": 1,
+"floor_number": 3,
+"index": 8,
+"owner": "Player 3",
+"tooltip": "This is Player 3's office."
+}, {
+"door_slot": 1,
+"door_type": 2,
+"floor_number": 3,
+"index": 9,
+"owner": "Player 3",
+"tooltip": "This is Player 3's newsroom."
+}, {
+"door_slot": 2,
+"door_type": 3,
+"floor_number": 3,
+"index": 10,
+"owner": "Player 3",
+"tooltip": "This is the boss' office from Player 3."
+}, {
+"door_slot": 3,
+"door_type": 4,
+"floor_number": 3,
+"index": 11,
+"owner": "Player 3",
+"tooltip": "This is the media archive from Player 3."
+}])

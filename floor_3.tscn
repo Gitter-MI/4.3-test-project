@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://buyj1wi0od04s"]
+
+[ext_resource type="Texture2D" uid="uid://vjrpwgq6hhdx" path="res://Building/Floors/Floor_3.png" id="1_ax0db"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c40nk"]
+
+[node name="floor_3" type="Area2D"]
+
+[node name="FloorSprite" type="Sprite2D" parent="."]
+texture = ExtResource("1_ax0db")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_c40nk")
+
+[node name="Marker2D" type="Marker2D" parent="."]
+visible = false
