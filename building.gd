@@ -3,9 +3,7 @@ extends Node2D
 
 # Preload the single floor scene
 const FLOOR_SCENE = preload("res://Floor.tscn")  # Update the path to your single floor scene
-
 const DOOR_DATA_RESOURCE = preload("res://DoorData.tres")
-
 const NUM_FLOORS = 14  # Total number of floors
 
 func _ready():
@@ -31,7 +29,7 @@ func generate_building():
 			push_warning("Failed to instantiate floor number " + str(floor_number))
 
 func instantiate_floor(floor_number):
-	print("instantiate_floor")  # Debug print
+	# print("instantiate_floor")  # Debug # print
 	var floor_instance = FLOOR_SCENE.instantiate()
 	if not floor_instance:
 		push_warning("Failed to instantiate floor scene")
@@ -42,8 +40,7 @@ func instantiate_floor(floor_number):
 
 	# Construct the expected image path
 	var image_path = "res://Building/Floors/Floor_" + str(floor_number) + ".png"
-	print("Constructed image path: " + image_path)  # Debug print
-
+	# print("Constructed image path: " + image_path)  # Debug # print
 	floor_instance.floor_image_path = image_path
 
 	# Now add the floor instance to the scene tree

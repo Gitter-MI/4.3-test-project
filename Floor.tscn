@@ -13,3 +13,4 @@ script = ExtResource("1_fq872")
 shape = SubResource("RectangleShape2D_sb7ux")
 
 [node name="Marker2D" type="Marker2D" parent="."]
+visible = false

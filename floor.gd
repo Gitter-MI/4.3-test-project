@@ -10,18 +10,30 @@ var floor_sprite: Sprite2D
 
 const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
 
+# Class-level constant for boundaries
+const BOUNDARIES = {
+	"x1": 0.0695,  # Left boundary
+	"x2": 0.929,   # Right boundary
+	"y1": 0.0760,  # Top boundary
+	"y2": 0.9941   # Bottom boundary
+}
+
+
 func _ready():
+	add_to_group("floors")
 	# Get the FloorSprite node
 	floor_sprite = $FloorSprite
 	# Set the floor image
 	set_floor_image(floor_image_path)
 	# Configure collision shape
 	configure_collision_shape()
+	collision_layer = 1
 	# Configure marker
 	configure_marker()
+	add_to_group("floors")
 
 func set_floor_image(image_path: String):
-	print("Attempting to load image from path: " + image_path)  # Debug print
+	# print("Attempting to load image from path: " + image_path)  # Debug # print
 	if image_path.is_empty():
 		push_warning("Image path is empty!")
 		return
@@ -29,7 +41,7 @@ func set_floor_image(image_path: String):
 	var texture = load(image_path)
 	if texture:
 		floor_sprite.texture = texture
-		print("Successfully loaded texture for floor " + str(floor_number))
+		# print("Successfully loaded texture for floor " + str(floor_number))
 	else:
 		push_error("Failed to load floor image at path: " + image_path)
 		# Try to verify if the file exists
@@ -40,24 +52,19 @@ func set_floor_image(image_path: String):
 			print("File does not exist at path: " + image_path)
 
 func configure_collision_shape():
+	# Set the collision layer to 1 (first bit)
+	collision_layer = 1
 	var collision_shape = $CollisionShape2D
 	if not (floor_sprite and collision_shape):
 		push_warning("Missing nodes for collision shape configuration")
 		return
 
-	var boundary = {
-		"x1": 0.0695,  # Left boundary
-		"x2": 0.929,   # Right boundary
-		"y1": 0.0760,  # Top boundary
-		"y2": 0.9941,  # Bottom boundary
-	}
-
 	var sprite_width = floor_sprite.texture.get_width() * floor_sprite.scale.x
 	var sprite_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
-	var collision_width = (boundary.x2 - boundary.x1) * sprite_width
-	var collision_height = (boundary.y2 - boundary.y1) * sprite_height
-	var delta_x = ((boundary.x1 + boundary.x2) / 2 - 0.5) * sprite_width
-	var delta_y = ((boundary.y1 + boundary.y2) / 2 - 0.5) * sprite_height
+	var collision_width = (BOUNDARIES.x2 - BOUNDARIES.x1) * sprite_width
+	var collision_height = (BOUNDARIES.y2 - BOUNDARIES.y1) * sprite_height
+	var delta_x = ((BOUNDARIES.x1 + BOUNDARIES.x2) / 2 - 0.5) * sprite_width
+	var delta_y = ((BOUNDARIES.y1 + BOUNDARIES.y2) / 2 - 0.5) * sprite_height
 
 	var rectangle_shape = RectangleShape2D.new()
 	rectangle_shape.extents = Vector2(collision_width / 2, collision_height / 2)
