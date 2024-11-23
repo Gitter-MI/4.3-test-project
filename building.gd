@@ -1,16 +1,13 @@
 # building.gd
 extends Node2D
 
-# Preload all floor scenes
-const FLOOR_SCENES = [
-	preload("res://floor_0.tscn"),
-	preload("res://floor_1.tscn"),
-	preload("res://floor_2.tscn"),
-	preload("res://floor_3.tscn"),
-]
+# Preload the single floor scene
+const FLOOR_SCENE = preload("res://Floor.tscn")	# Update the path to your single floor scene
 
 const DOOR_DATA_RESOURCE = preload("res://DoorData.tres")
-const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
+const DOOR_SCENE = preload("res://Door.tscn")	# Preload the Door scene
+
+const NUM_FLOORS = 14	# Total number of floors
 
 func _ready():
 	generate_building()
@@ -19,8 +16,8 @@ func generate_building():
 	var previous_floor_top_y_position = 0.0
 	var is_first_floor = true
 
-	for i in range(FLOOR_SCENES.size()):
-		var floor_instance = instantiate_floor(FLOOR_SCENES[i])
+	for floor_number in range(NUM_FLOORS):
+		var floor_instance = instantiate_floor(floor_number)
 		if floor_instance:
 			previous_floor_top_y_position = position_floor(floor_instance, previous_floor_top_y_position, is_first_floor)
 			configure_collision_shape(floor_instance)
@@ -28,7 +25,6 @@ func generate_building():
 			is_first_floor = false
 
 			# After floor is ready, pass door data to floor to handle door instantiation
-			var floor_number = i
 			var floor_doors = DOOR_DATA_RESOURCE.doors.filter(func(door):
 				return door.floor_number == floor_number
 			)
@@ -39,39 +35,45 @@ func generate_building():
 				# Pass door_data and floor_instance to the door
 				door_instance.setup(door_data, floor_instance)
 		else:
-			push_warning("Failed to instantiate floor at index " + str(i))
+			push_warning("Failed to instantiate floor number " + str(floor_number))
 
-# The rest of the functions remain the same
-# Removed door-related methods:
-# - add_doors_to_floor()
-# - configure_door()
-# - get_door_slot_position()
-# - get_door_dimensions()
-# - get_door_height_offset()
-
-func instantiate_floor(scene):
-	var floor_instance = scene.instantiate()
+func instantiate_floor(floor_number):
+	print("instantiate_floor")	# Debug print
+	var floor_instance = FLOOR_SCENE.instantiate()
 	if not floor_instance:
-		push_warning("Failed to instantiate scene: " + str(scene))
+		push_warning("Failed to instantiate floor scene")
 		return null
+
+	# Set the floor number and image path before adding to the scene tree
+	floor_instance.floor_number = floor_number
+
+	# Construct the expected image path
+	var image_path = "res://Building/Floors/Floor_" + str(floor_number) + ".png"
+	print("Constructed image path: " + image_path)	# Debug print
+
+	floor_instance.floor_image_path = image_path
+
+	# Now add the floor instance to the scene tree
 	add_child(floor_instance)
+
 	return floor_instance
+
 
 func position_floor(floor_instance, previous_floor_top_y_position, is_first_floor):
 	var floor_sprite = floor_instance.get_node("FloorSprite")
 	if not floor_sprite:
 		push_warning("Floor instance is missing FloorSprite node!")
-		return
+		return previous_floor_top_y_position  # Return previous value to avoid errors
 
 	var viewport_size = get_viewport().size
 	var floor_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
 
 	# Calculate x position to center horizontally
-	var x_position = (viewport_size.x) / 2
+	var x_position = viewport_size.x / 2
 	var y_position = 0.0
 
 	if is_first_floor:
-		# Center the floor vertically
+		# Center the first floor vertically
 		y_position = (viewport_size.y - floor_height) / 1.5
 	else:
 		# Stack the floor above the previous floor
