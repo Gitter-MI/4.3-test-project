@@ -79,22 +79,17 @@ func configure_collision_shape():
     rectangle_shape.extents = Vector2(collision_width / 2, collision_height / 2)
     collision_shape.shape = rectangle_shape
     collision_shape.position = Vector2(delta_x, delta_y)
-
-    # Rename the local variable to avoid shadowing
+    
     var floor_global_position = global_transform.origin  # Get the global position of the floor
     var top_left = floor_global_position + Vector2(delta_x - collision_width / 2, delta_y - collision_height / 2)
     var bottom_right = floor_global_position + Vector2(delta_x + collision_width / 2, delta_y + collision_height / 2)
-
-    # Store collision edges in global coordinates
+    
     collision_edges = {
         "left": top_left.x,
         "right": bottom_right.x,
         "top": top_left.y,
         "bottom": bottom_right.y
     }
-
-    print("Collision shape configured with edges: ", collision_edges)
-
 
 
 func set_floor_image(image_path: String):
@@ -117,8 +112,8 @@ func set_floor_image(image_path: String):
 
 # Helper method to return the precalculated collision edges
 func get_collision_edges() -> Dictionary:
-    print("get collision edges called")
-    print(collision_edges)
+    # print("get collision edges called")
+    # print(collision_edges)
     #if collision_edges.empty():
         #print("Warning: Collision edges for floor ", floor_number, " have not been calculated yet.")
     return collision_edges

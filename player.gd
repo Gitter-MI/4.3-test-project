@@ -153,7 +153,7 @@ func _process(delta: float) -> void:
 
 
 func handle_arrival(current_floor: Node2D, collision_edges: Dictionary) -> void:
-    print("In handle_arrival, current floor: ", current_floor)
+    # print("In handle_arrival, current floor: ", current_floor)
 
     # Check if the player is at the elevator position
     if current_floor and sprite_data.target_position == get_elevator_position(collision_edges):
@@ -180,7 +180,7 @@ func handle_arrival(current_floor: Node2D, collision_edges: Dictionary) -> void:
   
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:    
 
-    print("In player script: Floor number: ", floor_number, ", Global Position: ", click_position, ", Bottom Edge Y: ", bottom_edge_y)
+    # print("In player script: Floor number: ", floor_number, ", Global Position: ", click_position, ", Bottom Edge Y: ", bottom_edge_y)
 
     # Get the adjusted click position using collision_edges
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
