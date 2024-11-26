@@ -43,6 +43,9 @@ func instantiate_floor(floor_number):
     # print("Constructed image path: " + image_path)  # Debug # print
     floor_instance.floor_image_path = image_path
 
+    # Assign a meaningful name to the node
+    floor_instance.name = "Floor_" + str(floor_number)
+
     # Now add the floor instance to the scene tree
     add_child(floor_instance)
 

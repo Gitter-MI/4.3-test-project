@@ -22,7 +22,14 @@ const BOUNDARIES = {
 # Define signal
 signal floor_clicked(floor_number: int, position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
 
-# Remove configure_collision_shape() from _ready()
+# Handle input events, including the calculated collision edges
+func _input_event(_viewport, event, _shape_idx):
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+        # Get the marker's global y position which represents the bottom edge
+        var bottom_edge_y = $Marker2D.global_position.y
+        # Emit the signal with the additional collision edges
+        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)
+
 func _ready():
     add_to_group("floors")
     input_pickable = true    
@@ -30,6 +37,9 @@ func _ready():
     set_floor_image(floor_image_path)    
     collision_layer = 1    
     configure_marker()
+    
+
+
 
 func position_floor(previous_floor_top_y_position, is_first_floor):
     if not floor_sprite:
@@ -91,7 +101,6 @@ func configure_collision_shape():
         "bottom": bottom_right.y
     }
 
-
 func set_floor_image(image_path: String):
     if image_path.is_empty():
         push_warning("Image path is empty!")
@@ -108,14 +117,8 @@ func set_floor_image(image_path: String):
         else:
             print("File does not exist at path: " + image_path)
 
-
-
-# Helper method to return the precalculated collision edges
 func get_collision_edges() -> Dictionary:
-    # print("get collision edges called")
-    # print(collision_edges)
-    #if collision_edges.empty():
-        #print("Warning: Collision edges for floor ", floor_number, " have not been calculated yet.")
+    # is called when a sprite moves to a new floor to determine the y-coordinate    
     return collision_edges
 
 func configure_marker():
@@ -131,21 +134,10 @@ func configure_marker():
     # Set the marker position to align with the sprite's bottom edge
     marker.position = Vector2(0, sprite_bottom_y)
 
-# Call configure_collision_shape() after setting the position
-
-
 func setup_doors(door_data_array):
     for door_data in door_data_array:
         var door_instance = DOOR_SCENE.instantiate()
+        door_instance.name = "Door_" + str(door_data.index)
         add_child(door_instance)
         # Pass door_data and self to the door
         door_instance.setup(door_data, self)
-
-# Handle input events, including the calculated collision edges
-func _input_event(viewport, event, shape_idx):
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        # Get the marker's global y position which represents the bottom edge
-        var bottom_edge_y = $Marker2D.global_position.y
-
-        # Emit the signal with the additional collision edges
-        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)

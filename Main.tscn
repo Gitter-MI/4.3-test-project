@@ -13,8 +13,8 @@
 unique_name_in_owner = true
 script = ExtResource("3_gsbds")
 
-[node name="Node2D" type="Node2D" parent="."]
+[node name="Camera" type="Node2D" parent="."]
 metadata/_edit_group_ = true
 
-[node name="Camera2D" type="Camera2D" parent="Node2D"]
+[node name="Camera2D" type="Camera2D" parent="Camera"]
 script = ExtResource("4_a875k")
