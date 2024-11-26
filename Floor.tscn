@@ -14,3 +14,5 @@ shape = SubResource("RectangleShape2D_sb7ux")
 
 [node name="Marker2D" type="Marker2D" parent="."]
 visible = false
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]

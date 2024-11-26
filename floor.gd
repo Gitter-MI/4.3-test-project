@@ -1,4 +1,3 @@
-# floor.gd
 extends Area2D
 
 # Exported variables for the floor number and image path
@@ -10,107 +9,148 @@ var floor_sprite: Sprite2D
 
 const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
 
-# Class-level constant for boundaries
+# Store collision edges, initialized as empty
+var collision_edges: Dictionary = {}
+
 const BOUNDARIES = {
-	"x1": 0.0695,  # Left boundary
-	"x2": 0.929,   # Right boundary
-	"y1": 0.0760,  # Top boundary
-	"y2": 0.9941   # Bottom boundary
+    "x1": 0.0695,  # Left boundary
+    "x2": 0.929,   # Right boundary
+    "y1": 0.0760,  # Top boundary
+    "y2": 0.9941   # Bottom boundary
 }
 
+# Define signal
+signal floor_clicked(floor_number: int, position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
 
+# Remove configure_collision_shape() from _ready()
 func _ready():
-	add_to_group("floors")
-	# Get the FloorSprite node
-	floor_sprite = $FloorSprite
-	# Set the floor image
-	set_floor_image(floor_image_path)
-	# Configure collision shape
-	configure_collision_shape()
-	collision_layer = 1
-	# Configure marker
-	configure_marker()
-	add_to_group("floors")
-
-func set_floor_image(image_path: String):
-	# print("Attempting to load image from path: " + image_path)  # Debug # print
-	if image_path.is_empty():
-		push_warning("Image path is empty!")
-		return
-
-	var texture = load(image_path)
-	if texture:
-		floor_sprite.texture = texture
-		# print("Successfully loaded texture for floor " + str(floor_number))
-	else:
-		push_error("Failed to load floor image at path: " + image_path)
-		# Try to verify if the file exists
-		var file = FileAccess.open(image_path, FileAccess.READ)
-		if file:
-			print("File exists but couldn't be loaded as texture")
-		else:
-			print("File does not exist at path: " + image_path)
-
-func configure_collision_shape():
-	# Set the collision layer to 1 (first bit)
-	collision_layer = 1
-	var collision_shape = $CollisionShape2D
-	if not (floor_sprite and collision_shape):
-		push_warning("Missing nodes for collision shape configuration")
-		return
-
-	var sprite_width = floor_sprite.texture.get_width() * floor_sprite.scale.x
-	var sprite_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
-	var collision_width = (BOUNDARIES.x2 - BOUNDARIES.x1) * sprite_width
-	var collision_height = (BOUNDARIES.y2 - BOUNDARIES.y1) * sprite_height
-	var delta_x = ((BOUNDARIES.x1 + BOUNDARIES.x2) / 2 - 0.5) * sprite_width
-	var delta_y = ((BOUNDARIES.y1 + BOUNDARIES.y2) / 2 - 0.5) * sprite_height
-
-	var rectangle_shape = RectangleShape2D.new()
-	rectangle_shape.extents = Vector2(collision_width / 2, collision_height / 2)
-	collision_shape.shape = rectangle_shape
-	collision_shape.position = Vector2(delta_x, delta_y)
-
-func configure_marker():
-	var marker = $Marker2D
-	if not (floor_sprite and marker):
-		push_warning("Missing nodes for marker configuration")
-		return
-
-	# Calculate the bottom edge of the sprite
-	var sprite_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
-	var sprite_bottom_y = sprite_height / 2  # Since the sprite's origin is at its center
-
-	# Set the marker position to align with the sprite's bottom edge
-	marker.position = Vector2(0, sprite_bottom_y)
+    add_to_group("floors")
+    input_pickable = true    
+    floor_sprite = $FloorSprite
+    set_floor_image(floor_image_path)    
+    collision_layer = 1    
+    configure_marker()
 
 func position_floor(previous_floor_top_y_position, is_first_floor):
-	if not floor_sprite:
-		push_warning("Floor instance is missing FloorSprite node!")
-		return previous_floor_top_y_position  # Return previous value to avoid errors
+    if not floor_sprite:
+        push_warning("Floor instance is missing FloorSprite node!")
+        return previous_floor_top_y_position  # Return previous value to avoid errors
 
-	var viewport_size = get_viewport().size
-	var floor_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
+    var viewport_size = get_viewport().size
+    var floor_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
 
-	# Calculate x position to center horizontally
-	var x_position = viewport_size.x / 2
-	var y_position = 0.0
+    # Calculate x position to center horizontally
+    var x_position = viewport_size.x / 2
+    var y_position = 0.0
 
-	if is_first_floor:
-		# Center the first floor vertically
-		y_position = (viewport_size.y - floor_height) / 1.5
-	else:
-		# Stack the floor above the previous floor
-		y_position = previous_floor_top_y_position - floor_height
+    if is_first_floor:
+        # Center the first floor vertically
+        y_position = (viewport_size.y - floor_height) / 1.5
+    else:
+        # Stack the floor above the previous floor
+        y_position = previous_floor_top_y_position - floor_height
 
-	# Set the position
-	position = Vector2(x_position, y_position)
-	# Return the y position of the top of this floor for the next calculation
-	return y_position
+    # Set the position
+    position = Vector2(x_position, y_position)
+
+    # Now that the position is set, configure the collision shape
+    configure_collision_shape()
+
+    # Return the y position of the top of this floor for the next calculation
+    return y_position
+
+
+func configure_collision_shape():
+    var collision_shape = $CollisionShape2D
+    if not (floor_sprite and collision_shape):
+        push_warning("Missing nodes for collision shape configuration")
+        return
+
+    # Calculate sprite dimensions
+    var sprite_width = floor_sprite.texture.get_width() * floor_sprite.scale.x
+    var sprite_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
+    var collision_width = (BOUNDARIES.x2 - BOUNDARIES.x1) * sprite_width
+    var collision_height = (BOUNDARIES.y2 - BOUNDARIES.y1) * sprite_height
+    var delta_x = ((BOUNDARIES.x1 + BOUNDARIES.x2) / 2 - 0.5) * sprite_width
+    var delta_y = ((BOUNDARIES.y1 + BOUNDARIES.y2) / 2 - 0.5) * sprite_height
+
+    # Configure the collision shape
+    var rectangle_shape = RectangleShape2D.new()
+    rectangle_shape.extents = Vector2(collision_width / 2, collision_height / 2)
+    collision_shape.shape = rectangle_shape
+    collision_shape.position = Vector2(delta_x, delta_y)
+
+    # Rename the local variable to avoid shadowing
+    var floor_global_position = global_transform.origin  # Get the global position of the floor
+    var top_left = floor_global_position + Vector2(delta_x - collision_width / 2, delta_y - collision_height / 2)
+    var bottom_right = floor_global_position + Vector2(delta_x + collision_width / 2, delta_y + collision_height / 2)
+
+    # Store collision edges in global coordinates
+    collision_edges = {
+        "left": top_left.x,
+        "right": bottom_right.x,
+        "top": top_left.y,
+        "bottom": bottom_right.y
+    }
+
+    print("Collision shape configured with edges: ", collision_edges)
+
+
+
+func set_floor_image(image_path: String):
+    if image_path.is_empty():
+        push_warning("Image path is empty!")
+        return
+
+    var texture = load(image_path)
+    if texture:
+        floor_sprite.texture = texture
+    else:
+        push_error("Failed to load floor image at path: " + image_path)
+        var file = FileAccess.open(image_path, FileAccess.READ)
+        if file:
+            print("File exists but couldn't be loaded as texture")
+        else:
+            print("File does not exist at path: " + image_path)
+
+
+
+# Helper method to return the precalculated collision edges
+func get_collision_edges() -> Dictionary:
+    print("get collision edges called")
+    print(collision_edges)
+    #if collision_edges.empty():
+        #print("Warning: Collision edges for floor ", floor_number, " have not been calculated yet.")
+    return collision_edges
+
+func configure_marker():
+    var marker = $Marker2D
+    if not (floor_sprite and marker):
+        push_warning("Missing nodes for marker configuration")
+        return
+
+    # Calculate the bottom edge of the sprite
+    var sprite_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
+    var sprite_bottom_y = sprite_height / 2  # Since the sprite's origin is at its center
+
+    # Set the marker position to align with the sprite's bottom edge
+    marker.position = Vector2(0, sprite_bottom_y)
+
+# Call configure_collision_shape() after setting the position
+
 
 func setup_doors(door_data_array):
-	for door_data in door_data_array:
-		var door_instance = DOOR_SCENE.instantiate()
-		add_child(door_instance)
-		# Pass door_data and self to the door
-		door_instance.setup(door_data, self)
+    for door_data in door_data_array:
+        var door_instance = DOOR_SCENE.instantiate()
+        add_child(door_instance)
+        # Pass door_data and self to the door
+        door_instance.setup(door_data, self)
+
+# Handle input events, including the calculated collision edges
+func _input_event(viewport, event, shape_idx):
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+        # Get the marker's global y position which represents the bottom edge
+        var bottom_edge_y = $Marker2D.global_position.y
+
+        # Emit the signal with the additional collision edges
+        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)

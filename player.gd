@@ -1,191 +1,198 @@
 extends Node2D
 
-var target_position: Vector2
-var stored_target_position: Vector2 = Vector2.ZERO  # Changed from `null` to `Vector2.ZERO`
-var has_stored_position: bool = false              # Added from the first script
-var target_floor_number: int = -1
-var current_floor_number: int = -1
-var speed: float = 400.0
+# Load the SpriteData class
+const PlayerSpriteData = preload("res://SpriteData.gd")
+
+var sprite_data: PlayerSpriteData
 
 func _ready():
-	set_initial_position()
-	# Initialize the target position to the player's current position after setting global_position
-	target_position = global_position
+    # Initialize the data model
+    sprite_data = PlayerSpriteData.new()
 
-func set_initial_position():
-	# Find floor 1 from the "floors" group
-	var floors = get_tree().get_nodes_in_group("floors")
-	for building_floor in floors:
-		if building_floor.floor_number == 1:
-			# Get collision bounds of floor 1
-			var edges = get_collision_bounds(building_floor)
-			var left_edge_x = edges.left
-			var bottom_edge_y = edges.bottom
+    # Update the sprite dimensions in the SpriteData resource
+    if $Sprite2D.texture:
+        sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
+        sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
 
-			# Get the player's sprite dimensions
-			var sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
-			var sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
+    set_initial_position()
 
-			# Set the player's starting position
-			global_position = Vector2(
-				left_edge_x + sprite_width / 2,
-				bottom_edge_y - sprite_height / 2
-			)
-			# Set the current floor number
-			current_floor_number = building_floor.floor_number
-			# Break the loop once floor 1 is found and position is set
-			break
+    # Initialize the target position to the player's current position
+    sprite_data.target_position = global_position
+    sprite_data.current_position = global_position
 
-func get_collision_bounds(building_floor):
-	# Get the floor's global position and transform
-	var floor_transform = building_floor.global_transform
+    # Connect to floor_clicked signal from all floors
+    var floors = get_tree().get_nodes_in_group("floors")
+    for floor_node in floors:
+        floor_node.floor_clicked.connect(_on_floor_clicked)
 
-	# Get the collision shape of the floor
-	var collision_shape = building_floor.get_node("CollisionShape2D")
-	var rectangle_shape = collision_shape.shape as RectangleShape2D
-	var collision_extents = rectangle_shape.extents
+func set_initial_position() -> void:
+    # Find floor 1 from the "floors" group
+    var floors: Array = get_tree().get_nodes_in_group("floors")
+    var target_floor: Node2D = null
 
-	# Calculate the collision area's edges using the floor's transform
-	var center = floor_transform * collision_shape.position
+    for building_floor in floors:
+        if building_floor.floor_number == 1:
+            target_floor = building_floor
+            break
 
-	# Create a dictionary with all edges
-	var edges = {
-		"left": center.x - collision_extents.x,
-		"right": center.x + collision_extents.x,
-		"top": center.y - collision_extents.y,
-		"bottom": center.y + collision_extents.y
-	}
+    # If no floor 1 is found, print an error and exit
+    if target_floor == null:
+        print("Error: No floor with number 1 found.")
+        return
 
-	return edges
+    
+    # Ensure collision edges are available
+    var edges: Dictionary = {}
+    if target_floor.has_method("get_collision_edges"):
+        edges = target_floor.get_collision_edges()
+    else:
+        # Print a detailed error message with the floor number
+        print("Error: Target floor with floor_number ", target_floor.floor_number, " does not provide collision edges.")
+        return
 
-func adjust_click_position(building_floor, click_position):
-	# Get collision bounds of the floor
-	var edges = get_collision_bounds(building_floor)
+    # Retrieve the necessary bounds from the collision edges
+    var left_edge_x: float = edges.get("left", 0.0)
+    var bottom_edge_y: float = edges.get("bottom", 0.0)
 
-	# Get the player's sprite dimensions
-	var sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
-	var sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
+    # Use the sprite dimensions from sprite_data
+    var sprite_width: float = sprite_data.sprite_width
+    var sprite_height: float = sprite_data.sprite_height
 
-	# Adjust x-position based on sprite width to keep the sprite within the collision area
-	var adjusted_x = click_position.x
-	if click_position.x < edges.left + sprite_width / 2:
-		adjusted_x = edges.left + sprite_width / 2
-	elif click_position.x > edges.right - sprite_width / 2:
-		adjusted_x = edges.right - sprite_width / 2
+    # Set the player's starting position
+    global_position = Vector2(
+        left_edge_x + sprite_width / 2,
+        bottom_edge_y - sprite_height / 2
+    )
 
-	# The y-position is set to align the bottom of the sprite with the floor
-	var adjusted_y = edges.bottom - sprite_height / 2
+    # Update data model
+    sprite_data.current_position = global_position
+    sprite_data.current_floor_number = target_floor.floor_number
 
-	return Vector2(adjusted_x, adjusted_y)
+
+
+func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
+    # Use the player's sprite dimensions from sprite_data
+    var sprite_width: float = sprite_data.sprite_width
+    var sprite_height: float = sprite_data.sprite_height
+
+    # Adjust x-position to keep the sprite horizontally within bounds
+    var adjusted_x: float = click_position.x
+    var left_bound: float = collision_edges["left"]
+    var right_bound: float = collision_edges["right"]
+
+    if click_position.x < left_bound + sprite_width / 2:
+        adjusted_x = left_bound + sprite_width / 2
+    elif click_position.x > right_bound - sprite_width / 2:
+        adjusted_x = right_bound - sprite_width / 2
+
+    # Adjust y-position to align the bottom of the sprite with the floor
+    var adjusted_y: float = bottom_edge_y - sprite_height / 2
+
+    return Vector2(adjusted_x, adjusted_y)
+
+
 
 func get_current_floor():
-	# Create the physics query
-	var query = PhysicsPointQueryParameters2D.new()
-	query.position = global_position
-	query.collision_mask = 1
-	query.collide_with_areas = true  # Detect Area2D nodes
-	query.collide_with_bodies = false  # We only want to detect areas
+    # Create the physics query
+    var query = PhysicsPointQueryParameters2D.new()
+    query.position = global_position
+    query.collision_mask = 1
+    query.collide_with_areas = true  # Detect Area2D nodes
+    query.collide_with_bodies = false  # We only want to detect areas
 
-	# Get the physics state and perform the intersection test
-	var space_state = get_world_2d().direct_space_state
-	var results = space_state.intersect_point(query)
+    # Get the physics state and perform the intersection test
+    var space_state = get_world_2d().direct_space_state
+    var results = space_state.intersect_point(query)
 
-	# Check if we're on any floor areas
-	if results.size() > 0:
-		for result in results:
-			if result.collider.is_in_group("floors"):
-				return result.collider  # Return the current floor node
-	return null  # Not on any floor
+    # Check if we're on any floor areas
+    if results.size() > 0:
+        for result in results:
+            if result.collider.is_in_group("floors"):
+                return result.collider  # Return the current floor node
+    return null  # Not on any floor
 
-func get_elevator_position(building_floor):
-	var edges = get_collision_bounds(building_floor)
-	var center_x = (edges.left + edges.right) / 2
+func get_elevator_position(collision_edges: Dictionary) -> Vector2:
+    var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
+    var sprite_height: float = sprite_data.sprite_height
+    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
 
-	# The y-position aligns the bottom of the sprite with the floor
-	var sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
-	var adjusted_y = edges.bottom - sprite_height / 2
+    return Vector2(center_x, adjusted_y)
 
-	return Vector2(center_x, adjusted_y)
 
-func _process(delta):
-	# Update current floor number
-	var current_floor = get_current_floor()
-	if current_floor:
-		current_floor_number = current_floor.floor_number
-	else:
-		current_floor_number = -1
+func _process(delta: float) -> void:
+    # Update current floor number
+    var current_floor: Node2D = get_current_floor()
+    if current_floor:
+        sprite_data.current_floor_number = current_floor.floor_number
+    else:
+        sprite_data.current_floor_number = -1
 
-	# Move the player towards the target position
-	if global_position != target_position:
-		# Calculate the direction vector to the target position
-		var direction = (target_position - global_position).normalized()
-		var distance = global_position.distance_to(target_position)
+    # Move the player towards the target position
+    if global_position != sprite_data.target_position:
+        # Calculate the direction vector to the target position
+        var direction: Vector2 = (sprite_data.target_position - global_position).normalized()
+        var distance: float = global_position.distance_to(sprite_data.target_position)
 
-		# Move the player if not at the target position
-		if distance > 1:
-			global_position += direction * speed * delta
-		else:
-			global_position = target_position  # Snap to the target position when close enough
+        # Move the player if not at the target position
+        if distance > 1:
+            global_position += direction * sprite_data.speed * delta
+            # sprite_data.state = "walking"
+        else:
+            global_position = sprite_data.target_position  # Snap to the target position when close enough
+            # sprite_data.state = "idle"
+            # Update current position in data model
+            sprite_data.current_position = global_position
 
-			# Check if we have arrived at the elevator position
-			if has_stored_position:  # Changed from `stored_target_position != null`
-				# If at elevator position on current floor, simulate moving to target floor
-				if current_floor and target_position == get_elevator_position(current_floor):
-					# Move player to the elevator position on target floor
-					var floors = get_tree().get_nodes_in_group("floors")
-					for building_floor in floors:
-						if building_floor.floor_number == target_floor_number:
-							var elevator_pos = get_elevator_position(building_floor)
-							global_position = elevator_pos
-							# Update target position to stored target position
-							target_position = stored_target_position
-							has_stored_position = false  # Changed from setting `stored_target_position` to null
-							break
+            # Retrieve collision edges for the current floor
+            if current_floor and current_floor.has_method("get_collision_edges"):
+                var collision_edges: Dictionary = current_floor.get_collision_edges()
+                # Handle arrival at target position
+                handle_arrival(current_floor, collision_edges)
+            else:
+                print("Error: Current floor or collision edges are not available.")
 
-func _input(event):
-	# Detect mouse click events
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		# Create the physics query
-		var query = PhysicsPointQueryParameters2D.new()
-		query.position = event.position
-		query.collision_mask = 1
-		query.collide_with_areas = true  # Detect Area2D nodes
-		query.collide_with_bodies = false  # We only want to detect areas
 
-		# Get the physics state and perform the intersection test
-		var space_state = get_world_2d().direct_space_state
-		var results = space_state.intersect_point(query)
+func handle_arrival(current_floor: Node2D, collision_edges: Dictionary) -> void:
+    print("In handle_arrival, current floor: ", current_floor)
 
-		# Check if we hit any floor areas
-		if results.size() > 0:
-			var building_floor = null
-			for result in results:
-				if result.collider.is_in_group("floors"):
-					building_floor = result.collider
-					break  # Found the clicked floor
+    # Check if the player is at the elevator position
+    if current_floor and sprite_data.target_position == get_elevator_position(collision_edges):
+        # Check if the current floor is different from the destination floor
+        if sprite_data.current_floor_number != sprite_data.target_floor_number:
+            # Simulate moving to the target floor
+            var floors: Array = get_tree().get_nodes_in_group("floors")
+            for building_floor in floors:
+                if building_floor.floor_number == sprite_data.target_floor_number:
+                    # Move player to the elevator position on the target floor
+                    var target_floor_edges: Dictionary = building_floor.collision_edges  # Assuming edges are stored in the floor node
+                    var elevator_pos: Vector2 = get_elevator_position(target_floor_edges)
+                    global_position = elevator_pos
+                    sprite_data.current_position = global_position
+                    sprite_data.current_floor_number = building_floor.floor_number
+                    # Update target position to the stored target position
+                    sprite_data.target_position = sprite_data.stored_target_position
+                    break
+        else:
+            # Already on the target floor, no action needed
+            sprite_data.target_position = sprite_data.stored_target_position
 
-			if building_floor:
-				var clicked_floor_number = building_floor.floor_number
-				var adjusted_click_position = adjust_click_position(building_floor, event.position)
-				var current_floor = get_current_floor()
 
-				if current_floor and current_floor.floor_number == clicked_floor_number:
-					# Adjust the click position as usual
-					target_position = adjusted_click_position
-					has_stored_position = false  # Changed from setting `stored_target_position` to null
-					target_floor_number = -1  # Reset target floor
-				else:
-					# Store the target position and floor number for later
-					stored_target_position = adjusted_click_position
-					has_stored_position = true  # Changed from checking `stored_target_position != null`
-					target_floor_number = clicked_floor_number
+  
+func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:    
 
-					# Compute elevator position on current floor
-					if current_floor:
-						target_position = get_elevator_position(current_floor)
-					else:
-						print("Player is not on any floor.")
-			else:
-				print("Clicked outside of any floor area.")
-		else:
-			print("Clicked outside of any floor area.")
+    print("In player script: Floor number: ", floor_number, ", Global Position: ", click_position, ", Bottom Edge Y: ", bottom_edge_y)
+
+    # Get the adjusted click position using collision_edges
+    var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
+
+    if sprite_data.current_floor_number == floor_number:
+        # Adjust the click position as usual
+        sprite_data.target_position = adjusted_click_position
+        sprite_data.target_floor_number = floor_number  # No floor switch needed
+    else:
+        # Store the target position and floor number for later
+        sprite_data.target_floor_number = floor_number
+        sprite_data.target_position = adjusted_click_position
+
+        # Use the provided collision edges to compute the elevator position
+        sprite_data.stored_target_position = get_elevator_position(collision_edges)
