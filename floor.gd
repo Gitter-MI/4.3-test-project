@@ -15,7 +15,7 @@ const BOUNDARIES = {
     "y2": 0.9941   # Bottom boundary
 }
 
-signal floor_clicked(floor_number: int, position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
+signal floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
 
 func _ready():
     add_to_group("floors")
@@ -138,5 +138,5 @@ func setup_doors(door_data_array):
         door_instance.name = "Door_" + str(door_data.index)
         add_child(door_instance)
         # Pass door_data and self to the door
-        door_instance.setup(door_data, self)
+        door_instance.setup_door_instance(door_data, self)
 #endregion

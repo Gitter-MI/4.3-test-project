@@ -21,6 +21,10 @@ func _ready():
     for floor_node in floors:
         floor_node.floor_clicked.connect(_on_floor_clicked)
     
+    var doors = get_tree().get_nodes_in_group("doors")
+    for door_node in doors:
+        door_node.door_clicked.connect(_on_door_clicked)
+    
     # Movement logic will be handled in _process
     pass
 
@@ -67,7 +71,8 @@ func movement_logic(delta: float) -> void:
             sprite_data.needs_elevator = true
             # Move to elevator position on the same floor
             if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
-                print('calling elevator')
+                pass
+                # print('calling elevator')
                 # Additional elevator logic can be added here
             else:
                 # Keep moving towards the elevator
@@ -93,6 +98,7 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
 
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
     # Get the adjusted click position using collision_edges
+    print("floor clicked")
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
 
     if sprite_data.current_floor_number == floor_number:
@@ -109,6 +115,27 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
         var current_edges = current_floor.get_collision_edges()
         sprite_data.current_elevator_position = get_elevator_position(current_edges)
 
+
+func _on_door_clicked(door_center_x: int, floor_number: int, collision_edges: Dictionary, click_position: Vector2) -> void:
+    print("door_center_x: ", door_center_x, ", floor_number: ", floor_number, ", collision_edges: ", collision_edges)
+    var bottom_edge_y = collision_edges["bottom"]
+    # var door_click_position = (x=x from click position, y = collision edges.bottom)
+    var door_click_position: Vector2 = Vector2(door_center_x, collision_edges["bottom"])
+    var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, door_click_position, bottom_edge_y)
+  
+    if sprite_data.current_floor_number == floor_number:
+        # Adjust the click position as usual
+        sprite_data.target_position = adjusted_click_position
+        sprite_data.target_floor_number = floor_number  # No floor switch needed
+    else:
+        # Store the target position and floor number for later
+        sprite_data.target_floor_number = floor_number
+        sprite_data.target_position = adjusted_click_position
+
+        # Need to get the elevator position of the current floor
+        var current_floor = get_floor_by_number(sprite_data.current_floor_number)
+        var current_edges = current_floor.get_collision_edges()
+        sprite_data.current_elevator_position = get_elevator_position(current_edges)  
 
 #region Initial and unused methods
 ############################################
