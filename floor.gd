@@ -1,17 +1,13 @@
+# floor.gd -> do not remove this comment!
 extends Area2D
 
-# Exported variables for the floor number and image path
 @export var floor_number: int = 0
 @export var floor_image_path: String
-
-# Reference to the FloorSprite node
 var floor_sprite: Sprite2D
-
-const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
-
-# Store collision edges, initialized as empty
 var collision_edges: Dictionary = {}
 
+
+const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
 const BOUNDARIES = {
     "x1": 0.0695,  # Left boundary
     "x2": 0.929,   # Right boundary
@@ -19,16 +15,7 @@ const BOUNDARIES = {
     "y2": 0.9941   # Bottom boundary
 }
 
-# Define signal
 signal floor_clicked(floor_number: int, position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
-
-# Handle input events, including the calculated collision edges
-func _input_event(_viewport, event, _shape_idx):
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        # Get the marker's global y position which represents the bottom edge
-        var bottom_edge_y = $Marker2D.global_position.y
-        # Emit the signal with the additional collision edges
-        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)
 
 func _ready():
     add_to_group("floors")
@@ -38,8 +25,29 @@ func _ready():
     collision_layer = 1    
     configure_marker()
     
+func get_collision_edges() -> Dictionary:
+    # print("get_collision_edges: ", collision_edges)
+    # is called when a sprite moves to a new floor to determine the y-coordinate    
+    return collision_edges
+    
+    
+func _input_event(_viewport, event, _shape_idx):
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+        # Get the marker's global y position which represents the bottom edge
+        var bottom_edge_y = $Marker2D.global_position.y
+        # Emit the signal with the additional collision edges
+        # print("bottom edge: ", bottom_edge_y)
+        # print("coll_edges; ", collision_edges)
+        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)
 
 
+
+
+
+#region set-up methods
+############################################
+### these functions are called only once ###
+############################################
 
 func position_floor(previous_floor_top_y_position, is_first_floor):
     if not floor_sprite:
@@ -47,9 +55,7 @@ func position_floor(previous_floor_top_y_position, is_first_floor):
         return previous_floor_top_y_position  # Return previous value to avoid errors
 
     var viewport_size = get_viewport().size
-    var floor_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
-
-    # Calculate x position to center horizontally
+    var floor_height = floor_sprite.texture.get_height() * floor_sprite.scale.y    
     var x_position = viewport_size.x / 2
     var y_position = 0.0
 
@@ -59,16 +65,11 @@ func position_floor(previous_floor_top_y_position, is_first_floor):
     else:
         # Stack the floor above the previous floor
         y_position = previous_floor_top_y_position - floor_height
-
-    # Set the position
-    position = Vector2(x_position, y_position)
-
-    # Now that the position is set, configure the collision shape
+    
+    position = Vector2(x_position, y_position)    
     configure_collision_shape()
-
     # Return the y position of the top of this floor for the next calculation
     return y_position
-
 
 func configure_collision_shape():
     var collision_shape = $CollisionShape2D
@@ -117,10 +118,6 @@ func set_floor_image(image_path: String):
         else:
             print("File does not exist at path: " + image_path)
 
-func get_collision_edges() -> Dictionary:
-    # is called when a sprite moves to a new floor to determine the y-coordinate    
-    return collision_edges
-
 func configure_marker():
     var marker = $Marker2D
     if not (floor_sprite and marker):
@@ -135,9 +132,11 @@ func configure_marker():
     marker.position = Vector2(0, sprite_bottom_y)
 
 func setup_doors(door_data_array):
+    # print("setup doors called")
     for door_data in door_data_array:
         var door_instance = DOOR_SCENE.instantiate()
         door_instance.name = "Door_" + str(door_data.index)
         add_child(door_instance)
         # Pass door_data and self to the door
         door_instance.setup(door_data, self)
+#endregion

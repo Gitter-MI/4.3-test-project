@@ -1,6 +1,12 @@
+# camera_2d.gd # do not remove this comment
 extends Camera2D
 
-@export var screen_center_x: float = 960.0  # Replace this with half the screen width.
+var viewport_size: Vector2
+var screen_center_x: float = 0
+
+func _ready():
+    viewport_size = get_viewport().size
+    screen_center_x = viewport_size.x / 2
 
 func _process(_delta: float) -> void:
     # Keep the x-position of the camera centered on the screen
