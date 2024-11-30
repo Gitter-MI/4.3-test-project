@@ -2,7 +2,8 @@
 extends Node2D
 
 # Preload the single floor scene
-const FLOOR_SCENE = preload("res://Floor.tscn")  # Update the path to your single floor scene
+const FLOOR_SCENE = preload("res://Floor.tscn")
+const ELEVATOR_SCENE = preload("res://Elevator.tscn")
 const DOOR_DATA_RESOURCE = preload("res://DoorData.tres")
 const NUM_FLOORS = 14  # Total number of floors
 
@@ -16,17 +17,14 @@ func generate_building():
     for floor_number in range(NUM_FLOORS):
         var floor_instance = instantiate_floor(floor_number)
         if floor_instance:
-            # Let the floor instance position itself
             previous_floor_top_y_position = floor_instance.position_floor(previous_floor_top_y_position, is_first_floor)
             is_first_floor = false
 
-            # Pass door data to floor to handle door instantiation
             var floor_doors = DOOR_DATA_RESOURCE.doors.filter(func(door):
                 return door.floor_number == floor_number
             )
             floor_instance.setup_doors(floor_doors)
-        else:
-            push_warning("Failed to instantiate floor number " + str(floor_number))
+            floor_instance.setup_elevator()  # Add this line to set up the elevator
 
 func instantiate_floor(floor_number):
     # print("instantiate_floor")  # Debug # print

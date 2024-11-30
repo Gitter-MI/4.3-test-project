@@ -24,8 +24,6 @@ func _ready():
     var doors = get_tree().get_nodes_in_group("doors")
     for door_node in doors:
         door_node.door_clicked.connect(_on_door_clicked)
-    
-    # Movement logic will be handled in _process
     pass
 
 

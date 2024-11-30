@@ -8,6 +8,8 @@ var collision_edges: Dictionary = {}
 
 
 const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
+const ELEVATOR_SCENE = preload("res://Elevator.tscn")
+
 const BOUNDARIES = {
     "x1": 0.0695,  # Left boundary
     "x2": 0.929,   # Right boundary
@@ -139,4 +141,11 @@ func setup_doors(door_data_array):
         add_child(door_instance)
         # Pass door_data and self to the door
         door_instance.setup_door_instance(door_data, self)
+
+func setup_elevator():
+    var elevator_instance = ELEVATOR_SCENE.instantiate()
+    elevator_instance.name = "Elevator"
+    add_child(elevator_instance)
+    elevator_instance.setup_elevator_instance(self)
+        
 #endregion
