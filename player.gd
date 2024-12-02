@@ -4,10 +4,16 @@ extends Node2D
 var sprite_data: PlayerSpriteData
 
 const PlayerSpriteData = preload("res://SpriteData.gd")
+# @onready var elevator = preload("res://Cabin.tscn")
+
+
 
 
 func _ready():
-    # Initialize the data model
+
+    add_to_group("player_sprites")
+    
+    
     sprite_data = PlayerSpriteData.new()
 
     # Update the sprite dimensions in the SpriteData resource    
@@ -20,11 +26,17 @@ func _ready():
     var floors = get_tree().get_nodes_in_group("floors")
     for floor_node in floors:
         floor_node.floor_clicked.connect(_on_floor_clicked)
-    
+        
     var doors = get_tree().get_nodes_in_group("doors")
     for door_node in doors:
         door_node.door_clicked.connect(_on_door_clicked)
     pass
+    
+
+    
+    # we want to connect the signal floor_requested here. This is the absolute path: C:/Users/VeitB/Documents/4.3-test-project/Cabin.tscn
+    # this is the path that we get by drag and drop in the UI : "res://Cabin.tscn"
+    # attached to the Cabin scene's parent node is the cabin.gd
 
 
 func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
@@ -47,7 +59,6 @@ func adjust_click_position(collision_edges: Dictionary, click_position: Vector2,
 
     return Vector2(adjusted_x, adjusted_y)
 
-
 func get_elevator_position(collision_edges: Dictionary) -> Vector2:
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
     var sprite_height: float = sprite_data.sprite_height
@@ -55,10 +66,8 @@ func get_elevator_position(collision_edges: Dictionary) -> Vector2:
 
     return Vector2(center_x, adjusted_y)
 
-
 func _process(delta: float) -> void:
     movement_logic(delta)
-
 
 func movement_logic(delta: float) -> void:
     if sprite_data.current_position != sprite_data.target_position:
@@ -68,8 +77,9 @@ func movement_logic(delta: float) -> void:
         else:
             sprite_data.needs_elevator = true
             if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
-                # implemented for debugging. Needs actual elevator logic
-                print("calling elevator")
+                SignalBus.floor_requested.emit(sprite_data.current_floor_number)
+                # wait for elevator to arrive before entering
+
                 
                 # Jump to target floor
                 var target_floor = get_floor_by_number(sprite_data.target_floor_number)

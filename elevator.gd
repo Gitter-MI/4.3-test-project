@@ -11,8 +11,10 @@ func setup_elevator_instance(p_floor_instance):
     apply_scale_factor()
     position_elevator()
     update_collision_shape()
-    if floor_instance.floor_number == 1:
-        setup_cabin()  # Only instantiate the Cabin for Elevator_01
+    # Instantiate the Cabin only if its `current_floor` matches the floor_instance's number
+    var cabin_instance = CABIN_SCENE.instantiate()
+    if cabin_instance.get("current_floor") == floor_instance.floor_number:
+        setup_cabin()
 
 
 func apply_scale_factor():
