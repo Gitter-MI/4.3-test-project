@@ -14,7 +14,7 @@ const BOUNDARIES = {
     "x1": 0.0695,  # Left boundary
     "x2": 0.929,   # Right boundary
     "y1": 0.0760,  # Top boundary
-    "y2": 0.9941   # Bottom boundary
+    "y2": 1   # Bottom boundary
 }
 
 signal floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
