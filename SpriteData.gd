@@ -1,6 +1,8 @@
 # SpriteData.gd
 class_name SpriteData
 
+var sprite_name: String = "Player_1"
+
 var sprite_height: int = -1
 var sprite_width: int = -1
 

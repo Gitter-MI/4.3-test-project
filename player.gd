@@ -4,7 +4,7 @@ extends Node2D
 var sprite_data: PlayerSpriteData
 
 const PlayerSpriteData = preload("res://SpriteData.gd")
-# @onready var elevator = preload("res://Cabin.tscn")
+
 
 
 
@@ -33,31 +33,8 @@ func _ready():
     pass
     
 
-    
-    # we want to connect the signal floor_requested here. This is the absolute path: C:/Users/VeitB/Documents/4.3-test-project/Cabin.tscn
-    # this is the path that we get by drag and drop in the UI : "res://Cabin.tscn"
-    # attached to the Cabin scene's parent node is the cabin.gd
 
 
-func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
-    # Use the player's sprite dimensions from sprite_data
-    var sprite_width: float = sprite_data.sprite_width
-    var sprite_height: float = sprite_data.sprite_height
-
-    # Adjust x-position to keep the sprite horizontally within bounds
-    var adjusted_x: float = click_position.x
-    var left_bound: float = collision_edges["left"]
-    var right_bound: float = collision_edges["right"]
-
-    if click_position.x < left_bound + sprite_width / 2:
-        adjusted_x = left_bound + sprite_width / 2
-    elif click_position.x > right_bound - sprite_width / 2:
-        adjusted_x = right_bound - sprite_width / 2
-
-    # Adjust y-position to align the bottom of the sprite with the floor
-    var adjusted_y: float = bottom_edge_y - sprite_height / 2
-
-    return Vector2(adjusted_x, adjusted_y)
 
 func get_elevator_position(collision_edges: Dictionary) -> Vector2:
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
@@ -77,8 +54,9 @@ func movement_logic(delta: float) -> void:
         else:
             sprite_data.needs_elevator = true
             if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
-                SignalBus.floor_requested.emit(sprite_data.current_floor_number)
-                # wait for elevator to arrive before entering
+                SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
+
+                
 
                 
                 # Jump to target floor
@@ -113,6 +91,29 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
 
     # Update current position in data model
     sprite_data.current_position = global_position
+
+
+func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
+    # Use the player's sprite dimensions from sprite_data
+    var sprite_width: float = sprite_data.sprite_width
+    var sprite_height: float = sprite_data.sprite_height
+
+    # Adjust x-position to keep the sprite horizontally within bounds
+    var adjusted_x: float = click_position.x
+    var left_bound: float = collision_edges["left"]
+    var right_bound: float = collision_edges["right"]
+
+    if click_position.x < left_bound + sprite_width / 2:
+        adjusted_x = left_bound + sprite_width / 2
+    elif click_position.x > right_bound - sprite_width / 2:
+        adjusted_x = right_bound - sprite_width / 2
+
+    # Adjust y-position to align the bottom of the sprite with the floor
+    var adjusted_y: float = bottom_edge_y - sprite_height / 2
+
+    return Vector2(adjusted_x, adjusted_y)
+
+
 
 
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
