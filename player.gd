@@ -59,16 +59,16 @@ func movement_logic(delta: float) -> void:
                 
 
                 
-                # Jump to target floor
-                var target_floor = get_floor_by_number(sprite_data.target_floor_number)
-                var target_edges = target_floor.get_collision_edges()
-                var target_elevator_position = get_elevator_position(target_edges)
-
-                # Update sprite position to the elevator position of the target floor
-                global_position = target_elevator_position
-                sprite_data.current_position = global_position
-                sprite_data.current_floor_number = sprite_data.target_floor_number                
-                sprite_data.needs_elevator = false                
+                ## Jump to target floor
+                #var target_floor = get_floor_by_number(sprite_data.target_floor_number)
+                #var target_edges = target_floor.get_collision_edges()
+                #var target_elevator_position = get_elevator_position(target_edges)
+#
+                ## Update sprite position to the elevator position of the target floor
+                #global_position = target_elevator_position
+                #sprite_data.current_position = global_position
+                #sprite_data.current_floor_number = sprite_data.target_floor_number                
+                #sprite_data.needs_elevator = false                
 
             else:
                 # Keep moving towards the elevator
