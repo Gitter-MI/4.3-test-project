@@ -1,6 +1,18 @@
 # SpriteData.gd
+extends Resource
 class_name SpriteData
 
+# Define the possible states a sprite can be in
+enum State {
+    IDLE,
+    WALKING,
+    IN_ROOM,
+    ENTERING_ROOM,
+    IN_ELEVATOR,
+    WAITING_FOR_ELEVATOR
+}
+
+# Sprite properties
 var sprite_name: String = "Player_1"
 
 var sprite_height: int = -1
@@ -18,3 +30,6 @@ var target_room: int = -1
 
 var needs_elevator: bool = false
 var current_elevator_position: Vector2 = Vector2.ZERO
+
+# Add a variable to track the current state of the sprite
+var current_state: State = State.IDLE

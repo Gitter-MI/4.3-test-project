@@ -1,10 +1,11 @@
+# Door.gd
 extends Area2D
 
 enum DoorState { CLOSED, OPEN }
 
 var current_state: DoorState = DoorState.CLOSED
 var door_type: int
-var door_data
+var door_data: Dictionary
 var floor_instance
 var door_center_x: float = 0.0 
 
@@ -14,7 +15,7 @@ const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var tooltip_background = $TooltipBackground  # TooltipBackground node with tooltip.gd attached
 
-signal door_clicked(door_center_x: int, floor_number: int, collision_edges: Dictionary, click_position: Vector2)
+signal door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, click_position: Vector2)
 
 func _ready():
     add_to_group("doors")
@@ -24,9 +25,11 @@ func _ready():
 func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         var parent_collision_edges = get_parent().collision_edges
-        print("door_clicked. Center:", door_center_x,", Floor: ", door_data.floor_number)
-        emit_signal("door_clicked", door_center_x, door_data.floor_number, parent_collision_edges, event.global_position)
+        print("door_clicked. Center:", door_center_x, ", Floor:", door_data.floor_number, ", Index:", door_data.index)
+        # Emit the updated signal with door_index
+        emit_signal("door_clicked", door_center_x, door_data.floor_number, door_data.index, parent_collision_edges, event.global_position)
         get_viewport().set_input_as_handled()
+
 
 
 func set_door_state(new_state: DoorState) -> void:

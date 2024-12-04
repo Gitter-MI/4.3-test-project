@@ -2,18 +2,15 @@
 extends Node2D
 
 var sprite_data: PlayerSpriteData
+var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
 
 const PlayerSpriteData = preload("res://SpriteData.gd")
 
 
 
-
-
 func _ready():
 
-    add_to_group("player_sprites")
-    
-    
+    add_to_group("player_sprites")   
     sprite_data = PlayerSpriteData.new()
 
     # Update the sprite dimensions in the SpriteData resource    
@@ -54,7 +51,33 @@ func movement_logic(delta: float) -> void:
         else:
             sprite_data.needs_elevator = true
             if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
-                SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
+                # Check if the current request is identical to the last request
+                var current_request = {
+                    "sprite_name": sprite_data.sprite_name,
+                    "floor_number": sprite_data.target_floor_number
+                }
+                
+                if current_request != last_elevator_request:
+                    # Emit the elevator request signal
+                    SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
+                    print("signal emitted: elevator requested")
+                    
+                    # Update the last elevator request
+                    last_elevator_request = current_request
+                    
+                    # Set sprite state to WAITING_FOR_ELEVATOR
+                    sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
+                    print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
+                else:
+                    pass
+                    # print("Duplicate elevator request detected. Signal not emitted.")
+            else:
+                # Keep moving towards the elevator
+                move_towards_position(sprite_data.current_elevator_position, delta)
+                # Potentially emit a signal here if needed, but based on your comment, 
+                # it seems you want to emit only when at the elevator position
+                # Therefore, we omit emitting the signal here to prevent duplicates
+
 
                 
 
@@ -70,9 +93,9 @@ func movement_logic(delta: float) -> void:
                 #sprite_data.current_floor_number = sprite_data.target_floor_number                
                 #sprite_data.needs_elevator = false                
 
-            else:
-                # Keep moving towards the elevator
-                move_towards_position(sprite_data.current_elevator_position, delta)
+            #else:
+                ## Keep moving towards the elevator
+                #move_towards_position(sprite_data.current_elevator_position, delta)
 
 
 
@@ -80,17 +103,41 @@ func move_towards_target_position(delta: float) -> void:
     move_towards_position(sprite_data.target_position, delta)
 
 
+# Function to move the sprite towards a target position
 func move_towards_position(target_position: Vector2, delta: float) -> void:
     var direction: Vector2 = (target_position - global_position).normalized()
     var distance: float = global_position.distance_to(target_position)
 
     if distance > 1:
+        # Set state to WALKING if not already walking
+        if sprite_data.current_state != SpriteData.State.WALKING:
+            sprite_data.current_state = SpriteData.State.WALKING
+            print(sprite_data.sprite_name, " started WALKING towards ", target_position)
+
+        # Move the sprite
         global_position += direction * sprite_data.speed * delta
     else:
-        global_position = target_position  # Snap to the target position when close enough
+        # Snap to the target position when close enough
+        global_position = target_position
+        sprite_data.current_position = global_position
 
-    # Update current position in data model
-    sprite_data.current_position = global_position
+        # Update state based on specific conditions
+        update_state_after_movement()
+
+# Helper function to update the sprite's state after reaching the target position
+func update_state_after_movement() -> void:
+    if sprite_data.needs_elevator:
+        if sprite_data.current_state != SpriteData.State.WAITING_FOR_ELEVATOR:
+            sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
+            print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. in update state")
+    elif sprite_data.target_room >= 0:
+        if sprite_data.current_state != SpriteData.State.ENTERING_ROOM:
+            sprite_data.current_state = SpriteData.State.ENTERING_ROOM
+            print(sprite_data.sprite_name, " is ENTERING_ROOM ", sprite_data.target_room)
+    else:
+        if sprite_data.current_state != SpriteData.State.IDLE:
+            sprite_data.current_state = SpriteData.State.IDLE
+            print(sprite_data.sprite_name, " is now IDLE.")
 
 
 func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
@@ -125,37 +172,52 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
         # Adjust the click position as usual
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_floor_number = floor_number  # No floor switch needed
+        sprite_data.target_room = -1
     else:
         # Store the target position and floor number for later
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
-
+        sprite_data.target_room = -1
+        
         # Need to get the elevator position of the current floor
         var current_floor = get_floor_by_number(sprite_data.current_floor_number)
         var current_edges = current_floor.get_collision_edges()
         sprite_data.current_elevator_position = get_elevator_position(current_edges)
 
 
-func _on_door_clicked(door_center_x: int, floor_number: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
-    print("door_center_x: ", door_center_x, ", floor_number: ", floor_number, ", collision_edges: ", collision_edges)
+# Function to handle door clicks
+func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
+    print("door_center_x: ", door_center_x, ", floor_number: ", floor_number, ", door_index: ", door_index, ", collision_edges: ", collision_edges)
+    
     var bottom_edge_y = collision_edges["bottom"]
-    # var door_click_position = (x=x from click position, y = collision edges.bottom)
-    var door_click_position: Vector2 = Vector2(door_center_x, collision_edges["bottom"])
+    
+    # Calculate the door's click position (assuming it's centered horizontally on the door)
+    var door_click_position: Vector2 = Vector2(door_center_x, bottom_edge_y)
+    
+    # Adjust the click position if necessary (implementation depends on your game's layout)
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, door_click_position, bottom_edge_y)
   
     if sprite_data.current_floor_number == floor_number:
         # Adjust the click position as usual
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_floor_number = floor_number  # No floor switch needed
+        
+        # **Update the sprite_data.target_room with the door index**
+        sprite_data.target_room = door_index
+        print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
     else:
         # Store the target position and floor number for later
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
-
+        
+        # **Update the sprite_data.target_room with the door index**
+        sprite_data.target_room = door_index
+        print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
+        
         # Need to get the elevator position of the current floor
         var current_floor = get_floor_by_number(sprite_data.current_floor_number)
         var current_edges = current_floor.get_collision_edges()
-        sprite_data.current_elevator_position = get_elevator_position(current_edges)  
+        sprite_data.current_elevator_position = get_elevator_position(current_edges) 
 
 #region Initial and unused methods
 ############################################
