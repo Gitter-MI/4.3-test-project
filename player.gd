@@ -169,12 +169,12 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
 
     if sprite_data.current_floor_number == floor_number:
-        # Adjust the click position as usual
+        # Adjust the click position and store the target position and floor number for later
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_floor_number = floor_number  # No floor switch needed
         sprite_data.target_room = -1
     else:
-        # Store the target position and floor number for later
+        # Adjust the click position and store the target position and floor number for later
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_room = -1
@@ -185,32 +185,23 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
         sprite_data.current_elevator_position = get_elevator_position(current_edges)
 
 
-# Function to handle door clicks
 func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
     print("door_center_x: ", door_center_x, ", floor_number: ", floor_number, ", door_index: ", door_index, ", collision_edges: ", collision_edges)
     
     var bottom_edge_y = collision_edges["bottom"]
-    
-    # Calculate the door's click position (assuming it's centered horizontally on the door)
     var door_click_position: Vector2 = Vector2(door_center_x, bottom_edge_y)
-    
-    # Adjust the click position if necessary (implementation depends on your game's layout)
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, door_click_position, bottom_edge_y)
   
     if sprite_data.current_floor_number == floor_number:
-        # Adjust the click position as usual
+        # Store the target position, floor number and target_room for later
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_floor_number = floor_number  # No floor switch needed
-        
-        # **Update the sprite_data.target_room with the door index**
         sprite_data.target_room = door_index
         print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
     else:
-        # Store the target position and floor number for later
+        # Store the target position, floor number and target_room for later
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
-        
-        # **Update the sprite_data.target_room with the door index**
         sprite_data.target_room = door_index
         print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
         
