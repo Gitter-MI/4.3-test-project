@@ -59,7 +59,7 @@ func movement_logic(delta: float) -> void:
                 
                 if current_request != last_elevator_request:
                     # Emit the elevator request signal
-                    SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
+                    SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
                     print("signal emitted: elevator requested")
                     
                     # Update the last elevator request
@@ -77,10 +77,6 @@ func movement_logic(delta: float) -> void:
                 # Potentially emit a signal here if needed, but based on your comment, 
                 # it seems you want to emit only when at the elevator position
                 # Therefore, we omit emitting the signal here to prevent duplicates
-
-
-                
-
                 
                 ## Jump to target floor
                 #var target_floor = get_floor_by_number(sprite_data.target_floor_number)
@@ -126,17 +122,22 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
 
 # Helper function to update the sprite's state after reaching the target position
 func update_state_after_movement() -> void:
-    if sprite_data.needs_elevator:
+    if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
         if sprite_data.current_state != SpriteData.State.WAITING_FOR_ELEVATOR:
             sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
             print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. in update state")
     elif sprite_data.target_room >= 0:
         if sprite_data.current_state != SpriteData.State.ENTERING_ROOM:
             sprite_data.current_state = SpriteData.State.ENTERING_ROOM
+            last_elevator_request = {"sprite_name": "", "floor_number": -1}
+            sprite_data.needs_elevator = false
             print(sprite_data.sprite_name, " is ENTERING_ROOM ", sprite_data.target_room)
+            
     else:
         if sprite_data.current_state != SpriteData.State.IDLE:
             sprite_data.current_state = SpriteData.State.IDLE
+            last_elevator_request = {"sprite_name": "", "floor_number": -1}
+            sprite_data.needs_elevator = false
             print(sprite_data.sprite_name, " is now IDLE.")
 
 
@@ -173,6 +174,8 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_floor_number = floor_number  # No floor switch needed
         sprite_data.target_room = -1
+        sprite_data.needs_elevator = false
+        last_elevator_request = {"sprite_name": "", "floor_number": -1}
     else:
         # Adjust the click position and store the target position and floor number for later
         sprite_data.target_floor_number = floor_number
@@ -197,6 +200,8 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_floor_number = floor_number  # No floor switch needed
         sprite_data.target_room = door_index
+        sprite_data.needs_elevator = false
+        last_elevator_request = {"sprite_name": "", "floor_number": -1}
         print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
     else:
         # Store the target position, floor number and target_room for later
