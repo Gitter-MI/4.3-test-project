@@ -1,5 +1,4 @@
-# cabing.gd
-extends Node2D
+extends Sprite2D
 
 enum ElevatorState {
     WAITING,       # 0
@@ -14,66 +13,8 @@ var current_floor: int = 2
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
 
-const SCALE_FACTOR: float = 2.3
-
 func _ready():
     SignalBus.floor_requested.connect(_on_floor_requested)
-    apply_scale_factor()
-    position_cabin()
-
-func apply_scale_factor():
-    # Apply the scale factor to the Cabin node
-    scale = Vector2.ONE * SCALE_FACTOR
-
-# Positions the cabin based on the current floor
-func position_cabin():
-    var viewport_size = get_viewport().size
-    var x_position = viewport_size.x / 2  # Center horizontally
-
-    # Retrieve all nodes in the "floors" group
-    var floor_nodes = get_tree().get_nodes_in_group("floors")
-    var floor_node = null
-
-    # Iterate through the floor nodes to find the one matching current_floor
-    for floors in floor_nodes:
-        # Assume each floor node has a 'floor_number' property
-        if floors.floor_number == current_floor:
-            floor_node = floors
-            break
-
-    # If no matching floor node is found, log a warning and exit the function
-    if not floor_node:
-        push_warning("Floor node for floor %d not found" % current_floor)
-        return
-
-    # Get collision edges from the floor node
-    var collision_edges = floor_node.get_collision_edges()
-    var bottom_edge_y = collision_edges["bottom"]
-
-    # Calculate the cabin's height after scaling
-    var cabin_height = get_cabin_height()
-    
-    # Determine the Y position to place the cabin on top of the floor
-    var y_position = bottom_edge_y - (cabin_height / 2)
-
-    # Set the cabin's global position
-    global_position = Vector2(x_position, y_position)
-
-func get_cabin_height():
-    var sprite = get_node("Sprite2D")  # Replace "Sprite2D" with the actual sprite node name if different
-    if sprite and sprite.texture:
-        return sprite.texture.get_height() * scale.y
-    else:
-        return 0
-
-func get_floor_node(floor_number):
-    var floor_path = "../Floors/Floor_%d" % floor_number  # Adjust the path according to your scene tree
-    if has_node(floor_path):
-        return get_node(floor_path)
-    else:
-        return null
-
-
 
 
 func _process(delta: float) -> void:

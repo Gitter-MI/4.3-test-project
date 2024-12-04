@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://dskoa4nl525pd"]
+[gd_scene load_steps=3 format=3 uid="uid://c1voqfl0thkhx"]
 
-[ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="1_s6ryv"]
+[ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="1_l3g6p"]
 [ext_resource type="Script" path="res://cabin.gd" id="2_enpm1"]
 
-[node name="Cabin" type="Sprite2D"]
-texture = ExtResource("1_s6ryv")
+[node name="Cabin" type="Node2D"]
 script = ExtResource("2_enpm1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_l3g6p")
