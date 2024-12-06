@@ -59,7 +59,7 @@ func movement_logic(delta: float) -> void:
                 
                 if current_request != last_elevator_request:
                     # Emit the elevator request signal
-                    SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+                    SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
                     print("signal emitted: elevator requested")
                     
                     # Update the last elevator request
