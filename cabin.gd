@@ -1,4 +1,3 @@
-# cabing.gd
 extends Node2D
 
 enum ElevatorState {
@@ -15,15 +14,10 @@ var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
 
 const SCALE_FACTOR: float = 2.3
-const SPEED: float = 200.0  # Pixels per second
+const SPEED: float = 400.0  # Pixels per second
 
-# Variables to store target position
 var target_position: Vector2 = Vector2.ZERO
-
-
 var cabin_timer: Timer
-
-
 
 func _ready():
     SignalBus.floor_requested.connect(_on_floor_requested)
@@ -31,90 +25,85 @@ func _ready():
     position_cabin()
     z_index = -10
 
-    # Initialize and configure the timer
     cabin_timer = Timer.new()
     cabin_timer.one_shot = true
-    cabin_timer.wait_time = 2.0  # Wait 2 seconds
+    cabin_timer.wait_time = 2.0
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
+
 
 func _process(delta: float) -> void:
     match state:
         ElevatorState.WAITING:
             elevator_logic()
+        ElevatorState.CLOSING:
+            handle_closing()
         ElevatorState.IN_TRANSIT:
             move_elevator(delta)
+        ElevatorState.OPENING:
+            handle_opening()
 
-    
-# Elevator Logic
+
 func elevator_logic() -> void:
+    # If we have a request and we are waiting
     if elevator_queue.size() > 0 and state == ElevatorState.WAITING:
         update_destination_floor()
-        
-        # Check if the destination floor is the same as the current floor
-        if destination_floor == current_floor:
-            var completed_request = elevator_queue[0]
-            
-            # Emit the elevator_arrived signal immediately
-            SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-            
-            # Set the state to OPENING (placeholder) then back to WAITING.
-            # This simulates door opening and then waiting for an action.
-            state = ElevatorState.OPENING  
-            state = ElevatorState.WAITING
-            
-            # **Only start the timer if it's not already running**
-            if cabin_timer.is_stopped():
-                cabin_timer.start()
-                print("Timer started because the elevator is waiting at the destination floor.")
-        else:
-            # If we are not at the destination floor, no timer should start here.
-            # The timer will start once we actually arrive and enter the WAITING state.
+        if destination_floor != current_floor:
             initialize_target_position()
-            update_state_to_in_transit()
+            # Instead of going directly to IN_TRANSIT, go through CLOSING first
+            state = ElevatorState.CLOSING
+        else:
+            # Already at the correct floor
+            handle_same_floor_request()
 
 
-# Move the Elevator Cabin Vertically
-func move_elevator(delta: float) -> void:    
+func move_elevator(delta: float) -> void:
     if target_position == Vector2.ZERO:
-        return  # No valid target position
-    
-    var current_pos = global_position
-    var direction = sign(target_position.y - current_pos.y)
+        return  # No valid target position set yet
+
+    var direction = sign(target_position.y - global_position.y)
     var movement = SPEED * delta * direction
-    var new_y = current_pos.y + movement
-    
+    var new_y = global_position.y + movement
+
+    # Check if we reach or pass the target position this frame
     if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
-        new_y = target_position.y
-        global_position.y = new_y
-        current_floor = destination_floor
-        
-        # Retrieve and remove the completed request
-        var completed_request = elevator_queue[0]     
-        state = ElevatorState.OPENING  # placeholder
-        state = ElevatorState.WAITING
-        print("Elevator has arrived at location: Floor ", current_floor)
-        
-        # Emit the elevator_arrived signal
-        SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-
-        # Start the cabin_timer for 2 seconds to wait for an action.
-        cabin_timer.start()
-        
-        # The request will be removed if no action is taken within 2 seconds after arrival.
-        
+        # Snap to target position
+        global_position.y = target_position.y
+        handle_arrival()
     else:
-        # Continue moving towards the target
         global_position.y = new_y
 
-# Timer Timeout Callback
-func _on_cabin_timer_timeout():
-    # If the elevator is still waiting after 2 seconds, remove the first request from the queue.
-    if state == ElevatorState.WAITING and elevator_queue.size() > 0:
-        var timed_out_request = elevator_queue[0]
-        remove_from_elevator_queue(timed_out_request)
-        print("No action taken within 2 seconds, removed request:", timed_out_request)
 
+func handle_arrival() -> void:
+    # Elevator has arrived at the target floor
+    current_floor = destination_floor
+    var completed_request = elevator_queue[0]
+    state = ElevatorState.OPENING
+    SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
+    cabin_timer.start()
+
+    # After a delay or immediately, handle_opening() will set the state back to WAITING.
+
+func handle_same_floor_request() -> void:
+    var request = elevator_queue[0]
+    SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)
+    state = ElevatorState.WAITING
+
+func arrived_at_target_floor() -> bool:
+    # Check if elevator is at target_position
+    return global_position.y == target_position.y
+
+
+func handle_closing() -> void:
+    # Placeholder for closing doors. In the future, add door closing animations/timers.
+    # Once done, go to IN_TRANSIT to start moving.
+    state = ElevatorState.IN_TRANSIT
+
+
+func handle_opening() -> void:
+    # Placeholder for opening doors. After "opening" doors, return to WAITING.
+    # This simulates that the elevator is now idle at the floor with doors open.
+    state = ElevatorState.WAITING
 
 
 # Initialize the target position based on the first request in the queue
@@ -151,8 +140,7 @@ func update_destination_floor() -> void:
     if elevator_queue.size() > 0:
         destination_floor = elevator_queue[0]['target_floor']
 
-func update_state_to_in_transit() -> void:
-    # Update the state to IN_TRANSIT
+func update_state_to_in_transit() -> void:    
     state = ElevatorState.IN_TRANSIT
 
 
@@ -178,15 +166,18 @@ func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
     add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
     print("Added new request for sprite: ", sprite_name, " to floor: ", target_floor)
 
-# Add a floor request to the elevator queue
 func add_to_elevator_queue(request: Dictionary) -> void:
+    # For testing purposes: Add the hardcoded dummy request from Player 2 to floor 0. Do not remove. 
+    # var dummy_request = {"target_floor": 0, "sprite_name": "Player_2"}     
+    
     # Append the new request to the end of the queue
     elevator_queue.append(request)
+    # elevator_queue.append(dummy_request)
     print("Current elevator queue:", elevator_queue)
 
 # Remove a specific request from the elevator queue
 func remove_from_elevator_queue(request: Dictionary) -> void:
-    print("remove_from_elevator_queue called")
+    # print("remove_from_elevator_queue called")
     # Ensure the request exists in the queue before removing
     if request in elevator_queue:
         elevator_queue.erase(request)
@@ -194,6 +185,13 @@ func remove_from_elevator_queue(request: Dictionary) -> void:
     else:
         print("Request not found in queue:", request)
 
+# Timer Timeout Callback
+func _on_cabin_timer_timeout():    
+    # If the elevator is still waiting after 2 seconds, remove the first request from the queue.
+    if state == ElevatorState.WAITING and elevator_queue.size() > 0:
+        var timed_out_request = elevator_queue[0]
+        remove_from_elevator_queue(timed_out_request)
+        print("No action taken within 2 seconds, removed request:", timed_out_request)
 
 
 #region Cabin Set-Up
