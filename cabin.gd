@@ -10,7 +10,7 @@ enum ElevatorState {
 
 # Properties
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 1
+var current_floor: int = 2
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
 
@@ -21,12 +21,22 @@ const SPEED: float = 200.0  # Pixels per second
 var target_position: Vector2 = Vector2.ZERO
 
 
+var cabin_timer: Timer
+
+
 
 func _ready():
     SignalBus.floor_requested.connect(_on_floor_requested)
     apply_scale_factor()
     position_cabin()
     z_index = -10
+
+    # Initialize and configure the timer
+    cabin_timer = Timer.new()
+    cabin_timer.one_shot = true
+    cabin_timer.wait_time = 2.0  # Wait 2 seconds
+    cabin_timer.timeout.connect(_on_cabin_timer_timeout)
+    add_child(cabin_timer)
 
 func _process(delta: float) -> void:
     match state:
@@ -36,25 +46,35 @@ func _process(delta: float) -> void:
             move_elevator(delta)
 
     
-# **Updated Function: Elevator Logic**
+# Elevator Logic
 func elevator_logic() -> void:
     if elevator_queue.size() > 0 and state == ElevatorState.WAITING:
         update_destination_floor()
-        print("Elevator State: ", state, ", Current Floor: ", current_floor, ", Destination Floor: ", destination_floor, ", Queue: ", elevator_queue)
         
         # Check if the destination floor is the same as the current floor
         if destination_floor == current_floor:
-            print("Elevator is already at the requested floor: ", current_floor)            
             var completed_request = elevator_queue[0]
+            
             # Emit the elevator_arrived signal immediately
             SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-            # the request will be removed when the sprite signals the elevator that it has arrived at it's destination floor. This will be implemented later.             
+            
+            # Set the state to OPENING (placeholder) then back to WAITING.
+            # This simulates door opening and then waiting for an action.
+            state = ElevatorState.OPENING  
+            state = ElevatorState.WAITING
+            
+            # **Only start the timer if it's not already running**
+            if cabin_timer.is_stopped():
+                cabin_timer.start()
+                print("Timer started because the elevator is waiting at the destination floor.")
         else:
-            # Initialize target_position when starting transit
+            # If we are not at the destination floor, no timer should start here.
+            # The timer will start once we actually arrive and enter the WAITING state.
             initialize_target_position()
             update_state_to_in_transit()
 
-# **Updated Function: Move the Elevator Cabin Vertically**
+
+# Move the Elevator Cabin Vertically
 func move_elevator(delta: float) -> void:    
     if target_position == Vector2.ZERO:
         return  # No valid target position
@@ -71,15 +91,30 @@ func move_elevator(delta: float) -> void:
         
         # Retrieve and remove the completed request
         var completed_request = elevator_queue[0]     
-        state = ElevatorState.OPENING
-        print("Elevator has arrived at location: Floor ", current_floor)        
-        # Emit the elevator_arrived signal with the completed request's sprite_name
+        state = ElevatorState.OPENING  # placeholder
+        state = ElevatorState.WAITING
+        print("Elevator has arrived at location: Floor ", current_floor)
+        
+        # Emit the elevator_arrived signal
         SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-        # the request will be removed when the sprite signals the elevator that it has arrived at it's destination floor. This will be implemented later. 
-        # add new function to perform: the request will be removed if the sprite doesn't enter the elevator within two seconds after arrival. 
+
+        # Start the cabin_timer for 2 seconds to wait for an action.
+        cabin_timer.start()
+        
+        # The request will be removed if no action is taken within 2 seconds after arrival.
+        
     else:
         # Continue moving towards the target
         global_position.y = new_y
+
+# Timer Timeout Callback
+func _on_cabin_timer_timeout():
+    # If the elevator is still waiting after 2 seconds, remove the first request from the queue.
+    if state == ElevatorState.WAITING and elevator_queue.size() > 0:
+        var timed_out_request = elevator_queue[0]
+        remove_from_elevator_queue(timed_out_request)
+        print("No action taken within 2 seconds, removed request:", timed_out_request)
+
 
 
 # Initialize the target position based on the first request in the queue
@@ -151,6 +186,7 @@ func add_to_elevator_queue(request: Dictionary) -> void:
 
 # Remove a specific request from the elevator queue
 func remove_from_elevator_queue(request: Dictionary) -> void:
+    print("remove_from_elevator_queue called")
     # Ensure the request exists in the queue before removing
     if request in elevator_queue:
         elevator_queue.erase(request)
