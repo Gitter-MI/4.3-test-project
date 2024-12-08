@@ -17,8 +17,10 @@ func _ready():
     sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
     sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
 
-    set_initial_position()
+    SignalBus.elevator_arrived.connect(_on_elevator_arrived)
+    SignalBus.elevator_position_updated.connect(_on_elevator_ride)
 
+    set_initial_position()
     # Connect to floor_clicked signal from all floors
     var floors = get_tree().get_nodes_in_group("floors")
     for floor_node in floors:
@@ -28,17 +30,28 @@ func _ready():
     for door_node in doors:
         door_node.door_clicked.connect(_on_door_clicked)
     pass
+
+func _on_elevator_arrived(sprite_name: String, _current_floor: int):    
+    if sprite_name == sprite_data.sprite_name and sprite_data.current_position == sprite_data.current_elevator_position and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
+        SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+        sprite_data.current_state = SpriteData.State.IN_ELEVATOR
+        z_index = -9
+        print("my elevator has arrived. I am getting in")
+    else:
+        if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+            SignalBus.exiting_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+            sprite_data.current_state = SpriteData.State.WALKING
+            z_index = 0    
+        
+
+func _on_elevator_ride(global_pos: Vector2) -> void:
+    pass    
     
+    # Update the sprite_data resource with the new position
+    # sprite_data.current_position = global_pos
 
-
-
-
-func get_elevator_position(collision_edges: Dictionary) -> Vector2:
-    var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
-    var sprite_height: float = sprite_data.sprite_height
-    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
-
-    return Vector2(center_x, adjusted_y)
+    # Update the sprite's actual global position to match the elevator
+    # global_position = sprite_data.current_position
 
 func _process(delta: float) -> void:
     movement_logic(delta)
@@ -161,9 +174,6 @@ func adjust_click_position(collision_edges: Dictionary, click_position: Vector2,
 
     return Vector2(adjusted_x, adjusted_y)
 
-
-
-
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
     # Get the adjusted click position using collision_edges
     print("floor clicked")
@@ -186,7 +196,6 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
         var current_floor = get_floor_by_number(sprite_data.current_floor_number)
         var current_edges = current_floor.get_collision_edges()
         sprite_data.current_elevator_position = get_elevator_position(current_edges)
-
 
 func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
     print("door_center_x: ", door_center_x, ", floor_number: ", floor_number, ", door_index: ", door_index, ", collision_edges: ", collision_edges)
@@ -214,6 +223,14 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
         var current_floor = get_floor_by_number(sprite_data.current_floor_number)
         var current_edges = current_floor.get_collision_edges()
         sprite_data.current_elevator_position = get_elevator_position(current_edges) 
+
+func get_elevator_position(collision_edges: Dictionary) -> Vector2:
+    var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
+    var sprite_height: float = sprite_data.sprite_height
+    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
+
+    return Vector2(center_x, adjusted_y)
+
 
 #region Initial and unused methods
 ############################################

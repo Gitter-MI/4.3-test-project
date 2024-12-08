@@ -5,3 +5,6 @@ extends Node
 
 signal floor_requested(sprite_name: String, target_floor: int)
 signal elevator_arrived(sprite_name: String, current_floor: int)
+signal entering_elevator(sprite_name: String, current_floor: int)
+signal exiting_elevator(sprite_name: String, current_floor: int)
+signal elevator_position_updated(global_pos: Vector2)

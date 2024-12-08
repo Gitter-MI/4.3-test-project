@@ -21,6 +21,8 @@ var cabin_timer: Timer
 
 func _ready():
     SignalBus.floor_requested.connect(_on_floor_requested)
+    SignalBus.entering_elevator.connect(_on_sprite_entering)
+    SignalBus.exiting_elevator.connect(_on_sprite_exiting)
     apply_scale_factor()
     position_cabin()
     z_index = -10
@@ -42,6 +44,39 @@ func _process(delta: float) -> void:
             move_elevator(delta)
         ElevatorState.OPENING:
             handle_opening()
+
+
+
+
+func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:    
+    cabin_timer.stop()
+    handle_closing()
+    state = ElevatorState.WAITING
+    print("sprite is entering")
+
+    # Update elevator queue item that belongs to the sprite_name
+    update_elevator_queue(sprite_name, target_floor)
+
+
+
+func _on_sprite_exiting(sprite_name: String, target_floor: int) -> void:    
+    handle_opening()
+    state = ElevatorState.WAITING
+    cabin_timer.stop()
+    
+    for request in elevator_queue:
+        if request.has("sprite_name") and request["sprite_name"] == sprite_name \
+                and request.has("target_floor") and request["target_floor"] == target_floor:
+            remove_from_elevator_queue(request)
+            break
+
+
+func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
+    for item in elevator_queue:
+        if item.has("sprite_name") and item["sprite_name"] == sprite_name:
+            item["target_floor"] = new_target_floor
+            return
+
 
 
 func elevator_logic() -> void:
@@ -78,16 +113,17 @@ func handle_arrival() -> void:
     # Elevator has arrived at the target floor
     current_floor = destination_floor
     var completed_request = elevator_queue[0]
-    state = ElevatorState.OPENING
-    SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
+    handle_opening()
+    SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)    
     cabin_timer.start()
-
-    # After a delay or immediately, handle_opening() will set the state back to WAITING.
+    
 
 func handle_same_floor_request() -> void:
     var request = elevator_queue[0]
     SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)
+    
     state = ElevatorState.WAITING
+    
 
 func arrived_at_target_floor() -> bool:
     # Check if elevator is at target_position
@@ -97,7 +133,7 @@ func arrived_at_target_floor() -> bool:
 func handle_closing() -> void:
     # Placeholder for closing doors. In the future, add door closing animations/timers.
     # Once done, go to IN_TRANSIT to start moving.
-    state = ElevatorState.IN_TRANSIT
+    state = ElevatorState.IN_TRANSIT    
 
 
 func handle_opening() -> void:
