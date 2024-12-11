@@ -3,6 +3,8 @@ extends Node2D
 
 var sprite_data: PlayerSpriteData
 var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
+var previous_elevator_position: Vector2 = Vector2.ZERO
+
 
 const PlayerSpriteData = preload("res://SpriteData.gd")
 
@@ -19,6 +21,8 @@ func _ready():
 
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
+    SignalBus.elevator_doors_opened.connect(_on_elevator_doors_opened)
+
 
     set_initial_position()
     # Connect to floor_clicked signal from all floors
@@ -31,32 +35,82 @@ func _ready():
         door_node.door_clicked.connect(_on_door_clicked)
     pass
 
-func _on_elevator_arrived(sprite_name: String, _current_floor: int):    
-    if sprite_name == sprite_data.sprite_name and sprite_data.current_position == sprite_data.current_elevator_position and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
+func _on_elevator_arrived(sprite_name: String, _current_floor: int):
+    if sprite_name == sprite_data.sprite_name \
+    and sprite_data.current_position == sprite_data.current_elevator_position \
+    and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
+
         SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
         sprite_data.current_state = SpriteData.State.IN_ELEVATOR
         z_index = -9
         print("my elevator has arrived. I am getting in")
-    else:
-        if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
-            SignalBus.exiting_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
-            sprite_data.current_state = SpriteData.State.WALKING
-            z_index = 0    
+
+        # Store elevator collision edges of the current floor for later reference
+        var current_floor_node = get_floor_by_number(sprite_data.current_floor_number)
+        var current_edges = current_floor_node.get_collision_edges()
+        sprite_data.current_elevator_collision_edges = current_edges
+  
+
+
+func _on_elevator_doors_opened(current_floor: int) -> void:
+    # If the sprite is currently in elevator and the elevator doors have opened
+    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+        # Update state to EXITING_ELEVATOR
+        sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
+        print(sprite_data.sprite_name, " is now EXITING_ELEVATOR")
+
+        # Call the exiting function
+        exiting_elevator()
+
+func exiting_elevator() -> void:
+    # Update z-index to 0 (as if stepping off the elevator)
+    z_index = 0
+    sprite_data.current_floor_number = sprite_data.target_floor_number
+    # Set sprite state to IDLE
+    sprite_data.current_state = SpriteData.State.IDLE
+    print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
         
 
 func _on_elevator_ride(global_pos: Vector2) -> void:
-    pass    
-    
-    # Update the sprite_data resource with the new position
-    # sprite_data.current_position = global_pos
+    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+        # Retrieve the stored collision edges
+        # var edges = sprite_data.current_elevator_collision_edges
+        # var bottom_edge_y = edges["bottom"]
 
-    # Update the sprite's actual global position to match the elevator
-    # global_position = sprite_data.current_position
+        # The player should stand so that their bottom aligns with bottom_edge_y.
+        # Since global_pos is set by get_elevator_position(), which aligns the elevator floor line to global_pos.y,
+        # we can directly place the player at global_pos, adjusting by half their height if needed.
+
+        # If global_pos is already the correct floor line for the player's feet, just set the player's position:
+        global_position.x = global_pos.x
+        global_position.y = global_pos.y
+
+        # If the player appears to float above or below the floor, adjust by half the sprite height:
+        # For example, if the player seems to float above the floor, try:
+        global_position.y = global_pos.y + (sprite_data.sprite_height / 2)
+        # If the player appears sunk into the floor, try:
+        # global_position.y = global_pos.y - (sprite_data.sprite_height / 2)
+
+        sprite_data.current_position = global_position
+
+
+
+
 
 func _process(delta: float) -> void:
-    movement_logic(delta)
+    # If the sprite is currently inside the elevator (IN_ELEVATOR),
+    # we rely solely on the elevator updates for movement.
+    # If not in the elevator, proceed with normal movement logic.
+    if sprite_data.current_state != SpriteData.State.IN_ELEVATOR:
+        movement_logic(delta)
+
 
 func movement_logic(delta: float) -> void:
+    # If currently in the elevator, vertical movement is handled by the _on_elevator_ride signal callback.
+    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+        return
+
+    # If not in elevator, proceed with horizontal movement logic:
     if sprite_data.current_position != sprite_data.target_position:
         if sprite_data.target_floor_number == sprite_data.current_floor_number:
             # Move to target position on the same floor
@@ -69,42 +123,26 @@ func movement_logic(delta: float) -> void:
                     "sprite_name": sprite_data.sprite_name,
                     "floor_number": sprite_data.target_floor_number
                 }
-                
+
                 if current_request != last_elevator_request:
                     # Emit the elevator request signal
                     SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
                     print("signal emitted: elevator requested")
-                    
+
                     # Update the last elevator request
                     last_elevator_request = current_request
-                    
+
                     # Set sprite state to WAITING_FOR_ELEVATOR
                     sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
                     print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
                 else:
+                    # Duplicate request detected, do nothing here
                     pass
-                    # print("Duplicate elevator request detected. Signal not emitted.")
             else:
                 # Keep moving towards the elevator
                 move_towards_position(sprite_data.current_elevator_position, delta)
-                # Potentially emit a signal here if needed, but based on your comment, 
-                # it seems you want to emit only when at the elevator position
-                # Therefore, we omit emitting the signal here to prevent duplicates
-                
-                ## Jump to target floor
-                #var target_floor = get_floor_by_number(sprite_data.target_floor_number)
-                #var target_edges = target_floor.get_collision_edges()
-                #var target_elevator_position = get_elevator_position(target_edges)
-#
-                ## Update sprite position to the elevator position of the target floor
-                #global_position = target_elevator_position
-                #sprite_data.current_position = global_position
-                #sprite_data.current_floor_number = sprite_data.target_floor_number                
-                #sprite_data.needs_elevator = false                
+    # If current_position == target_position, no further horizontal movement is required here.
 
-            #else:
-                ## Keep moving towards the elevator
-                #move_towards_position(sprite_data.current_elevator_position, delta)
 
 
 
@@ -131,10 +169,10 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
         sprite_data.current_position = global_position
 
         # Update state based on specific conditions
-        update_state_after_movement()
+        update_state_after_horizontal_movement()
 
 # Helper function to update the sprite's state after reaching the target position
-func update_state_after_movement() -> void:
+func update_state_after_horizontal_movement() -> void:
     if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
         if sprite_data.current_state != SpriteData.State.WAITING_FOR_ELEVATOR:
             sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR

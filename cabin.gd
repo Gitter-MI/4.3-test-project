@@ -94,7 +94,7 @@ func elevator_logic() -> void:
 
 func move_elevator(delta: float) -> void:
     if target_position == Vector2.ZERO:
-        return  # No valid target position set yet
+        return
 
     var direction = sign(target_position.y - global_position.y)
     var movement = SPEED * delta * direction
@@ -102,11 +102,14 @@ func move_elevator(delta: float) -> void:
 
     # Check if we reach or pass the target position this frame
     if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
-        # Snap to target position
         global_position.y = target_position.y
         handle_arrival()
     else:
         global_position.y = new_y
+
+    # Emit the elevator's current global position so that sprites inside can follow
+    SignalBus.elevator_position_updated.emit(global_position)
+
 
 
 func handle_arrival() -> void:
@@ -138,8 +141,10 @@ func handle_closing() -> void:
 
 func handle_opening() -> void:
     # Placeholder for opening doors. After "opening" doors, return to WAITING.
-    # This simulates that the elevator is now idle at the floor with doors open.
     state = ElevatorState.WAITING
+    # Emit a signal that doors have fully opened, passing the current floor.
+    SignalBus.elevator_doors_opened.emit(current_floor)
+
 
 
 # Initialize the target position based on the first request in the queue
