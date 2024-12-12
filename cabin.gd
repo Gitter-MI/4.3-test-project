@@ -23,6 +23,7 @@ func _ready():
     SignalBus.floor_requested.connect(_on_floor_requested)
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
+
     apply_scale_factor()
     position_cabin()
     z_index = -10
@@ -134,16 +135,25 @@ func arrived_at_target_floor() -> bool:
 
 
 func handle_closing() -> void:
-    # Placeholder for closing doors. In the future, add door closing animations/timers.
-    # Once done, go to IN_TRANSIT to start moving.
-    state = ElevatorState.IN_TRANSIT    
-
+    var elevator = get_elevator_for_floor(current_floor)
+    if elevator:
+        # Call the elevator's door closing animation
+        elevator.animate_doors_closing()
+    
+    # After closing doors, proceed to move or remain in waiting state as per logic
+    state = ElevatorState.IN_TRANSIT
+    
 
 func handle_opening() -> void:
-    # Placeholder for opening doors. After "opening" doors, return to WAITING.
+    var elevator = get_elevator_for_floor(current_floor)
+    if elevator:
+        # Call the elevator's door opening animation
+        elevator.animate_doors_opening()
+    
+    # After opening doors, remain in waiting state
     state = ElevatorState.WAITING
-    # Emit a signal that doors have fully opened, passing the current floor.
     SignalBus.elevator_doors_opened.emit(current_floor)
+
 
 
 
@@ -158,6 +168,14 @@ func initialize_target_position() -> void:
     else:
         push_warning("Target floor %d not found" % request['target_floor'])
 
+func get_elevator_for_floor(floor_number: int) -> Area2D:
+    var elevators = get_tree().get_nodes_in_group("elevators")
+    for elevator in elevators:
+        # Check if this elevator matches the current floor number
+        # 'floor_instance' is set in 'setup_elevator_instance'
+        if elevator.floor_instance and elevator.floor_instance.floor_number == floor_number:
+            return elevator
+    return null
 
 
 # Retrieve the floor node by its floor number
