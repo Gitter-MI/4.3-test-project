@@ -18,47 +18,57 @@ func _ready():
     # Update the sprite dimensions in the SpriteData resource    
     sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
     sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
+    set_initial_position()
 
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
-    SignalBus.elevator_doors_opened.connect(_on_elevator_doors_opened)
+    SignalBus.elevator_doors_opened.connect(_on_elevator_doors_opened)   # disregard this duplicate for now. We will fix this in a separate step.     
+    SignalBus.floor_clicked.connect(_on_floor_clicked)        
+    SignalBus.door_clicked.connect(_on_door_clicked)        
+    ####################################################
+    SignalBus.doors_closing.connect(_on_doors_closing)
+    SignalBus.doors_closed.connect(_on_doors_closed)
+    SignalBus.doors_opening.connect(_on_doors_opening)
+    SignalBus.doors_opened.connect(_on_doors_opened)
+    ####################################################
 
+# Placeholder handlers
+func _on_doors_closing(elevator_name, floor_number):
+    print("Doors closing signal received for elevator:", elevator_name, "on floor:", floor_number)
 
-    set_initial_position()
-    # Connect to floor_clicked signal from all floors
-    var floors = get_tree().get_nodes_in_group("floors")
-    for floor_node in floors:
-        floor_node.floor_clicked.connect(_on_floor_clicked)
-        
-    var doors = get_tree().get_nodes_in_group("doors")
-    for door_node in doors:
-        door_node.door_clicked.connect(_on_door_clicked)
-    pass
+func _on_doors_closed(elevator_name, floor_number):
+    print("Doors closed signal received for elevator:", elevator_name, "on floor:", floor_number)
+
+func _on_doors_opening(elevator_name, floor_number):
+    print("Doors opening signal received for elevator:", elevator_name, "on floor:", floor_number)
+
+func _on_doors_opened(elevator_name, floor_number):
+    print("Doors opened signal received for elevator:", elevator_name, "on floor:", floor_number)
+
 
 func _on_elevator_arrived(sprite_name: String, _current_floor: int):
     if sprite_name == sprite_data.sprite_name \
     and sprite_data.current_position == sprite_data.current_elevator_position \
     and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
 
+
+        print("My elevator has arrived. I will need to wait for the elevator doors to open before I can get in.")
+        
+        # the code below is actually for the sprite entering the elevator
         SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+        # note: entering the elevator will take some time. We should use the ENTERING_ELEVATOR state and define the proper logic.
+        # we can start by emitting the elevator arrived signal from the cabin after the doors have been opened. Then we can handle the entering process inside the player script
+        # with these changes this function can remain unchanged for now. 
         sprite_data.current_state = SpriteData.State.IN_ELEVATOR
         z_index = -9
-        print("my elevator has arrived. I am getting in")
-
-        # Store elevator collision edges of the current floor for later reference
-        var current_floor_node = get_floor_by_number(sprite_data.current_floor_number)
-        var current_edges = current_floor_node.get_collision_edges()
-        sprite_data.current_elevator_collision_edges = current_edges
-  
 
 
-func _on_elevator_doors_opened(current_floor: int) -> void:
+func _on_elevator_doors_opened(_current_floor: int) -> void:
     # If the sprite is currently in elevator and the elevator doors have opened
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
         # Update state to EXITING_ELEVATOR
         sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
         print(sprite_data.sprite_name, " is now EXITING_ELEVATOR")
-
         # Call the exiting function
         exiting_elevator()
 
@@ -73,27 +83,9 @@ func exiting_elevator() -> void:
 
 func _on_elevator_ride(global_pos: Vector2) -> void:
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
-        # Retrieve the stored collision edges
-        # var edges = sprite_data.current_elevator_collision_edges
-        # var bottom_edge_y = edges["bottom"]
-
-        # The player should stand so that their bottom aligns with bottom_edge_y.
-        # Since global_pos is set by get_elevator_position(), which aligns the elevator floor line to global_pos.y,
-        # we can directly place the player at global_pos, adjusting by half their height if needed.
-
-        # If global_pos is already the correct floor line for the player's feet, just set the player's position:
-        global_position.x = global_pos.x
-        global_position.y = global_pos.y
-
-        # If the player appears to float above or below the floor, adjust by half the sprite height:
-        # For example, if the player seems to float above the floor, try:
+        global_position.x = global_pos.x              
         global_position.y = global_pos.y + (sprite_data.sprite_height / 2)
-        # If the player appears sunk into the floor, try:
-        # global_position.y = global_pos.y - (sprite_data.sprite_height / 2)
-
         sprite_data.current_position = global_position
-
-
 
 
 

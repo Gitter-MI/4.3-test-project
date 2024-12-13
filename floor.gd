@@ -17,7 +17,7 @@ const BOUNDARIES = {
     "y2": 1   # Bottom boundary
 }
 
-signal floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
+
 
 func _ready():
     add_to_group("floors")
@@ -40,7 +40,7 @@ func _input_event(_viewport, event, _shape_idx):
         # Emit the signal with the additional collision edges
         # print("bottom edge: ", bottom_edge_y)
         # print("coll_edges; ", collision_edges)
-        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)
+        SignalBus.floor_clicked.emit(floor_number, event.global_position, bottom_edge_y, collision_edges)
 
 
 

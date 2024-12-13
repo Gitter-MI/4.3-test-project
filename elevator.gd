@@ -1,10 +1,8 @@
+# elevator.gd
 extends Area2D
 
 var floor_instance
-const SCALE_FACTOR = 2.3  # Apply scale factor
-
-
-
+const SCALE_FACTOR = 2.3
 
 func setup_elevator_instance(p_floor_instance):
     floor_instance = p_floor_instance
@@ -13,7 +11,51 @@ func setup_elevator_instance(p_floor_instance):
     apply_scale_factor()
     position_elevator()
     update_collision_shape()
-    setup_doors_position()  # Position the elevator_doors after the elevator and floor_instance are set
+    setup_elevator_animations()
+
+
+# create the four new signals using the SignalBus and emit them via the SignalBus
+
+
+func show_doors_closed():
+    var elevator_doors = $AnimatedSprite2D
+    if elevator_doors:
+        elevator_doors.visible = true
+        elevator_doors.play("closed")        
+        SignalBus.emit_signal("doors_closed", name, floor_instance.floor_number)
+
+func show_doors_opened():
+    var elevator_doors = $AnimatedSprite2D
+    if elevator_doors:
+        elevator_doors.stop()
+        elevator_doors.visible = false
+        SignalBus.emit_signal("doors_opened", name, floor_instance.floor_number)
+
+func animate_doors_opening():
+    var elevator_doors = $AnimatedSprite2D
+    if elevator_doors:
+        elevator_doors.visible = true
+        elevator_doors.play("opening")    
+        SignalBus.emit_signal("doors_opening", name, floor_instance.floor_number)
+
+func animate_doors_closing():
+    var elevator_doors = $AnimatedSprite2D
+    if elevator_doors:
+        elevator_doors.visible = true
+        elevator_doors.play("closing")    
+        SignalBus.emit_signal("doors_closing", name, floor_instance.floor_number)
+
+
+
+
+# callback function _on_doors_animation_finished()
+# when the opening animation is done we call show_doors_opened and emit the signal that the elevator has arrived 
+# signal elevator_arrived(sprite_name: String, current_floor: int) using the gloabl SignalBus
+# 
+# preferably 
+
+#region Elevator Frame and Animation Set-up
+
 
 func apply_scale_factor():
     var elevator_sprite = $Frame
@@ -53,8 +95,7 @@ func update_collision_shape():
     else:
         push_warning("Cannot update collision shape: Missing nodes or textures")
 
-
-func setup_doors_position():
+func setup_elevator_animations():
     # Now that floor_instance and collision edges are set, position the elevator_doors.
     var elevator_doors = $AnimatedSprite2D
     if not elevator_doors:
@@ -75,27 +116,4 @@ func setup_doors_position():
 
     # Start in the closed state
     show_doors_closed()
-
-func show_doors_closed():
-    var elevator_doors = $AnimatedSprite2D
-    if elevator_doors:
-        elevator_doors.visible = true
-        elevator_doors.play("closed")
-
-func show_doors_opened():
-    var elevator_doors = $AnimatedSprite2D
-    if elevator_doors:
-        elevator_doors.stop()
-        elevator_doors.visible = false
-
-func animate_doors_opening():
-    var elevator_doors = $AnimatedSprite2D
-    if elevator_doors:
-        elevator_doors.visible = true
-        elevator_doors.play("opening")
-
-func animate_doors_closing():
-    var elevator_doors = $AnimatedSprite2D
-    if elevator_doors:
-        elevator_doors.visible = true
-        elevator_doors.play("closing")
+#endregion

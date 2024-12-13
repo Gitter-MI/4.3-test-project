@@ -8,8 +8,10 @@ enum State {
     WALKING,
     IN_ROOM,
     ENTERING_ROOM,
+    EXITING_ROOM,
     IN_ELEVATOR,
     WAITING_FOR_ELEVATOR,
+    ENTERING_ELEVATOR,
     EXITING_ELEVATOR
 }
 
@@ -31,7 +33,6 @@ var target_room: int = -1
 
 var needs_elevator: bool = false
 var current_elevator_position: Vector2 = Vector2.ZERO
-var current_elevator_collision_edges: Dictionary
 var inside_elevator_offset_y: float = 0.0
 
 
