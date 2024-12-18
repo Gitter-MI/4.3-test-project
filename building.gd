@@ -1,7 +1,6 @@
 # building.gd
 extends Node2D
 
-# Preload the single floor scene
 const FLOOR_SCENE = preload("res://Floor.tscn")
 const ELEVATOR_SCENE = preload("res://Elevator.tscn")
 const DOOR_DATA_RESOURCE = preload("res://DoorData.tres")
@@ -26,27 +25,15 @@ func generate_building():
             floor_instance.setup_doors(floor_doors)
             floor_instance.setup_elevator()
 
-func instantiate_floor(floor_number):
-    # print("instantiate_floor")  # Debug # print
+func instantiate_floor(floor_number):    
     var floor_instance = FLOOR_SCENE.instantiate()
     if not floor_instance:
         push_warning("Failed to instantiate floor scene")
         return null
-
-    # Set the floor number and image path before adding to the scene tree
+    
     floor_instance.floor_number = floor_number
-
-    # Construct the expected image path
-    var image_path = "res://Building/Floors/Floor_" + str(floor_number) + ".png"
-    # print("Constructed image path: " + image_path)  # Debug # print
+    var image_path = "res://Building/Floors/Floor_" + str(floor_number) + ".png"    
     floor_instance.floor_image_path = image_path
-
-    # Assign a meaningful name to the node
     floor_instance.name = "Floor_" + str(floor_number)
-
-    # Now add the floor instance to the scene tree
     add_child(floor_instance)
-
     return floor_instance
-
-# Removed methods: position_floor, configure_collision_shape, configure_marker
