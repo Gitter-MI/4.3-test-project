@@ -17,33 +17,25 @@ const BOUNDARIES = {
     "y2": 1   # Bottom boundary
 }
 
-
+signal floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
 
 func _ready():
     add_to_group("floors")
     input_pickable = true    
     floor_sprite = $FloorSprite
     set_floor_image(floor_image_path)    
-    collision_layer = 1    
-    configure_marker()
+    collision_layer = 1        
     
-func get_collision_edges() -> Dictionary:
-    # print("get_collision_edges: ", collision_edges)
+func get_collision_edges() -> Dictionary:    
     # is called when a sprite moves to a new floor to determine the y-coordinate    
     return collision_edges
     
     
 func _input_event(_viewport, event, _shape_idx):
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        # Get the marker's global y position which represents the bottom edge
-        var bottom_edge_y = $Marker2D.global_position.y
-        # Emit the signal with the additional collision edges
-        # print("bottom edge: ", bottom_edge_y)
-        # print("coll_edges; ", collision_edges)
-        SignalBus.floor_clicked.emit(floor_number, event.global_position, bottom_edge_y, collision_edges)
-
-
-
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
+        var collision_edges = get_collision_edges()        
+        var bottom_edge_y = collision_edges["bottom"]
+        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)
 
 
 #region set-up methods
@@ -120,26 +112,11 @@ func set_floor_image(image_path: String):
         else:
             print("File does not exist at path: " + image_path)
 
-func configure_marker():
-    var marker = $Marker2D
-    if not (floor_sprite and marker):
-        push_warning("Missing nodes for marker configuration")
-        return
-
-    # Calculate the bottom edge of the sprite
-    var sprite_height = floor_sprite.texture.get_height() * floor_sprite.scale.y
-    var sprite_bottom_y = sprite_height / 2  # Since the sprite's origin is at its center
-
-    # Set the marker position to align with the sprite's bottom edge
-    marker.position = Vector2(0, sprite_bottom_y)
-
-func setup_doors(door_data_array):
-    # print("setup doors called")
+func setup_doors(door_data_array):    
     for door_data in door_data_array:
         var door_instance = DOOR_SCENE.instantiate()
         door_instance.name = "Door_" + str(door_data.index)
-        add_child(door_instance)
-        # Pass door_data and self to the door
+        add_child(door_instance)        
         door_instance.setup_door_instance(door_data, self)
 
 func setup_elevator():

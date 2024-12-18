@@ -15,7 +15,7 @@ const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var tooltip_background = $TooltipBackground  # TooltipBackground node with tooltip.gd attached
 
-
+signal door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, click_position: Vector2)
 
 func _ready():
     add_to_group("doors")
@@ -25,12 +25,9 @@ func _ready():
 func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         var parent_collision_edges = get_parent().collision_edges
-        print("door_clicked. Center:", door_center_x, ", Floor:", door_data.floor_number, ", Index:", door_data.index)
-        # Emit the updated signal with door_index
-        SignalBus.emit_signal("door_clicked", door_center_x, door_data.floor_number, door_data.index, parent_collision_edges, event.global_position)
+        print("door_clicked. Center:", door_center_x, ", Floor:", door_data.floor_number, ", Index:", door_data.index)        
+        emit_signal("door_clicked", door_center_x, door_data.floor_number, door_data.index, parent_collision_edges, event.global_position)
         get_viewport().set_input_as_handled()
-
-
 
 func set_door_state(new_state: DoorState) -> void:
     current_state = new_state
@@ -75,14 +72,14 @@ func position_door():
         push_warning("Invalid door slot index %d" % slot_index)
         return
 
-    var marker = floor_instance.get_node("Marker2D")
     var floor_collision_shape = floor_instance.get_node("CollisionShape2D")
-    if not (marker and floor_collision_shape):
-        push_warning("Missing nodes for door position calculation")
+    if not floor_collision_shape:
+        push_warning("Missing CollisionShape2D node for door position calculation")
         return
 
     var shape = floor_collision_shape.shape
     if shape is RectangleShape2D:
+        # Determine the x-position from the collision shape and slot percentage
         var rect_shape = shape as RectangleShape2D
         var collision_width = rect_shape.extents.x * 2
         var collision_left_edge = floor_collision_shape.global_position.x - rect_shape.extents.x
@@ -90,17 +87,22 @@ func position_door():
         var percentage = SLOT_PERCENTAGES[slot_index]
         var local_x = collision_left_edge + percentage * collision_width
 
-        var dimensions = get_door_dimensions()
-        var local_y = marker.global_position.y - (dimensions.height / 2)
+        # Determine the y-position from the floor’s bottom edge
+        var collision_edges = floor_instance.get_collision_edges()
+        var bottom_edge_y = collision_edges["bottom"]
         
+        var dimensions = get_door_dimensions()
+        # Position the door such that its center aligns with the bottom edge
+        # The door should be placed just above the floor, so we subtract half the door's height.
+        var local_y = bottom_edge_y - (dimensions.height / 2)
+
+        # Update the door's global position
         var global_door_position = Vector2(local_x, local_y)
         global_position = global_door_position
         door_center_x = global_door_position.x
-        
     else:
         push_warning("Collision shape is not a RectangleShape2D")
 
-        push_warning("Collision shape is not a RectangleShape2D")
 
 func get_door_dimensions():
     var animation_name = "door_type_%d" % door_type

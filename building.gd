@@ -24,7 +24,7 @@ func generate_building():
                 return door.floor_number == floor_number
             )
             floor_instance.setup_doors(floor_doors)
-            floor_instance.setup_elevator()  # Add this line to set up the elevator
+            floor_instance.setup_elevator()
 
 func instantiate_floor(floor_number):
     # print("instantiate_floor")  # Debug # print

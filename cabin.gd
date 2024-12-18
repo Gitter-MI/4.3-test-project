@@ -72,7 +72,11 @@ func _on_sprite_exiting(sprite_name: String, target_floor: int) -> void:
             break
 
 
-
+func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
+    for item in elevator_queue:
+        if item.has("sprite_name") and item["sprite_name"] == sprite_name:
+            item["target_floor"] = new_target_floor
+            return
 
 
 
@@ -109,29 +113,25 @@ func move_elevator(delta: float) -> void:
 
 
 
-#func handle_arrival() -> void:
-    ## Elevator has arrived at the target floor
-    #current_floor = destination_floor
-    #var completed_request = elevator_queue[0]
-    ## handle opening should block the elevator cabin from emitting the arrived signal
-    ## first the cabin needs to arrive at the target floor, then the door needs to open, then the elevator has 'arrived' and we emit the signal
-    ## requires a new signal to elevator scene + callback when the doors are open, then the elevator cabin can proceed into waiting state
-    # handle_opening()
-    # SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)    
-    # cabin_timer.start()
-    
-
 func handle_arrival() -> void:
+    # Elevator has arrived at the target floor
     current_floor = destination_floor
-    # var completed_request = elevator_queue[0]
-    handle_opening()    
+    var completed_request = elevator_queue[0]
+    handle_opening()
+    SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)    
     cabin_timer.start()
+    
 
 func handle_same_floor_request() -> void:
     var request = elevator_queue[0]
     SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)
+    
     state = ElevatorState.WAITING
     
+
+func arrived_at_target_floor() -> bool:
+    # Check if elevator is at target_position
+    return global_position.y == target_position.y
 
 
 func handle_closing() -> void:
@@ -225,30 +225,24 @@ func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
     add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
     print("Added new request for sprite: ", sprite_name, " to floor: ", target_floor)
 
-
-func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
-# needed to move the previously idling cabin to the requesting sprite's current floor
-    for item in elevator_queue:
-        if item.has("sprite_name") and item["sprite_name"] == sprite_name:
-            item["target_floor"] = new_target_floor
-            return
-
 func add_to_elevator_queue(request: Dictionary) -> void:
     # For testing purposes: Add the hardcoded dummy request from Player 2 to floor 0. Do not remove. 
-    var dummy_request = {"target_floor": 0, "sprite_name": "Player_2"}             
+    # var dummy_request = {"target_floor": 0, "sprite_name": "Player_2"}     
+    
+    # Append the new request to the end of the queue
     elevator_queue.append(request)
-    elevator_queue.append(dummy_request)
-    # print("Current elevator queue:", elevator_queue)
+    # elevator_queue.append(dummy_request)
+    print("Current elevator queue:", elevator_queue)
 
 # Remove a specific request from the elevator queue
 func remove_from_elevator_queue(request: Dictionary) -> void:
+    # print("remove_from_elevator_queue called")
     # Ensure the request exists in the queue before removing
     if request in elevator_queue:
         elevator_queue.erase(request)
-        # print("Removed request:", request, "from queue:", elevator_queue)
+        print("Removed request:", request, "from queue:", elevator_queue)
     else:
-        push_warning("Request not found in queue: " + str(request))
-
+        print("Request not found in queue:", request)
 
 # Timer Timeout Callback
 func _on_cabin_timer_timeout():    
