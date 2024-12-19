@@ -1,7 +1,41 @@
 extends Area2D
 
 var floor_instance
-const SCALE_FACTOR = 2.3  # Apply scale factor
+const SCALE_FACTOR = 2.3
+
+enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
+var door_state: DoorState = DoorState.CLOSED
+
+
+# the elevator doors should keep their own queue of who wants to enter
+# if a sprite moves away it's position will be removed from the queue
+
+
+
+func setup_elevator_instance(p_floor_instance):
+    floor_instance = p_floor_instance
+    name = "Elevator_" + str(floor_instance.floor_number)
+    add_to_group("elevators")
+    apply_scale_factor_to_elevator()
+    position_elevator()
+    update_elevator_door_collision_shape()
+    setup_elevator_doors_position()  # Position the elevator_doors after the elevator and floor_instance are set
+
+
+func set_door_state(new_state: DoorState):
+    door_state = new_state
+    match door_state:
+        DoorState.CLOSED:
+            show_doors_closed()
+        DoorState.OPEN:
+            show_doors_opened()
+        DoorState.OPENING:
+            animate_doors_opening()
+        DoorState.CLOSING:
+            animate_doors_closing()
+
+func get_door_state() -> DoorState:
+    return door_state
 
 
 func show_doors_closed():
@@ -30,14 +64,10 @@ func animate_doors_closing():
 
 
 #region Elevator Door Set-Up
-func setup_elevator_instance(p_floor_instance):
-    floor_instance = p_floor_instance
-    name = "Elevator_" + str(floor_instance.floor_number)
-    add_to_group("elevators")
-    apply_scale_factor_to_elevator()
-    position_elevator()
-    update_elevator_door_collision_shape()
-    setup_elevator_doors_position()  # Position the elevator_doors after the elevator and floor_instance are set
+
+# this method is called first. It's mentioned here as a reference
+# func setup_elevator_instance(p_floor_instance): 
+
 
 func apply_scale_factor_to_elevator():
     var elevator_sprite = $Frame
@@ -78,7 +108,6 @@ func update_elevator_door_collision_shape():
 
 
 func setup_elevator_doors_position():
-    # Now that floor_instance and collision edges are set, position the elevator_doors.
     var elevator_doors = $AnimatedSprite2D
     if not elevator_doors:
         push_warning("elevator_doors not found in Elevator scene.")
@@ -92,5 +121,7 @@ func setup_elevator_doors_position():
     var elevator_height = get_elevator_height()
     var door_y_offset = (elevator_height - door_height) / 2
     elevator_doors.position = Vector2(0, door_y_offset)    
-    show_doors_closed()
+
+    # Initially show the doors as closed
+    set_door_state(DoorState.CLOSED)
 #endregion
