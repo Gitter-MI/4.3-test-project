@@ -23,6 +23,7 @@ func _ready():
     SignalBus.floor_requested.connect(_on_floor_requested)
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
+    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
 
     apply_scale_factor()
     position_cabin()
@@ -47,8 +48,6 @@ func _process(delta: float) -> void:
             handle_opening()
 
 
-
-
 func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:    
     cabin_timer.stop()
     handle_closing()
@@ -57,7 +56,6 @@ func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:
 
     # Update elevator queue item that belongs to the sprite_name
     update_elevator_queue(sprite_name, target_floor)
-
 
 
 func _on_sprite_exiting(sprite_name: String, target_floor: int) -> void:    
@@ -77,7 +75,6 @@ func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor
             return
-
 
 
 func elevator_logic() -> void:
@@ -112,7 +109,6 @@ func move_elevator(delta: float) -> void:
     SignalBus.elevator_position_updated.emit(global_position)
 
 
-
 func handle_arrival() -> void:
     # Elevator has arrived at the target floor
     current_floor = destination_floor
@@ -120,42 +116,56 @@ func handle_arrival() -> void:
     handle_opening()
     SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)    
     cabin_timer.start()
-    
+
 
 func handle_same_floor_request() -> void:
     var request = elevator_queue[0]
     SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)
     
     state = ElevatorState.WAITING
-    
+
 
 func arrived_at_target_floor() -> bool:
-    # Check if elevator is at target_position
     return global_position.y == target_position.y
 
 
 func handle_closing() -> void:
     var elevator = get_elevator_for_floor(current_floor)
-    if elevator:
-        # Call the elevator's door closing animation
-        elevator.animate_doors_closing()
+    if elevator:        
+        elevator.set_door_state(elevator.DoorState.CLOSING)
     
-    # After closing doors, proceed to move or remain in waiting state as per logic
     state = ElevatorState.IN_TRANSIT
-    
+
 
 func handle_opening() -> void:
     var elevator = get_elevator_for_floor(current_floor)
-    if elevator:
-        # Call the elevator's door opening animation
-        elevator.animate_doors_opening()
+    if elevator:    
+        elevator.set_door_state(elevator.DoorState.OPENING)
     
-    # After opening doors, remain in waiting state
+    # Previously we emitted SignalBus.elevator_doors_opened here
+    # Now we rely on the door_state_changed signal to do that when the doors are actually OPEN.
     state = ElevatorState.WAITING
-    SignalBus.elevator_doors_opened.emit(current_floor)
 
 
+func _on_elevator_door_state_changed(new_state):
+    # React to door state changes from the elevator
+    match new_state:
+        # When doors become fully open, we can inform interested parties
+        # and ensure the elevator is WAITING for passengers
+        "OPEN":
+            SignalBus.elevator_doors_opened.emit(current_floor)
+            # Doors are fully open, ensure elevator is waiting
+            state = ElevatorState.WAITING
 
+        # When doors become fully closed, if we had planned to move, we can proceed
+        "CLOSED":
+            # If we just finished closing doors, we should now be in transit if needed
+            # The logic could vary depending on your design. If needed, adjust here.
+            # For now, we won't override 'state' since handle_closing() already sets it.
+            pass
+
+        # OPENING and CLOSING are transitional states, we usually wait until we get OPEN or CLOSED
+        # to do anything major.
 
 # Initialize the target position based on the first request in the queue
 func initialize_target_position() -> void:
@@ -171,14 +181,10 @@ func initialize_target_position() -> void:
 func get_elevator_for_floor(floor_number: int) -> Area2D:
     var elevators = get_tree().get_nodes_in_group("elevators")
     for elevator in elevators:
-        # Check if this elevator matches the current floor number
-        # 'floor_instance' is set in 'setup_elevator_instance'
         if elevator.floor_instance and elevator.floor_instance.floor_number == floor_number:
             return elevator
     return null
 
-
-# Retrieve the floor node by its floor number
 func get_floor_by_number(floor_number: int) -> Node2D:
     var floors = get_tree().get_nodes_in_group("floors")
     for building_floor in floors:
@@ -186,7 +192,6 @@ func get_floor_by_number(floor_number: int) -> Node2D:
             return building_floor
     return null  # Floor not found
 
-# Calculate the elevator's target position based on collision edges
 func get_elevator_position(collision_edges: Dictionary) -> Vector2:
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
     var sprite_height: float = get_cabin_height()
@@ -195,15 +200,12 @@ func get_elevator_position(collision_edges: Dictionary) -> Vector2:
 
 
 func update_destination_floor() -> void:
-    # Set destination_floor to the first request in the queue    
     if elevator_queue.size() > 0:
         destination_floor = elevator_queue[0]['target_floor']
 
 func update_state_to_in_transit() -> void:    
     state = ElevatorState.IN_TRANSIT
 
-
-# Handle a floor request by a sprite
 func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
     # Iterate through the elevator_queue to check for existing requests from the same sprite
     for i in range(elevator_queue.size()):
@@ -226,34 +228,21 @@ func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
     print("Added new request for sprite: ", sprite_name, " to floor: ", target_floor)
 
 func add_to_elevator_queue(request: Dictionary) -> void:
-    # For testing purposes: Add the hardcoded dummy request from Player 2 to floor 0. Do not remove. 
-    # var dummy_request = {"target_floor": 0, "sprite_name": "Player_2"}     
-    
-    # Append the new request to the end of the queue
     elevator_queue.append(request)
-    # elevator_queue.append(dummy_request)
     print("Current elevator queue:", elevator_queue)
 
-# Remove a specific request from the elevator queue
 func remove_from_elevator_queue(request: Dictionary) -> void:
-    # print("remove_from_elevator_queue called")
-    # Ensure the request exists in the queue before removing
     if request in elevator_queue:
         elevator_queue.erase(request)
         print("Removed request:", request, "from queue:", elevator_queue)
     else:
         print("Request not found in queue:", request)
 
-# Timer Timeout Callback
 func _on_cabin_timer_timeout():    
-    # If the elevator is still waiting after 2 seconds, remove the first request from the queue.
     if state == ElevatorState.WAITING and elevator_queue.size() > 0:
         var timed_out_request = elevator_queue[0]
         remove_from_elevator_queue(timed_out_request)
         print("No action taken within 2 seconds, removed request:", timed_out_request)
-
-
-#region Cabin Set-Up
 
 func apply_scale_factor():
     scale = Vector2.ONE * SCALE_FACTOR
@@ -281,9 +270,8 @@ func position_cabin():
     global_position = Vector2(x_position, y_position)
 
 func get_cabin_height():
-    var sprite = get_node("Sprite2D")  # Replace "Sprite2D" with the actual sprite node name if different
+    var sprite = get_node("Sprite2D")  # Adjust node path if your sprite differs
     if sprite and sprite.texture:
         return sprite.texture.get_height() * scale.y
     else:
         return 0
-#endregion

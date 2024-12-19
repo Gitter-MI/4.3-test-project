@@ -9,3 +9,5 @@ signal entering_elevator(sprite_name: String, current_floor: int)
 signal exiting_elevator(sprite_name: String, current_floor: int)
 signal elevator_position_updated(global_pos: Vector2)
 signal elevator_doors_opened(current_floor: int)
+
+signal door_state_changed(new_state)
