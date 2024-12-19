@@ -53,11 +53,23 @@ func _on_elevator_arrived(sprite_name: String, _current_floor: int):
 
 
 func _on_elevator_door_state_changed(new_state):
-    print("func _on_elevator_door_state_changed")
-    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR and new_state == DoorState.OPEN:
-        sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
-        print(sprite_data.sprite_name, " is now EXITING_ELEVATOR")
-        exiting_elevator()
+    print("Door state changed:", new_state)
+    # Check conditions when doors become fully OPEN
+    if new_state == DoorState.OPEN:
+        if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
+        and sprite_data.current_position == sprite_data.current_elevator_position:
+            # Player enters the elevator now that doors are open
+            sprite_data.current_state = SpriteData.State.IN_ELEVATOR
+            SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+            z_index = -9
+            print(sprite_data.sprite_name, " is now IN_ELEVATOR")
+        
+        elif sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+            # Player can now exit the elevator
+            sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
+            print(sprite_data.sprite_name, " is now EXITING_ELEVATOR")
+            exiting_elevator()
+
 
 
 func exiting_elevator() -> void:
@@ -66,6 +78,7 @@ func exiting_elevator() -> void:
     sprite_data.current_floor_number = sprite_data.target_floor_number    
     sprite_data.current_state = SpriteData.State.IDLE
     print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
+
 
 
 func _on_elevator_ride(global_pos: Vector2) -> void:
