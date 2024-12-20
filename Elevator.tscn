@@ -42,9 +42,9 @@ region = Rect2(40, 0, 40, 50)
 atlas = ExtResource("3_pia1j")
 region = Rect2(0, 0, 40, 50)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ar26r"]
-atlas = ExtResource("3_pia1j")
-region = Rect2(280, 0, 40, 50)
+[sub_resource type="AtlasTexture" id="AtlasTexture_8m2x3"]
+atlas = ExtResource("4_6cq6x")
+region = Rect2(0, 0, 56, 58)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g43w2"]
 atlas = ExtResource("3_pia1j")
@@ -84,7 +84,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_dtq8n")
 }],
-"loop": false,
+"loop": true,
 "name": &"closed",
 "speed": 5.0
 }, {
@@ -115,13 +115,13 @@ animations = [{
 }],
 "loop": false,
 "name": &"closing",
-"speed": 20.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ar26r")
+"texture": SubResource("AtlasTexture_8m2x3")
 }],
-"loop": false,
+"loop": true,
 "name": &"opened_idle",
 "speed": 5.0
 }, {
@@ -152,7 +152,7 @@ animations = [{
 }],
 "loop": false,
 "name": &"opening",
-"speed": 20.0
+"speed": 10.0
 }]
 
 [node name="Elevator" type="Area2D"]
@@ -167,4 +167,4 @@ shape = SubResource("RectangleShape2D_tyhfd")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_flxjs")
-animation = &"opening"
+animation = &"opened_idle"

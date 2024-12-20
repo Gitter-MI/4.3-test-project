@@ -41,28 +41,44 @@ func _on_elevator_arrived(sprite_name: String, _current_floor: int):
     and sprite_data.current_position == sprite_data.current_elevator_position \
     and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
 
-        SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
-        sprite_data.current_state = SpriteData.State.IN_ELEVATOR
-        z_index = -9
-        print("my elevator has arrived. I am getting in")
+        print("Elevator arrived. Checking door state...")
 
-        # Store elevator collision edges of the current floor for later reference
-        var current_floor_node = get_floor_by_number(sprite_data.current_floor_number)
-        var current_edges = current_floor_node.get_collision_edges()
-        sprite_data.current_elevator_collision_edges = current_edges
+        var elevator = get_elevator_for_current_floor()
+        if elevator:
+            var current_door_state = elevator.get_door_state()
+            if current_door_state == DoorState.OPEN:
+                # Doors are already open, so no need to wait.
+                sprite_data.current_state = SpriteData.State.IN_ELEVATOR
+                SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+                z_index = -9
+                print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors were already open)")
+            else:
+                # Doors not open yet, wait for DoorState.OPEN event
+                print("Elevator arrived. Waiting for doors to open before entering...")
+        else:
+            print("Elevator not found at floor:", sprite_data.current_floor_number)
+
+func get_elevator_for_current_floor() -> Area2D:
+    var elevators = get_tree().get_nodes_in_group("elevators")
+    for elevator in elevators:
+        if elevator.floor_instance and elevator.floor_instance.floor_number == sprite_data.current_floor_number:
+            return elevator
+    return null
+
+
 
 
 func _on_elevator_door_state_changed(new_state):
     print("Door state changed:", new_state)
-    # Check conditions when doors become fully OPEN
     if new_state == DoorState.OPEN:
+        # If player was waiting at the elevator, now it's safe to enter
         if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
         and sprite_data.current_position == sprite_data.current_elevator_position:
-            # Player enters the elevator now that doors are open
             sprite_data.current_state = SpriteData.State.IN_ELEVATOR
             SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
             z_index = -9
-            print(sprite_data.sprite_name, " is now IN_ELEVATOR")
+            print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors are open)")
+
         
         elif sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
             # Player can now exit the elevator
