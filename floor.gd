@@ -33,9 +33,9 @@ func get_collision_edges() -> Dictionary:
     
 func _input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
-        var collision_edges = get_collision_edges()        
+        var floor_collision_edges = get_collision_edges()        
         var bottom_edge_y = collision_edges["bottom"]
-        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, collision_edges)
+        emit_signal("floor_clicked", floor_number, event.global_position, bottom_edge_y, floor_collision_edges)
 
 
 #region set-up methods

@@ -18,8 +18,6 @@ func _ready():
 
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
-    
-    # Connect to the new door_state_changed signal instead of elevator_doors_opened
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
 
     set_initial_position()
@@ -276,8 +274,7 @@ func set_initial_position() -> void:
 
 
 
-func get_elevator_position(collision_edges: Dictionary) -> Vector2:
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+func get_elevator_position(collision_edges: Dictionary) -> Vector2:    
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
     var sprite_height: float = sprite_data.sprite_height
     var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2

@@ -20,7 +20,7 @@ func _ready():
     var elevator_doors = $AnimatedSprite2D
     if elevator_doors:
         elevator_doors.animation_finished.connect(_on_doors_animation_finished)
-        print("Connected animation_finished signal.")
+        # print("Connected animation_finished signal.")
     else:
         push_warning("AnimatedSprite2D node not found in Elevator scene.")
 
@@ -48,7 +48,7 @@ func show_doors_closed():
     if elevator_doors:
         elevator_doors.visible = true
         elevator_doors.play("closed")
-        print("Showing doors closed.")
+        # print("Showing doors closed.")
     else:
         push_warning("AnimatedSprite2D node not found when showing doors closed.")
 
@@ -57,7 +57,7 @@ func show_doors_opened():
     if elevator_doors:
         elevator_doors.stop()
         elevator_doors.visible = false
-        print("Doors are opened (not visible).")
+        # print("Doors are opened (not visible).")
     else:
         push_warning("AnimatedSprite2D node not found when showing doors opened.")
 
@@ -83,24 +83,25 @@ func _on_doors_animation_finished():
     var elevator_doors = $AnimatedSprite2D
     if elevator_doors:
         var current_anim = elevator_doors.animation
-        print("Doors animation finished: ", current_anim)
+        # print("Doors animation finished: ", current_anim)
         if current_anim == "opening" and door_state == DoorState.OPENING:
             set_door_state(DoorState.OPEN)
-            print("Doors have fully opened.")
+            # print("Doors have fully opened.")
         if current_anim == "closing" and door_state == DoorState.CLOSING:
             set_door_state(DoorState.CLOSED)
-            print("Doors have fully closed.")
+            # print("Doors have fully closed.")
             # Emit a signal to let the cabin know it can proceed
             SignalBus.doors_fully_closed.emit()
 
     else:
         push_warning("AnimatedSprite2D node not found when handling animation finished.")
 
+#region Elevator Door Set-Up
 func apply_scale_factor_to_elevator():
     var elevator_sprite = $Frame
     if elevator_sprite:
         elevator_sprite.scale *= SCALE_FACTOR
-        print("Applied scale factor to elevator frame.")
+        # print("Applied scale factor to elevator frame.")
     else:
         push_warning("Elevator sprite node not found to apply scale factor.")
 
@@ -112,7 +113,7 @@ func position_elevator():
     var elevator_height = get_elevator_height()
     var y_position = bottom_edge_y - (elevator_height / 2)
     global_position = Vector2(x_position, y_position)
-    print("Elevator positioned at: ", global_position)
+    # print("Elevator positioned at: ", global_position)
 
 func get_elevator_height():
     var elevator_sprite = $Frame
@@ -131,7 +132,7 @@ func update_elevator_door_collision_shape():
         var rectangle_shape = RectangleShape2D.new()
         rectangle_shape.extents = Vector2(width / 2, height / 2)
         collision_shape.shape = rectangle_shape
-        print("Updated elevator door collision shape.")
+        # print("Updated elevator door collision shape.")
     else:
         push_warning("Cannot update collision shape: Missing nodes or textures")
 
@@ -152,4 +153,5 @@ func setup_elevator_doors_position():
 
     # Initially show doors closed
     set_door_state(DoorState.CLOSED)
-    print("Elevator doors set up and initially closed.")
+    # print("Elevator doors set up and initially closed.")
+#endregion
