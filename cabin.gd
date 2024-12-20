@@ -3,8 +3,8 @@ extends Node2D
 enum ElevatorState {
     WAITING,       # 0
     IN_TRANSIT,    # 1
-    OPENING,       # 2
-    CLOSING        # 3
+    OPENING,       # 2   ## will be removed later
+    CLOSING        # 3  ## will be removed later
 }
 
 # Properties
@@ -35,6 +35,13 @@ func _ready():
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
 
+    # After positioning the cabin, force the elevator on the current floor to open its doors
+    var elevator = get_elevator_for_current_floor()
+    if elevator:
+        elevator.set_door_state(elevator.DoorState.OPEN)
+        print("Initial elevator doors opened at floor:", current_floor)
+
+
 
 func _process(delta: float) -> void:
     match state:
@@ -46,6 +53,15 @@ func _process(delta: float) -> void:
             move_elevator(delta)
         ElevatorState.OPENING:
             handle_opening()
+
+
+func get_elevator_for_current_floor() -> Area2D:
+    var elevators = get_tree().get_nodes_in_group("elevators")
+    for elevator in elevators:
+        if elevator.floor_instance and elevator.floor_instance.floor_number == current_floor:
+            return elevator
+    return null
+
 
 
 func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:    
