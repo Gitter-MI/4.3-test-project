@@ -12,9 +12,7 @@ enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
 
 func _ready():
     add_to_group("player_sprites")   
-    sprite_data = PlayerSpriteData.new()
-
-    # Update the sprite dimensions in the SpriteData resource    
+    sprite_data = PlayerSpriteData.new()    
     sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
     sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
 
@@ -25,8 +23,7 @@ func _ready():
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
 
     set_initial_position()
-
-    # Connect to floor_clicked signal from all floors
+    
     var floors = get_tree().get_nodes_in_group("floors")
     for floor_node in floors:
         floor_node.floor_clicked.connect(_on_floor_clicked)
@@ -36,29 +33,31 @@ func _ready():
         door_node.door_clicked.connect(_on_door_clicked)
 
 
+
+#####################################################################################################
+#####################################################################################################
+##################              Vertical Movement Component                   #######################
+#####################################################################################################
+#####################################################################################################
+
+
 func _on_elevator_arrived(sprite_name: String, _current_floor: int):
     if sprite_name == sprite_data.sprite_name \
     and sprite_data.current_position == sprite_data.current_elevator_position \
     and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
+        # print("Elevator arrived. Checking door state...")
+        var elevator = get_elevator_for_current_floor()        
+        var current_door_state = elevator.get_door_state()
+        if current_door_state == DoorState.OPEN:     
+                   
+            sprite_data.current_state = SpriteData.State.IN_ELEVATOR  # should go through entering elevator first. Needs to be implemented
+            SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+            z_index = -9
+            # print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors were already open)")
 
-        print("Elevator arrived. Checking door state...")
-
-        var elevator = get_elevator_for_current_floor()
-        if elevator:
-            var current_door_state = elevator.get_door_state()
-            if current_door_state == DoorState.OPEN:
-                # Doors are already open, so no need to wait.
-                sprite_data.current_state = SpriteData.State.IN_ELEVATOR
-                SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
-                z_index = -9
-                print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors were already open)")
-            else:
-                # Doors not open yet, wait for DoorState.OPEN event
-                print("Elevator arrived. Waiting for doors to open before entering...")
-        else:
-            print("Elevator not found at floor:", sprite_data.current_floor_number)
 
 func get_elevator_for_current_floor() -> Area2D:
+    # helper function for _on_elevator_arrived
     var elevators = get_tree().get_nodes_in_group("elevators")
     for elevator in elevators:
         if elevator.floor_instance and elevator.floor_instance.floor_number == sprite_data.current_floor_number:
@@ -66,10 +65,8 @@ func get_elevator_for_current_floor() -> Area2D:
     return null
 
 
-
-
 func _on_elevator_door_state_changed(new_state):
-    print("Door state changed:", new_state)
+    # print("Door state changed:", new_state)
     if new_state == DoorState.OPEN:
         # If player was waiting at the elevator, now it's safe to enter
         if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
@@ -78,7 +75,6 @@ func _on_elevator_door_state_changed(new_state):
             SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
             z_index = -9
             print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors are open)")
-
         
         elif sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
             # Player can now exit the elevator
@@ -87,28 +83,33 @@ func _on_elevator_door_state_changed(new_state):
             exiting_elevator()
 
 
-
 func exiting_elevator() -> void:
-    print("exiting_elevator")
+    # print("exiting_elevator")
     z_index = 0 
     sprite_data.current_floor_number = sprite_data.target_floor_number    
     sprite_data.current_state = SpriteData.State.IDLE
-    print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
-
+    # when not IN_ELEVATOR the movement_logic() will handle the next action
+    # print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
 
 
 func _on_elevator_ride(global_pos: Vector2) -> void:
+    # this is logically dependent on the move_elevator() in cabin.gd Both sprites need to move in sync but they have a function each. 
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
         # Update the player position according to the elevator's position
         global_position.x = global_pos.x
         global_position.y = global_pos.y + (sprite_data.sprite_height / 2) 
         sprite_data.current_position = global_position
 
-
 func _process(delta: float) -> void:
     if sprite_data.current_state != SpriteData.State.IN_ELEVATOR:
         movement_logic(delta)
 
+
+#####################################################################################################
+#####################################################################################################
+##################              Horizontal Movement Component                 #######################
+#####################################################################################################
+#####################################################################################################
 
 func movement_logic(delta: float) -> void:
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
@@ -179,6 +180,14 @@ func update_state_after_horizontal_movement() -> void:
             print(sprite_data.sprite_name, " is now IDLE.")
 
 
+
+
+#####################################################################################################
+#####################################################################################################
+##################              Human Player Movement Component               #######################
+#####################################################################################################
+#####################################################################################################
+
 func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
     var sprite_width: float = sprite_data.sprite_width
     var sprite_height: float = sprite_data.sprite_height
@@ -241,11 +250,12 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
         sprite_data.current_elevator_position = get_elevator_position(current_edges)
 
 
-func get_elevator_position(collision_edges: Dictionary) -> Vector2:
-    var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
-    var sprite_height: float = sprite_data.sprite_height
-    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
-    return Vector2(center_x, adjusted_y)
+
+#####################################################################################################
+#####################################################################################################
+##################              Basic Sprite Component                        #######################  
+#####################################################################################################
+#####################################################################################################
 
 
 func set_initial_position() -> void:
@@ -263,6 +273,15 @@ func set_initial_position() -> void:
     sprite_data.target_floor_number = target_floor.floor_number
 
     sprite_data.current_elevator_position = get_elevator_position(edges)
+
+
+
+func get_elevator_position(collision_edges: Dictionary) -> Vector2:
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
+    var sprite_height: float = sprite_data.sprite_height
+    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
+    return Vector2(center_x, adjusted_y)
 
 
 func get_floor_by_number(floor_number: int) -> Node2D:

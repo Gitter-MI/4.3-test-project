@@ -2,9 +2,7 @@ extends Node2D
 
 enum ElevatorState {
     WAITING,       # 0
-    IN_TRANSIT,    # 1
-    OPENING,       # 2   ## will be removed later
-    CLOSING        # 3  ## will be removed later
+    IN_TRANSIT    # 1
 }
 
 # Properties
@@ -12,6 +10,7 @@ var state: ElevatorState = ElevatorState.WAITING
 var current_floor: int = 2
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
+
 
 const SCALE_FACTOR: float = 2.3
 const SPEED: float = 400.0  # Pixels per second
@@ -36,8 +35,7 @@ func _ready():
     cabin_timer.wait_time = 2.0
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
-
-    # After positioning the cabin, force the elevator on the current floor to open its doors
+    
     var elevator = get_elevator_for_current_floor()
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPEN)
@@ -49,18 +47,17 @@ func _process(delta: float) -> void:
     match state:
         ElevatorState.WAITING:
             elevator_logic()
-        ElevatorState.CLOSING:
-            handle_closing()
         ElevatorState.IN_TRANSIT:
             move_elevator(delta)
-        ElevatorState.OPENING:
-            handle_opening()
+
 
 
 func _on_doors_fully_closed():
-    if state == ElevatorState.CLOSING:
+    # Doors are now fully closed. If we intended to move (we have a request and a different floor to go to):
+    if destination_floor != current_floor:
         state = ElevatorState.IN_TRANSIT
         print("Doors closed, now starting to move towards the destination floor.")
+
 
 
 func get_elevator_for_current_floor() -> Area2D:
@@ -72,26 +69,32 @@ func get_elevator_for_current_floor() -> Area2D:
 
 
 
-func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:    
+
+func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:
     cabin_timer.stop()
-    handle_closing()
+    # Instead of handle_closing(), do:
+    var elevator = get_elevator_for_floor(current_floor)
+    if elevator:
+        elevator.set_door_state(elevator.DoorState.CLOSING)
     state = ElevatorState.WAITING
+    update_elevator_queue(sprite_name, target_floor)
     print("sprite is entering")
 
-    # Update elevator queue item that belongs to the sprite_name
-    update_elevator_queue(sprite_name, target_floor)
-
-
-func _on_sprite_exiting(sprite_name: String, target_floor: int) -> void:    
-    handle_opening()
-    state = ElevatorState.WAITING
+func _on_sprite_exiting(sprite_name: String, target_floor: int) -> void:
     cabin_timer.stop()
+    # Instead of handle_opening(), do:
+    var elevator = get_elevator_for_floor(current_floor)
+    if elevator:
+        elevator.set_door_state(elevator.DoorState.OPENING)
+    state = ElevatorState.WAITING
     
+    # Remove the request from the queue
     for request in elevator_queue:
         if request.has("sprite_name") and request["sprite_name"] == sprite_name \
-                and request.has("target_floor") and request["target_floor"] == target_floor:
+            and request.has("target_floor") and request["target_floor"] == target_floor:
             remove_from_elevator_queue(request)
             break
+
 
 
 func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
@@ -102,16 +105,19 @@ func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
 
 
 func elevator_logic() -> void:
-    # If we have a request and we are waiting
     if elevator_queue.size() > 0 and state == ElevatorState.WAITING:
         update_destination_floor()
         if destination_floor != current_floor:
             initialize_target_position()
-            # Instead of going directly to IN_TRANSIT, go through CLOSING first
-            state = ElevatorState.CLOSING
+            # Instead of setting state to CLOSING, just request door close
+            var elevator = get_elevator_for_floor(current_floor)
+            if elevator:
+                elevator.set_door_state(elevator.DoorState.CLOSING)
+            # Keep state at WAITING until doors are closed
         else:
-            # Already at the correct floor
             handle_same_floor_request()
+
+
 
 
 func move_elevator(delta: float) -> void:
@@ -137,9 +143,12 @@ func handle_arrival() -> void:
     # Elevator has arrived at the target floor
     current_floor = destination_floor
     var completed_request = elevator_queue[0]
-    handle_opening()
-    SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)    
-    cabin_timer.start()
+    var elevator = get_elevator_for_floor(current_floor)
+
+    if elevator:
+        elevator.set_door_state(elevator.DoorState.OPENING)
+        SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)    
+        cabin_timer.start()
 
 
 func handle_same_floor_request() -> void:
@@ -153,43 +162,22 @@ func arrived_at_target_floor() -> bool:
     return global_position.y == target_position.y
 
 
-func handle_closing() -> void:
-    var elevator = get_elevator_for_floor(current_floor)
-    if elevator:        
-        elevator.set_door_state(elevator.DoorState.CLOSING)
-    
-    # state = ElevatorState.IN_TRANSIT
 
 
-func handle_opening() -> void:
-    var elevator = get_elevator_for_floor(current_floor)
-    if elevator:    
-        elevator.set_door_state(elevator.DoorState.OPENING)
-    
-    # Previously we emitted SignalBus.elevator_doors_opened here
-    # Now we rely on the door_state_changed signal to do that when the doors are actually OPEN.
-    state = ElevatorState.WAITING
 
 
 func _on_elevator_door_state_changed(new_state):
-    # React to door state changes from the elevator
+    var elevator = get_elevator_for_floor(current_floor)
     match new_state:
-        # When doors become fully open, we can inform interested parties
-        # and ensure the elevator is WAITING for passengers
-        "OPEN":
+        elevator.DoorState.OPEN:
             SignalBus.elevator_doors_opened.emit(current_floor)
-            # Doors are fully open, ensure elevator is waiting
             state = ElevatorState.WAITING
-
-        # When doors become fully closed, if we had planned to move, we can proceed
-        "CLOSED":
-            # If we just finished closing doors, we should now be in transit if needed
-            # The logic could vary depending on your design. If needed, adjust here.
-            # For now, we won't override 'state' since handle_closing() already sets it.
+        
+        elevator.DoorState.CLOSED:
+            # Handle closed if needed
             pass
 
-        # OPENING and CLOSING are transitional states, we usually wait until we get OPEN or CLOSED
-        # to do anything major.
+
 
 # Initialize the target position based on the first request in the queue
 func initialize_target_position() -> void:

@@ -38,7 +38,7 @@ func set_door_state(new_state: DoorState):
 
     # Emit the door state change via SignalBus
     SignalBus.door_state_changed.emit(door_state)
-    print("Door state changed to: ", door_state)
+    # print("Door state changed to: ", door_state)
 
 func get_door_state() -> DoorState:
     return door_state
@@ -66,7 +66,7 @@ func animate_doors_opening():
     if elevator_doors:
         elevator_doors.visible = true
         elevator_doors.play("opening")
-        print("Animating doors opening.")
+        # print("Animating doors opening.")
     else:
         push_warning("AnimatedSprite2D node not found when animating doors opening.")
 
@@ -75,7 +75,7 @@ func animate_doors_closing():
     if elevator_doors:
         elevator_doors.visible = true
         elevator_doors.play("closing")
-        print("Animating doors closing.")
+        # print("Animating doors closing.")
     else:
         push_warning("AnimatedSprite2D node not found when animating doors closing.")
 
