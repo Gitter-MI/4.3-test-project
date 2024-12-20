@@ -24,6 +24,8 @@ func _ready():
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
+    SignalBus.doors_fully_closed.connect(_on_doors_fully_closed)
+
 
     apply_scale_factor()
     position_cabin()
@@ -53,6 +55,12 @@ func _process(delta: float) -> void:
             move_elevator(delta)
         ElevatorState.OPENING:
             handle_opening()
+
+
+func _on_doors_fully_closed():
+    if state == ElevatorState.CLOSING:
+        state = ElevatorState.IN_TRANSIT
+        print("Doors closed, now starting to move towards the destination floor.")
 
 
 func get_elevator_for_current_floor() -> Area2D:
@@ -150,7 +158,7 @@ func handle_closing() -> void:
     if elevator:        
         elevator.set_door_state(elevator.DoorState.CLOSING)
     
-    state = ElevatorState.IN_TRANSIT
+    # state = ElevatorState.IN_TRANSIT
 
 
 func handle_opening() -> void:

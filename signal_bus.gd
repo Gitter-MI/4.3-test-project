@@ -11,3 +11,5 @@ signal elevator_position_updated(global_pos: Vector2)
 signal elevator_doors_opened(current_floor: int)
 
 signal door_state_changed(new_state)
+signal doors_fully_closed()
+signal doors_fully_opened()
