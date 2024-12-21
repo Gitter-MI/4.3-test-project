@@ -86,6 +86,7 @@ func exiting_elevator() -> void:
     z_index = 0 
     sprite_data.current_floor_number = sprite_data.target_floor_number    
     sprite_data.current_state = SpriteData.State.IDLE
+    SignalBus.exiting_elevator.emit(sprite_data.sprite_name, sprite_data.current_floor_number)  
     # when not IN_ELEVATOR the movement_logic() will handle the next action
     # print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
 
