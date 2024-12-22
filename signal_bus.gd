@@ -12,3 +12,19 @@ signal elevator_position_updated(global_pos: Vector2)   # used to move sprites a
 signal door_state_changed(new_state)
 signal doors_fully_closed()
 signal doors_fully_opened()
+
+
+signal floor_clicked(
+    floor_number: int,
+    click_position: Vector2,
+    bottom_edge_y: float,
+    collision_edges: Dictionary
+)
+
+signal door_clicked(
+    door_center_x: int,
+    floor_number: int,
+    door_index: int,
+    collision_edges: Dictionary,
+    click_position: Vector2
+)

@@ -176,6 +176,7 @@ func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
 
 
 func _on_cabin_timer_timeout() -> void:
+    ## Cabin timer has been temporarily removed
     pass
     ## If the queue is empty, do nothing
     #if elevator_queue.size() == 0:
@@ -190,28 +191,7 @@ func _on_cabin_timer_timeout() -> void:
 
 
 
-#region helper functions
-func cache_elevators():
-    var elevators = get_tree().get_nodes_in_group("elevators")
-    for elevator in elevators:
-        if elevator.floor_instance:
-            floor_to_elevator[elevator.floor_instance.floor_number] = elevator
 
-func cache_floor_positions():
-    var floors = get_tree().get_nodes_in_group("floors")
-    for building_floor in floors:
-        if building_floor.has_method("get_collision_edges"):
-            var collision_edges = building_floor.get_collision_edges()
-            var target_pos = get_elevator_position(collision_edges)
-            floor_to_target_position[building_floor.floor_number] = target_pos
-
-
-func get_elevator_for_floor(floor_number: int) -> Area2D:
-    return floor_to_elevator.get(floor_number, null)
-
-func get_elevator_for_current_floor() -> Area2D:
-    return get_elevator_for_floor(current_floor)
-#endregion
 
 #region elevator queue management
 func add_to_elevator_queue(request: Dictionary) -> void:
@@ -277,5 +257,27 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.wait_time = wait_time
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
+
+
+func cache_elevators():
+    var elevators = get_tree().get_nodes_in_group("elevators")
+    for elevator in elevators:
+        if elevator.floor_instance:
+            floor_to_elevator[elevator.floor_instance.floor_number] = elevator
+
+func cache_floor_positions():
+    var floors = get_tree().get_nodes_in_group("floors")
+    for building_floor in floors:
+        if building_floor.has_method("get_collision_edges"):
+            var collision_edges = building_floor.get_collision_edges()
+            var target_pos = get_elevator_position(collision_edges)
+            floor_to_target_position[building_floor.floor_number] = target_pos
+            
+
+func get_elevator_for_floor(floor_number: int) -> Area2D:    
+    return floor_to_elevator.get(floor_number, null)
+
+func get_elevator_for_current_floor() -> Area2D:    
+    return get_elevator_for_floor(current_floor)
 
 #endregion

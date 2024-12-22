@@ -12,23 +12,19 @@ enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
 
 func _ready():
     add_to_group("player_sprites")   
-    sprite_data = PlayerSpriteData.new()    
-    sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
-    sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
+    sprite_data = PlayerSpriteData.new()   
+    update_sprite_dimensions()
+    set_initial_position()
 
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
 
-    set_initial_position()
     
-    var floors = get_tree().get_nodes_in_group("floors")
-    for floor_node in floors:
-        floor_node.floor_clicked.connect(_on_floor_clicked)
-        
-    var doors = get_tree().get_nodes_in_group("doors")
-    for door_node in doors:
-        door_node.door_clicked.connect(_on_door_clicked)
+    # use the signal bus instead?
+    # would require adapting the door and floor script as well. 
+    SignalBus.floor_clicked.connect(_on_floor_clicked)
+    SignalBus.door_clicked.connect(_on_door_clicked)
 
 
 
@@ -105,10 +101,9 @@ func _process(delta: float) -> void:
 
 
 #####################################################################################################
-#####################################################################################################
 ##################              Horizontal Movement Component                 #######################
 #####################################################################################################
-#####################################################################################################
+
 
 func movement_logic(delta: float) -> void:
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
@@ -182,10 +177,9 @@ func update_state_after_horizontal_movement() -> void:
 
 
 #####################################################################################################
-#####################################################################################################
 ##################              Human Player Movement Component               #######################
 #####################################################################################################
-#####################################################################################################
+
 
 func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
     var sprite_width: float = sprite_data.sprite_width
@@ -251,10 +245,16 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
 
 
 #####################################################################################################
-#####################################################################################################
 ##################              Basic Sprite Component                        #######################  
 #####################################################################################################
-#####################################################################################################
+
+func update_sprite_dimensions():
+    if $Sprite2D.texture:
+        sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
+        sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
+    else:
+        print("Warning: Sprite2D texture is not set.")
+
 
 
 func set_initial_position() -> void:
@@ -275,7 +275,8 @@ func set_initial_position() -> void:
 
 
 
-func get_elevator_position(collision_edges: Dictionary) -> Vector2:    
+func get_elevator_position(collision_edges: Dictionary) -> Vector2:   
+    
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
     var sprite_height: float = sprite_data.sprite_height
     var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
@@ -283,6 +284,7 @@ func get_elevator_position(collision_edges: Dictionary) -> Vector2:
 
 
 func get_floor_by_number(floor_number: int) -> Node2D:
+    
     var floors = get_tree().get_nodes_in_group("floors")
     for building_floor in floors:
         if building_floor.floor_number == floor_number:
@@ -291,27 +293,4 @@ func get_floor_by_number(floor_number: int) -> Node2D:
 
 
 
-##############################################
-### These functions are currently not used ###
-##############################################
-
-func get_current_floor():
-    print("get current floor called")
-    # Create the physics query
-    var query = PhysicsPointQueryParameters2D.new()
-    query.position = global_position
-    query.collision_mask = 1
-    query.collide_with_areas = true  # Detect Area2D nodes
-    query.collide_with_bodies = false  # We only want to detect areas
-
-    # Get the physics state and perform the intersection test
-    var space_state = get_world_2d().direct_space_state
-    var results = space_state.intersect_point(query)
-
-    # Check if we're on any floor areas
-    if results.size() > 0:
-        for result in results:
-            if result.collider.is_in_group("floors"):
-                return result.collider  # Return the current floor node
-    return null  # Not on any floor
 #endregion

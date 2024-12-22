@@ -15,7 +15,7 @@ const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var tooltip_background = $TooltipBackground  # TooltipBackground node with tooltip.gd attached
 
-signal door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, click_position: Vector2)
+# signal door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, click_position: Vector2)
 
 # the doors should keep their own queue of who wants to enter
 # if a sprite moves away it's position will be removed from the queue
@@ -30,7 +30,13 @@ func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         var parent_collision_edges = get_parent().collision_edges
         print("door_clicked. Center:", door_center_x, ", Floor:", door_data.floor_number, ", Index:", door_data.index)        
-        emit_signal("door_clicked", door_center_x, door_data.floor_number, door_data.index, parent_collision_edges, event.global_position)
+        SignalBus.door_clicked.emit(
+            door_center_x,
+            door_data.floor_number,
+            door_data.index,
+            parent_collision_edges,
+            event.global_position
+        )
         get_viewport().set_input_as_handled()
 
 func set_door_state(new_state: DoorState) -> void:
