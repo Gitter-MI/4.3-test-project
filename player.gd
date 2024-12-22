@@ -110,10 +110,10 @@ func movement_logic(delta: float) -> void:
 
     if sprite_data.current_position != sprite_data.target_position:
         if sprite_data.target_floor_number == sprite_data.current_floor_number:
-            move_towards_target_position(delta)
+            move_towards_position(sprite_data.target_position, delta)
         else:
             sprite_data.needs_elevator = true
-            if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
+            if sprite_data.current_position == sprite_data.current_elevator_position:
                 var current_request = {
                     "sprite_name": sprite_data.sprite_name,
                     "floor_number": sprite_data.target_floor_number
@@ -121,21 +121,18 @@ func movement_logic(delta: float) -> void:
 
                 if current_request != last_elevator_request:
                     SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
-                    print("signal emitted: elevator requested")
+                    # print("signal emitted: elevator requested")
 
                     last_elevator_request = current_request
                     sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
-                    print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
+                    # print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
                 else:
-                    # Duplicate request detected, do nothing
+                    # Duplicate request detected, do nothing. Else, will send a signal each frame
                     pass
             else:
                 # Keep moving towards the elevator
                 move_towards_position(sprite_data.current_elevator_position, delta)
 
-
-func move_towards_target_position(delta: float) -> void:
-    move_towards_position(sprite_data.target_position, delta)
 
 
 func move_towards_position(target_position: Vector2, delta: float) -> void:
@@ -200,48 +197,31 @@ func adjust_click_position(collision_edges: Dictionary, click_position: Vector2,
 
 
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
-    # print("floor clicked")
+
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
-
-    if sprite_data.current_floor_number == floor_number:
-        sprite_data.target_position = adjusted_click_position
-        # sprite_data.target_floor_number = floor_number  #not needed target floor is already the current floor
-        sprite_data.target_room = -1
-        # sprite_data.needs_elevator = false  # not needed is already false        
-        # last_elevator_request = {"sprite_name": "", "floor_number": -1}  # not needed handled in state management after horizontal movement
-    else:
-        sprite_data.target_floor_number = floor_number
-        sprite_data.target_position = adjusted_click_position
-        sprite_data.target_room = -1
-
-        # var current_floor = get_floor_by_number(sprite_data.current_floor_number)
-        # var current_edges = current_floor.get_collision_edges()
-        sprite_data.current_elevator_position = get_elevator_position()
+    var door_index = -1
+    set_target_data(floor_number, adjusted_click_position, door_index)
 
 
 func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
-    print("door_center_x: ", door_center_x, ", floor_number: ", floor_number, ", door_index: ", door_index)
     var bottom_edge_y = collision_edges["bottom"]
     var door_click_position: Vector2 = Vector2(door_center_x, bottom_edge_y)
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, door_click_position, bottom_edge_y)
 
+    set_target_data(floor_number, adjusted_click_position, door_index)
+
+
+func set_target_data(floor_number: int, adjusted_click_position: Vector2, target_room: int) -> void:
+    # If already on the same floor, no elevator needed:
     if sprite_data.current_floor_number == floor_number:
         sprite_data.target_position = adjusted_click_position
-        # sprite_data.target_floor_number = floor_number
-        sprite_data.target_room = door_index
-        # sprite_data.needs_elevator = false
-        # last_elevator_request = {"sprite_name": "", "floor_number": -1}
-        print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
+        sprite_data.target_room = target_room
     else:
+        # Change floors, so update elevator position & floor number
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
-        sprite_data.target_room = door_index
-        print(sprite_data.sprite_name, " target_room set to door index: ", door_index)
-
-        # var current_floor = get_floor_by_number(sprite_data.current_floor_number)
-        # var current_edges = current_floor.get_collision_edges()
+        sprite_data.target_room = target_room
         sprite_data.current_elevator_position = get_elevator_position()
-
 
 
 #####################################################################################################
