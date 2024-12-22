@@ -15,8 +15,6 @@ const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var tooltip_background = $TooltipBackground  # TooltipBackground node with tooltip.gd attached
 
-# signal door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, click_position: Vector2)
-
 # the doors should keep their own queue of who wants to enter
 # if a sprite moves away it's position will be removed from the queue
 

@@ -17,7 +17,6 @@ const BOUNDARIES = {
     "y2": 1   # Bottom boundary
 }
 
-# signal floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary)
 
 func _ready():
     add_to_group("floors")
