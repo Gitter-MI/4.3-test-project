@@ -54,9 +54,12 @@ animations = [{
 }],
 "loop": false,
 "name": &"enter",
-"speed": 25.0
+"speed": 15.0
 }, {
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6xk1d")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_6xk1d")
 }, {
@@ -65,7 +68,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"idle",
-"speed": 5.0
+"speed": 2.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -106,4 +109,4 @@ animations = [{
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_h6gqg")
-animation = &"enter"
+animation = &"idle"

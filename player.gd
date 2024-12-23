@@ -56,26 +56,19 @@ func entering_elevator():
     var elevator = get_elevator_for_current_floor()
     sprite_data.elevator_y_offset = global_position.y - elevator.global_position.y
     z_index = -9
-    SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
-    $AnimatedSprite2D.play("enter")
+    SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)    
     _update_animation(Vector2.ZERO)
 
 
 
 func _on_sprite_entered_elevator():
-    print("animation finished")
+    # print("animation finished")
     var current_anim = $AnimatedSprite2D.animation
-
-    # Example: If the current animation is "enter" and we are in ENTERING_ELEVATOR
-    if current_anim == "enter" and sprite_data.current_state == SpriteData.State.ENTERING_ELEVATOR:
-        # Transition to the new state
+    
+    if current_anim == "enter" and sprite_data.current_state == SpriteData.State.ENTERING_ELEVATOR:        
         sprite_data.current_state = SpriteData.State.IN_ELEVATOR
         print("Enter animation finished. Sprite is now IN_ELEVATOR.")
-
-        # Now emit the global signal. The listener(s) can respond if needed.
-        SignalBus.enter_animation_finished.emit(sprite_data.sprite_name)
-
-        # Optionally, force an animation update if you want to switch to "idle" now.
+        SignalBus.enter_animation_finished.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
         _update_animation(Vector2.ZERO)
 
 

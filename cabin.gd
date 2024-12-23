@@ -22,7 +22,7 @@ var cabin_timer: Timer
 
 func _ready():
     SignalBus.elevator_request.connect(_on_elevator_request)
-    SignalBus.entering_elevator.connect(_on_sprite_entering)
+    SignalBus.enter_animation_finished.connect(_on_sprite_entered)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
 
@@ -98,7 +98,7 @@ func handle_arrival() -> void:
 
 
 
-func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:
+func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
     # cabin_timer.stop()    
     var elevator = floor_to_elevator.get(current_floor, null)
     if elevator:
