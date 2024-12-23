@@ -21,11 +21,10 @@ var target_position: Vector2 = Vector2.ZERO
 var cabin_timer: Timer
 
 func _ready():
-    SignalBus.floor_requested.connect(_on_floor_requested)
+    SignalBus.elevator_request.connect(_on_elevator_request)
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
-    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
-    SignalBus.doors_fully_closed.connect(_on_doors_fully_closed)
+    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
 
     apply_scale_factor()
     position_cabin()
@@ -52,23 +51,22 @@ func _process(delta: float) -> void:
 
 func elevator_logic() -> void:
     
-    if elevator_queue.size() > 0 and state == ElevatorState.WAITING:        
+    if elevator_queue.size() > 0:        
         if destination_floor != current_floor:
             var elevator = floor_to_elevator.get(current_floor, null)
-            if elevator:
-                elevator.set_door_state(elevator.DoorState.CLOSING)
+            elevator.set_door_state(elevator.DoorState.CLOSING)
         else:
             handle_same_floor_request()
 
 
 func handle_same_floor_request() -> void:
     var request = elevator_queue[0]
-    SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)    
-    state = ElevatorState.WAITING
-
+    SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)   
+    # print("SignalBus.elevator_arrived, handle_same_floor_request") 
 
 
 func move_elevator(delta: float) -> void:
+    # print("moving elevator")
     if target_position == Vector2.ZERO:
         return
 
@@ -86,6 +84,7 @@ func move_elevator(delta: float) -> void:
     SignalBus.elevator_position_updated.emit(global_position)
 
 
+# we can treat 
 func handle_arrival() -> void:
     # Elevator has arrived at the target floor
     current_floor = destination_floor
@@ -94,14 +93,9 @@ func handle_arrival() -> void:
 
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPENING)
-        SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)            
+        SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
+        print("SignalBus.elevator_arrived, handle_arrival")         
 
-
-func _on_doors_fully_closed():    
-    if destination_floor != current_floor:
-        initialize_target_position() 
-        state = ElevatorState.IN_TRANSIT
-        # print("Doors closed, now starting to move towards the destination floor.")
 
 
 func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:
@@ -109,38 +103,32 @@ func _on_sprite_entering(sprite_name: String, target_floor: int) -> void:
     var elevator = floor_to_elevator.get(current_floor, null)
     if elevator:
         elevator.set_door_state(elevator.DoorState.CLOSING)
-    state = ElevatorState.WAITING
+    state = ElevatorState.IN_TRANSIT
 
     update_elevator_queue(sprite_name, target_floor)
     update_destination_floor()
     # print("sprite is entering")
 
 
-func _on_sprite_exiting(sprite_name: String, target_floor: int) -> void:
-    var elevator = floor_to_elevator.get(current_floor, null)
-    state = ElevatorState.WAITING
-
-    # Remove the request for this sprite
-    for i in range(elevator_queue.size()):
-        var queue_req = elevator_queue[i]
-        if queue_req.has("sprite_name") and queue_req["sprite_name"] == sprite_name:
-            elevator_queue.remove_at(i)
-            print("Removed request at index: ", i, ", Updated queue: ", elevator_queue)
-            break
-
-
-
+func _on_sprite_exiting(sprite_name: String) -> void:    
+    remove_from_elevator_queue(sprite_name)
+    
+    
 func _on_elevator_door_state_changed(new_state):
+    # print("door_state_changed: ", new_state)
     var elevator = floor_to_elevator.get(current_floor, null)
     if elevator == null:
         return
     
     match new_state:
         elevator.DoorState.OPEN:
-            state = ElevatorState.WAITING
+            state = ElevatorState.WAITING   # problem: elevator is waiting when the sprite has exited.
         
         elevator.DoorState.CLOSED:
-            pass
+            state = ElevatorState.IN_TRANSIT
+            # print("new state is IN_TRANSIT")
+            if destination_floor != current_floor:
+                initialize_target_position() 
 
 
 func initialize_target_position() -> void:
@@ -154,7 +142,7 @@ func update_destination_floor() -> void:
         destination_floor = elevator_queue[0]['target_floor']
 
 
-func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
+func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
     var request_updated = false
     for i in range(elevator_queue.size()):
         var request = elevator_queue[i]
@@ -170,7 +158,7 @@ func _on_floor_requested(sprite_name: String, target_floor: int) -> void:
     
     if not request_updated:
         add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
-        print("Added new request for sprite: ", sprite_name, " to floor: ", target_floor)   
+        # print("Added new request for sprite: ", sprite_name, " to floor: ", target_floor)   
 
     update_destination_floor()
 
@@ -195,17 +183,36 @@ func _on_cabin_timer_timeout() -> void:
 
 #region elevator queue management
 func add_to_elevator_queue(request: Dictionary) -> void:
+    # print("add_to_elevator_queue called")
     elevator_queue.append(request)
-    print("Current elevator queue:", elevator_queue)
+    # print("Current elevator queue:", elevator_queue)
 
-func remove_from_elevator_queue(request: Dictionary) -> void:
-    if request in elevator_queue:
-        elevator_queue.erase(request)
-        print("Removed request:", request, "from queue:", elevator_queue)
-    else:
-        print("Request not found in queue:", request)
+#func remove_from_elevator_queue(request: Dictionary) -> void:
+    #print("remove from elevator_queue called")
+    #if request in elevator_queue:
+        #elevator_queue.erase(request)
+        #print("Removed request:", request, "from queue:", elevator_queue)
+    #else:
+        #print("Request not found in queue:", request)
+
+
+
+func remove_from_elevator_queue(sprite_name: String) -> void:
+    
+    for i in range(elevator_queue.size()):
+        var queue_req = elevator_queue[i]
+    
+        if queue_req.has("sprite_name") and queue_req["sprite_name"] == sprite_name:
+            elevator_queue.remove_at(i)
+            print("Removed request for:", sprite_name, ", updated queue:", elevator_queue)
+            return
+    
+    print("No elevator request found for:", sprite_name)
+
+
 
 func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
+    # print("update_elevator_queue called")
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor

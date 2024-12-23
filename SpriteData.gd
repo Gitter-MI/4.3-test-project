@@ -11,6 +11,7 @@ enum State {
     IN_ELEVATOR,
     WAITING_FOR_ELEVATOR,
     EXITING_ELEVATOR
+    # ENTERING_ELEVATOR
 }
 
 # Sprite properties

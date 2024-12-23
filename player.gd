@@ -16,7 +16,7 @@ func _ready():
     update_sprite_dimensions()
     set_initial_position()
 
-    SignalBus.elevator_arrived.connect(_on_elevator_arrived)
+    SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
     SignalBus.floor_clicked.connect(_on_floor_clicked)
@@ -42,11 +42,34 @@ func _on_elevator_arrived(sprite_name: String, _current_floor: int):
         var elevator = get_elevator_for_current_floor()        
         var current_door_state = elevator.get_door_state()
         if current_door_state == DoorState.OPEN:     
+            # needs a entering elevator function
                    
             sprite_data.current_state = SpriteData.State.IN_ELEVATOR  # should go through entering elevator first. Needs to be implemented
             SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+            print("ENTERING ELEVATOR IN _on_elevator_arrived")
             z_index = -9
             # print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors were already open)")
+
+
+
+
+func _on_elevator_door_state_changed(new_state):
+    # print("Door state changed:", new_state)
+    if new_state == DoorState.OPEN:
+        # If player was waiting at the elevator, now it's safe to enter
+        if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
+        and sprite_data.current_position == sprite_data.current_elevator_position:
+            
+            _on_elevator_arrived(sprite_data.sprite_name, sprite_data.current_floor_number)
+            
+
+        
+        elif sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+            # Player can now exit the elevator
+            sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
+            # print(sprite_data.sprite_name, " is now EXITING_ELEVATOR")
+            exiting_elevator()
+
 
 
 func get_elevator_for_current_floor() -> Area2D:
@@ -58,30 +81,13 @@ func get_elevator_for_current_floor() -> Area2D:
     return null
 
 
-func _on_elevator_door_state_changed(new_state):
-    # print("Door state changed:", new_state)
-    if new_state == DoorState.OPEN:
-        # If player was waiting at the elevator, now it's safe to enter
-        if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
-        and sprite_data.current_position == sprite_data.current_elevator_position:
-            sprite_data.current_state = SpriteData.State.IN_ELEVATOR
-            SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
-            z_index = -9
-            print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors are open)")
-        
-        elif sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
-            # Player can now exit the elevator
-            sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
-            print(sprite_data.sprite_name, " is now EXITING_ELEVATOR")
-            exiting_elevator()
-
 
 func exiting_elevator() -> void:
     # print("exiting_elevator")
     z_index = 0 
     sprite_data.current_floor_number = sprite_data.target_floor_number    
     sprite_data.current_state = SpriteData.State.IDLE
-    SignalBus.exiting_elevator.emit(sprite_data.sprite_name, sprite_data.current_floor_number)  
+    SignalBus.exiting_elevator.emit(sprite_data.sprite_name)  
     # when not IN_ELEVATOR the movement_logic() will handle the next action
     # print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
 
@@ -120,15 +126,11 @@ func movement_logic(delta: float) -> void:
                 }
 
                 if current_request != last_elevator_request:
-                    SignalBus.floor_requested.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
+                    SignalBus.elevator_request.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
                     # print("signal emitted: elevator requested")
-
                     last_elevator_request = current_request
                     sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
                     # print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
-                else:
-                    # Duplicate request detected, do nothing. Else, will send a signal each frame
-                    pass
             else:
                 # Keep moving towards the elevator
                 move_towards_position(sprite_data.current_elevator_position, delta)
@@ -142,7 +144,7 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
     if distance > 1:
         if sprite_data.current_state != SpriteData.State.WALKING:
             sprite_data.current_state = SpriteData.State.WALKING
-            print(sprite_data.sprite_name, " started WALKING towards ", target_position)
+            # print(sprite_data.sprite_name, " started WALKING towards ", target_position)
 
         global_position += direction * sprite_data.speed * delta
     else:
@@ -155,19 +157,19 @@ func update_state_after_horizontal_movement() -> void:
     if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
         if sprite_data.current_state != SpriteData.State.WAITING_FOR_ELEVATOR:
             sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
-            print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. in update state")
+            # print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. in update state")
     elif sprite_data.target_room >= 0:
         if sprite_data.current_state != SpriteData.State.ENTERING_ROOM:
             sprite_data.current_state = SpriteData.State.ENTERING_ROOM
             last_elevator_request = {"sprite_name": "", "floor_number": -1}
             sprite_data.needs_elevator = false
-            print(sprite_data.sprite_name, " is ENTERING_ROOM ", sprite_data.target_room)
+            # print(sprite_data.sprite_name, " is ENTERING_ROOM ", sprite_data.target_room)
     else:
         if sprite_data.current_state != SpriteData.State.IDLE:
             sprite_data.current_state = SpriteData.State.IDLE
             last_elevator_request = {"sprite_name": "", "floor_number": -1}
             sprite_data.needs_elevator = false
-            print(sprite_data.sprite_name, " is now IDLE.")
+            # print(sprite_data.sprite_name, " is now IDLE.")
 
 
 

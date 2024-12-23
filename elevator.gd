@@ -90,8 +90,9 @@ func _on_doors_animation_finished():
         if current_anim == "closing" and door_state == DoorState.CLOSING:
             set_door_state(DoorState.CLOSED)
             # print("Doors have fully closed.")
-            # Emit a signal to let the cabin know it can proceed
-            SignalBus.doors_fully_closed.emit()
+            
+            
+            
 
     else:
         push_warning("AnimatedSprite2D node not found when handling animation finished.")
