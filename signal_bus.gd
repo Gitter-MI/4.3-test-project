@@ -5,10 +5,13 @@ extends Node
 
 signal elevator_request(sprite_name: String, target_floor: int)
 signal elevator_arrived(sprite_name: String, current_floor: int)
-signal entering_elevator(sprite_name: String, current_floor: int)
+
 signal exiting_elevator(sprite_name: String)
 signal elevator_position_updated(global_pos: Vector2)   # used to move sprites along with the elevator cabin
 signal door_state_changed(new_state)
+
+signal entering_elevator(sprite_name: String, current_floor: int)
+signal enter_animation_finished(sprite_name: String)
 
 
 signal floor_clicked(

@@ -26,6 +26,8 @@ func _ready():
     SignalBus.floor_clicked.connect(_on_floor_clicked)
     SignalBus.door_clicked.connect(_on_door_clicked)
 
+    
+    $AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
 
 
 func _process(delta: float) -> void:
@@ -45,19 +47,36 @@ func _on_elevator_arrived(sprite_name: String, _current_floor: int):
         # print("Elevator arrived. Checking door state...")
         var elevator = get_elevator_for_current_floor()        
         var current_door_state = elevator.get_door_state()
-        if current_door_state == DoorState.OPEN:     
-            # needs a entering elevator function
-                   
-            sprite_data.current_state = SpriteData.State.IN_ELEVATOR  # should go through entering elevator first. Needs to be implemented
+        if current_door_state == DoorState.OPEN:                                    
+            entering_elevator()
             
-            # Record the difference between player's y and elevator's y:
-            var elevator_position = get_elevator_for_current_floor()
-            sprite_data.elevator_y_offset = global_position.y - elevator_position.global_position.y
-            SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
-            print("ENTERING ELEVATOR IN _on_elevator_arrived")
-            z_index = -9
-            # print(sprite_data.sprite_name, " is now IN_ELEVATOR (doors were already open)")
 
+func entering_elevator():    
+    sprite_data.current_state = SpriteData.State.ENTERING_ELEVATOR    
+    var elevator = get_elevator_for_current_floor()
+    sprite_data.elevator_y_offset = global_position.y - elevator.global_position.y
+    z_index = -9
+    SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
+    $AnimatedSprite2D.play("enter")
+    _update_animation(Vector2.ZERO)
+
+
+
+func _on_sprite_entered_elevator():
+    print("animation finished")
+    var current_anim = $AnimatedSprite2D.animation
+
+    # Example: If the current animation is "enter" and we are in ENTERING_ELEVATOR
+    if current_anim == "enter" and sprite_data.current_state == SpriteData.State.ENTERING_ELEVATOR:
+        # Transition to the new state
+        sprite_data.current_state = SpriteData.State.IN_ELEVATOR
+        print("Enter animation finished. Sprite is now IN_ELEVATOR.")
+
+        # Now emit the global signal. The listener(s) can respond if needed.
+        SignalBus.enter_animation_finished.emit(sprite_data.sprite_name)
+
+        # Optionally, force an animation update if you want to switch to "idle" now.
+        _update_animation(Vector2.ZERO)
 
 
 
@@ -66,8 +85,7 @@ func _on_elevator_door_state_changed(new_state):
     if new_state == DoorState.OPEN:
         # If player was waiting at the elevator, now it's safe to enter
         if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
-        and sprite_data.current_position == sprite_data.current_elevator_position:
-            
+        and sprite_data.current_position == sprite_data.current_elevator_position:            
             _on_elevator_arrived(sprite_data.sprite_name, sprite_data.current_floor_number)
             
 
@@ -101,14 +119,13 @@ func exiting_elevator() -> void:
 
 
 func _on_elevator_ride(elevator_pos: Vector2) -> void:
-    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
-        # Move the player by reusing the stored offset
+    # This is logically dependent on the move_elevator() in cabin.gd
+    # Both sprites need to move in sync but they have a function each. 
+    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:        
         global_position.x = elevator_pos.x
         global_position.y = elevator_pos.y + sprite_data.elevator_y_offset
 
         sprite_data.current_position = global_position
-
-
 
 
 #####################################################################################################
@@ -262,6 +279,10 @@ func apply_scale_factor_to_sprite():
 
 
 
+
+
+
+
 func _update_animation(direction: Vector2) -> void:
     match sprite_data.current_state:
         SpriteData.State.WALKING:
@@ -274,13 +295,25 @@ func _update_animation(direction: Vector2) -> void:
         SpriteData.State.IDLE:
             $AnimatedSprite2D.play("idle")
 
-        ## We'll handle "enter" animation later once the logic is in place
-        #SpriteData.State.IN_ELEVATOR, 
-        #SpriteData.State.WAITING_FOR_ELEVATOR,
-        #SpriteData.State.EXITING_ELEVATOR,
-        #SpriteData.State.ENTERING_ROOM:
-            ## For now, just default to idle, or do nothing
-            #$AnimatedSprite2D.play("idle")
+        SpriteData.State.WAITING_FOR_ELEVATOR:
+            # Here’s where we play the "enter" animation
+            $AnimatedSprite2D.play("enter")
+            
+        SpriteData.State.ENTERING_ELEVATOR:            
+            # Here’s where we play the "enter" animation
+            $AnimatedSprite2D.play("enter")
+
+        # Optionally handle other states:
+        SpriteData.State.IN_ELEVATOR:
+            # Could be idle or do nothing
+            $AnimatedSprite2D.play("idle")
+
+        SpriteData.State.EXITING_ELEVATOR:
+            $AnimatedSprite2D.play("idle")
+
+        SpriteData.State.ENTERING_ROOM:
+            $AnimatedSprite2D.play("idle")
+
 
 
 func set_initial_position() -> void:
