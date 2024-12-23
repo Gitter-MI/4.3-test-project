@@ -93,14 +93,13 @@ func exiting_elevator() -> void:
 
 
 func _on_elevator_ride(global_pos: Vector2) -> void:
-    # this is logically dependent on the move_elevator() in cabin.gd Both sprites need to move in sync but they have a function each. 
+    # This is logically dependent on the move_elevator() in cabin.gd
+    # Both sprites need to move in sync but they have a function each. 
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
         # Update the player position according to the elevator's position
         global_position.x = global_pos.x
-        global_position.y = global_pos.y + (sprite_data.sprite_height / 2) 
+        global_position.y = global_pos.y + (sprite_data.sprite_height / 2.0)
         sprite_data.current_position = global_position
-
-
 
 
 #####################################################################################################
