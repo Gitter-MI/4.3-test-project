@@ -1,6 +1,8 @@
 # player.gd
 extends Node2D
 
+const SCALE_FACTOR = 2.3
+
 var sprite_data: PlayerSpriteData
 var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
 var previous_elevator_position: Vector2 = Vector2.ZERO
@@ -13,8 +15,10 @@ enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
 func _ready():
     add_to_group("player_sprites")   
     sprite_data = PlayerSpriteData.new()   
-    update_sprite_dimensions()
-    set_initial_position()
+
+    apply_scale_factor_to_sprite()       # 1) scale
+    update_sprite_dimensions()           # 2) measure scaled sprite
+    set_initial_position()               # 3) position on the floor
 
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
@@ -45,6 +49,10 @@ func _on_elevator_arrived(sprite_name: String, _current_floor: int):
             # needs a entering elevator function
                    
             sprite_data.current_state = SpriteData.State.IN_ELEVATOR  # should go through entering elevator first. Needs to be implemented
+            
+            # Record the difference between player's y and elevator's y:
+            var elevator_position = get_elevator_for_current_floor()
+            sprite_data.elevator_y_offset = global_position.y - elevator_position.global_position.y
             SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
             print("ENTERING ELEVATOR IN _on_elevator_arrived")
             z_index = -9
@@ -92,14 +100,15 @@ func exiting_elevator() -> void:
     # print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
 
 
-func _on_elevator_ride(global_pos: Vector2) -> void:
-    # This is logically dependent on the move_elevator() in cabin.gd
-    # Both sprites need to move in sync but they have a function each. 
+func _on_elevator_ride(elevator_pos: Vector2) -> void:
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
-        # Update the player position according to the elevator's position
-        global_position.x = global_pos.x
-        global_position.y = global_pos.y + (sprite_data.sprite_height / 2.0)
+        # Move the player by reusing the stored offset
+        global_position.x = elevator_pos.x
+        global_position.y = elevator_pos.y + sprite_data.elevator_y_offset
+
         sprite_data.current_position = global_position
+
+
 
 
 #####################################################################################################
@@ -143,32 +152,32 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
     if distance > 1:
         if sprite_data.current_state != SpriteData.State.WALKING:
             sprite_data.current_state = SpriteData.State.WALKING
-            # print(sprite_data.sprite_name, " started WALKING towards ", target_position)
+            # print(sprite_data.sprite_name, " started WALKING")
 
         global_position += direction * sprite_data.speed * delta
     else:
         global_position = target_position
         sprite_data.current_position = global_position
         update_state_after_horizontal_movement()
+    
+    _update_animation(direction)
+
 
 
 func update_state_after_horizontal_movement() -> void:
     if sprite_data.needs_elevator and sprite_data.current_position == sprite_data.current_elevator_position:
         if sprite_data.current_state != SpriteData.State.WAITING_FOR_ELEVATOR:
             sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
-            # print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. in update state")
     elif sprite_data.target_room >= 0:
         if sprite_data.current_state != SpriteData.State.ENTERING_ROOM:
             sprite_data.current_state = SpriteData.State.ENTERING_ROOM
-            last_elevator_request = {"sprite_name": "", "floor_number": -1}
-            sprite_data.needs_elevator = false
-            # print(sprite_data.sprite_name, " is ENTERING_ROOM ", sprite_data.target_room)
     else:
         if sprite_data.current_state != SpriteData.State.IDLE:
             sprite_data.current_state = SpriteData.State.IDLE
             last_elevator_request = {"sprite_name": "", "floor_number": -1}
             sprite_data.needs_elevator = false
-            # print(sprite_data.sprite_name, " is now IDLE.")
+    
+    _update_animation(Vector2.ZERO)
 
 
 
@@ -225,34 +234,79 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         sprite_data.current_elevator_position = get_elevator_position()
 
 
+
 #####################################################################################################
 ##################              Basic Sprite Component                        #######################  
 #####################################################################################################
 
 func update_sprite_dimensions():
-    if $Sprite2D.texture:
-        sprite_data.sprite_width = $Sprite2D.texture.get_width() * $Sprite2D.scale.x
-        sprite_data.sprite_height = $Sprite2D.texture.get_height() * $Sprite2D.scale.y
+    var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
+    if idle_texture:
+        sprite_data.sprite_width = (idle_texture.get_width() * $AnimatedSprite2D.scale.x)
+        sprite_data.sprite_height = (idle_texture.get_height() * $AnimatedSprite2D.scale.y)
     else:
-        print("Warning: Sprite2D texture is not set.")
+        print("Warning: 'idle' animation (frame 0) not found.")
 
+
+
+func apply_scale_factor_to_sprite():
+    var sprite = $AnimatedSprite2D
+    if sprite:
+        sprite.scale *= SCALE_FACTOR  # Notice *= instead of = 
+        # print("Applied scale factor to player sprite.")
+    else:
+        push_warning("AnimatedSprite2D node not found for scaling.")
+
+
+
+
+
+
+func _update_animation(direction: Vector2) -> void:
+    match sprite_data.current_state:
+        SpriteData.State.WALKING:
+            # Decide left vs right based on direction.x
+            if direction.x > 0:
+                $AnimatedSprite2D.play("walk_to_right")
+            else:
+                $AnimatedSprite2D.play("walk_to_left")
+
+        SpriteData.State.IDLE:
+            $AnimatedSprite2D.play("idle")
+
+        ## We'll handle "enter" animation later once the logic is in place
+        #SpriteData.State.IN_ELEVATOR, 
+        #SpriteData.State.WAITING_FOR_ELEVATOR,
+        #SpriteData.State.EXITING_ELEVATOR,
+        #SpriteData.State.ENTERING_ROOM:
+            ## For now, just default to idle, or do nothing
+            #$AnimatedSprite2D.play("idle")
 
 
 func set_initial_position() -> void:
     var target_floor = get_floor_by_number(1)
     var edges: Dictionary = target_floor.get_collision_edges()
 
-    global_position = Vector2(
-        edges.left + float(sprite_data.sprite_width) / 2.0,
-        edges.bottom - float(sprite_data.sprite_height) / 2.0
-    )
+    # For demonstration, let's place the player at the center of the floor
+    var center_x = (edges.left + edges.right) / 2.0
+
+    # If your sprite pivot is center, do exactly like the elevator:
+    var bottom_edge_y = edges.bottom
+    var sprite_height = sprite_data.sprite_height
+    var y_position = bottom_edge_y - (sprite_height /2.0 )
+
+    # If the sprite’s feet are *still* inside the floor, add a tiny offset:
+    # e.g. y_position -= 2.0
+    # or if the pivot is top-left, do y_position = bottom_edge_y - sprite_height
+
+    global_position = Vector2(center_x, y_position)
 
     sprite_data.current_position = global_position
-    sprite_data.target_position = sprite_data.current_position
+    sprite_data.target_position = global_position
     sprite_data.current_floor_number = target_floor.floor_number
     sprite_data.target_floor_number = target_floor.floor_number
-
     sprite_data.current_elevator_position = get_elevator_position()
+
 
 
 
@@ -263,7 +317,8 @@ func get_elevator_position() -> Vector2:
     
     var center_x: float = (current_edges["left"] + current_edges["right"]) / 2
     var sprite_height: float = sprite_data.sprite_height
-    var adjusted_y: float = current_edges["bottom"] - sprite_height / 2
+    var adjusted_y: float = current_edges["bottom"] - (sprite_height / 2.0)
+
     return Vector2(center_x, adjusted_y)
 
 

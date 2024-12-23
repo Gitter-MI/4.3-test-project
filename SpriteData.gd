@@ -32,8 +32,9 @@ var target_room: int = -1
 
 var needs_elevator: bool = false
 var current_elevator_position: Vector2 = Vector2.ZERO
-var current_elevator_collision_edges: Dictionary
-var inside_elevator_offset_y: float = 0.0
+
+var elevator_y_offset
+
 
 
 # Add a variable to track the current state of the sprite
