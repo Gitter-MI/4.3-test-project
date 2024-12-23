@@ -27,13 +27,8 @@ signal door_clicked(
 )
 
 
-# signal_bus.gd (continued)
 
-
-# signal_bus.gd (continued)
-
-
-
+#region Warning Suppression. Remove later
 func _ready():
     # Connect signals to dummy functions using Godot 4's syntax
     elevator_request.connect(_on_elevator_request)
@@ -83,3 +78,4 @@ func _on_door_clicked(
     _click_position: Vector2
 ) -> void:
     pass
+#endregion
