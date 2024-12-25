@@ -16,9 +16,9 @@ func _ready():
     add_to_group("player_sprites")   
     sprite_data = PlayerSpriteData.new()   
 
-    apply_scale_factor_to_sprite()       # 1) scale
-    update_sprite_dimensions()           # 2) measure scaled sprite
-    set_initial_position()               # 3) position on the floor
+    apply_scale_factor_to_sprite()
+    update_sprite_dimensions()
+    set_initial_position()
 
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
@@ -56,7 +56,7 @@ func entering_elevator():
     var elevator = get_elevator_for_current_floor()
     sprite_data.elevator_y_offset = global_position.y - elevator.global_position.y
     z_index = -9
-    SignalBus.entering_elevator.emit(sprite_data.sprite_name, sprite_data.target_floor_number)    
+    SignalBus.entering_elevator.emit()    
     _update_animation(Vector2.ZERO)
 
 
@@ -67,7 +67,7 @@ func _on_sprite_entered_elevator():
     
     if current_anim == "enter" and sprite_data.current_state == SpriteData.State.ENTERING_ELEVATOR:        
         sprite_data.current_state = SpriteData.State.IN_ELEVATOR
-        print("Enter animation finished. Sprite is now IN_ELEVATOR.")
+        # print("Enter animation finished. Sprite is now IN_ELEVATOR.")
         SignalBus.enter_animation_finished.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
         _update_animation(Vector2.ZERO)
 
@@ -269,17 +269,9 @@ func apply_scale_factor_to_sprite():
 
 
 
-
-
-
-
-
-
-
 func _update_animation(direction: Vector2) -> void:
     match sprite_data.current_state:
         SpriteData.State.WALKING:
-            # Decide left vs right based on direction.x
             if direction.x > 0:
                 $AnimatedSprite2D.play("walk_to_right")
             else:
@@ -289,16 +281,12 @@ func _update_animation(direction: Vector2) -> void:
             $AnimatedSprite2D.play("idle")
 
         SpriteData.State.WAITING_FOR_ELEVATOR:
-            # Here’s where we play the "enter" animation
             $AnimatedSprite2D.play("enter")
             
         SpriteData.State.ENTERING_ELEVATOR:            
-            # Here’s where we play the "enter" animation
             $AnimatedSprite2D.play("enter")
 
-        # Optionally handle other states:
         SpriteData.State.IN_ELEVATOR:
-            # Could be idle or do nothing
             $AnimatedSprite2D.play("idle")
 
         SpriteData.State.EXITING_ELEVATOR:
@@ -316,14 +304,9 @@ func set_initial_position() -> void:
     # For demonstration, let's place the player at the center of the floor
     var center_x = (edges.left + edges.right) / 2.0
 
-    # If your sprite pivot is center, do exactly like the elevator:
     var bottom_edge_y = edges.bottom
     var sprite_height = sprite_data.sprite_height
     var y_position = bottom_edge_y - (sprite_height /2.0 )
-
-    # If the sprite’s feet are *still* inside the floor, add a tiny offset:
-    # e.g. y_position -= 2.0
-    # or if the pivot is top-left, do y_position = bottom_edge_y - sprite_height
 
     global_position = Vector2(center_x, y_position)
 
@@ -332,8 +315,6 @@ func set_initial_position() -> void:
     sprite_data.current_floor_number = target_floor.floor_number
     sprite_data.target_floor_number = target_floor.floor_number
     sprite_data.current_elevator_position = get_elevator_position()
-
-
 
 
 func get_elevator_position() -> Vector2:   

@@ -10,8 +10,8 @@ signal exiting_elevator(sprite_name: String)
 signal elevator_position_updated(global_pos: Vector2)   # used to move sprites along with the elevator cabin
 signal door_state_changed(new_state)
 
-signal entering_elevator(sprite_name: String, current_floor: int)
-signal enter_animation_finished(sprite_name: String)
+signal entering_elevator()
+signal enter_animation_finished(sprite_name: String, target_floor: int)
 
 
 signal floor_clicked(
@@ -42,6 +42,7 @@ func _ready():
     door_state_changed.connect(_on_door_state_changed)
     floor_clicked.connect(_on_floor_clicked)
     door_clicked.connect(_on_door_clicked)
+    enter_animation_finished.connect(_on_enter_animation_finished)
 
 
 
@@ -53,7 +54,7 @@ func _on_elevator_request(_sprite_name: String, _target_floor: int) -> void:
 func _on_elevator_arrived(_sprite_name: String, _current_floor: int) -> void:
     pass
 
-func _on_entering_elevator(_sprite_name: String, _current_floor: int) -> void:
+func _on_entering_elevator() -> void:
     pass
 
 func _on_exiting_elevator(_sprite_name: String) -> void:
@@ -80,5 +81,8 @@ func _on_door_clicked(
     _collision_edges: Dictionary,
     _click_position: Vector2
 ) -> void:
+    pass
+    
+func _on_enter_animation_finished(_sprite_name: String, _target_floor:int):
     pass
 #endregion

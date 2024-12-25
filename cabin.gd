@@ -22,6 +22,7 @@ var cabin_timer: Timer
 
 func _ready():
     SignalBus.elevator_request.connect(_on_elevator_request)
+    SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.enter_animation_finished.connect(_on_sprite_entered)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
@@ -60,9 +61,15 @@ func elevator_logic() -> void:
 
 
 func handle_same_floor_request() -> void:
+    print("handle_same_floor_request")
     var request = elevator_queue[0]
     SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)   
     # print("SignalBus.elevator_arrived, handle_same_floor_request") 
+
+
+
+func _on_sprite_entering():
+    state = ElevatorState.IN_TRANSIT
 
 
 func move_elevator(delta: float) -> void:
@@ -94,7 +101,7 @@ func handle_arrival() -> void:
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPENING)
         SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-        print("SignalBus.elevator_arrived, handle_arrival")         
+        # print("SignalBus.elevator_arrived, handle_arrival")         
 
 
 
@@ -204,7 +211,7 @@ func remove_from_elevator_queue(sprite_name: String) -> void:
     
         if queue_req.has("sprite_name") and queue_req["sprite_name"] == sprite_name:
             elevator_queue.remove_at(i)
-            print("Removed request for:", sprite_name, ", updated queue:", elevator_queue)
+            # print("Removed request for:", sprite_name, ", updated queue:", elevator_queue)
             return
     
     print("No elevator request found for:", sprite_name)
