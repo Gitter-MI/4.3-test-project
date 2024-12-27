@@ -91,22 +91,32 @@ func _on_elevator_door_state_changed(new_state):
 
 
 
-func get_elevator_for_current_floor() -> Area2D:
-    # helper function for _on_elevator_arrived
-    var elevators = get_tree().get_nodes_in_group("elevators")
-    for elevator in elevators:
-        if elevator.floor_instance and elevator.floor_instance.floor_number == sprite_data.current_floor_number:
-            return elevator
-    return null
+
 
 
 
 func exiting_elevator() -> void:
-    # print("exiting_elevator")
-    z_index = 0 
-    sprite_data.current_floor_number = sprite_data.target_floor_number    
+    # We are exiting the elevator:
+    # 1) Update floor and state
+    z_index = 0
+    sprite_data.current_floor_number = sprite_data.target_floor_number
     sprite_data.current_state = SpriteData.State.IDLE
-    SignalBus.exiting_elevator.emit(sprite_data.sprite_name)  
+
+    SignalBus.exiting_elevator.emit(sprite_data.sprite_name)
+
+    # 2) Check if there's stored click info
+    if sprite_data.elevator_stored_target_floor_number != -1:
+        set_target_data(
+            sprite_data.elevator_stored_target_floor_number,
+            sprite_data.elevator_stored_target_position,
+            sprite_data.elevator_stored_target_room
+        )
+
+        # Clear out the stored data
+        sprite_data.elevator_stored_target_floor_number = -1
+        sprite_data.elevator_stored_target_position = Vector2.ZERO
+        sprite_data.elevator_stored_target_room = -1
+
     # when not IN_ELEVATOR the movement_logic() will handle the next action
     # print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
 
@@ -120,6 +130,14 @@ func _on_elevator_ride(elevator_pos: Vector2) -> void:
 
         sprite_data.current_position = global_position
 
+
+func get_elevator_for_current_floor() -> Area2D:
+    # helper function for _on_elevator_arrived
+    var elevators = get_tree().get_nodes_in_group("elevators")
+    for elevator in elevators:
+        if elevator.floor_instance and elevator.floor_instance.floor_number == sprite_data.current_floor_number:
+            return elevator
+    return null
 
 #####################################################################################################
 ##################              Horizontal Movement Component                 #######################
@@ -217,10 +235,19 @@ func adjust_click_position(collision_edges: Dictionary, click_position: Vector2,
 
 
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
-
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
-    var door_index = -1
-    set_target_data(floor_number, adjusted_click_position, door_index)
+
+    # 1) Check if currently in the elevator:
+    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+        # Store click info for later
+        sprite_data.elevator_stored_target_floor_number = floor_number
+        sprite_data.elevator_stored_target_position = adjusted_click_position
+        sprite_data.elevator_stored_target_room = -1  # no specific room
+        return
+    else:
+        # If not in elevator, set the target data immediately
+        var door_index = -1
+        set_target_data(floor_number, adjusted_click_position, door_index)
 
 
 func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
@@ -228,7 +255,16 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
     var door_click_position: Vector2 = Vector2(door_center_x, bottom_edge_y)
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, door_click_position, bottom_edge_y)
 
-    set_target_data(floor_number, adjusted_click_position, door_index)
+    # 1) Check if currently in the elevator:
+    if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
+        # Store door click info
+        sprite_data.elevator_stored_target_floor_number = floor_number
+        sprite_data.elevator_stored_target_position = adjusted_click_position
+        sprite_data.elevator_stored_target_room = door_index
+        return
+    else:
+        # If not in elevator, set the target data immediately
+        set_target_data(floor_number, adjusted_click_position, door_index)
 
 
 func set_target_data(floor_number: int, adjusted_click_position: Vector2, target_room: int) -> void:
@@ -262,7 +298,7 @@ func update_sprite_dimensions():
 func apply_scale_factor_to_sprite():
     var sprite = $AnimatedSprite2D
     if sprite:
-        sprite.scale *= SCALE_FACTOR  # Notice *= instead of = 
+        sprite.scale *= SCALE_FACTOR
         # print("Applied scale factor to player sprite.")
     else:
         push_warning("AnimatedSprite2D node not found for scaling.")
@@ -301,7 +337,7 @@ func set_initial_position() -> void:
     var target_floor = get_floor_by_number(1)
     var edges: Dictionary = target_floor.get_collision_edges()
 
-    # For demonstration, let's place the player at the center of the floor
+    # center of the floor
     var center_x = (edges.left + edges.right) / 2.0
 
     var bottom_edge_y = edges.bottom

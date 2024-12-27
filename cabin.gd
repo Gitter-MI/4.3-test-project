@@ -107,11 +107,8 @@ func handle_arrival() -> void:
 
 func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
     # cabin_timer.stop()    
-    var elevator = floor_to_elevator.get(current_floor, null)
-    if elevator:
-        elevator.set_door_state(elevator.DoorState.CLOSING)
-    state = ElevatorState.IN_TRANSIT
-
+    var elevator = floor_to_elevator.get(current_floor, null)    
+    elevator.set_door_state(elevator.DoorState.CLOSING)    
     update_elevator_queue(sprite_name, target_floor)
     update_destination_floor()
     # print("sprite is entering")

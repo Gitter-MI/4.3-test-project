@@ -39,3 +39,9 @@ var elevator_y_offset
 
 # Add a variable to track the current state of the sprite
 var current_state: State = State.IDLE
+
+
+# New variables for storing the click data while IN_ELEVATOR
+var elevator_stored_target_position: Vector2 = Vector2.ZERO
+var elevator_stored_target_floor_number: int = -1
+var elevator_stored_target_room: int = -1
