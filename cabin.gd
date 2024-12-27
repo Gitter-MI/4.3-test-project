@@ -14,10 +14,13 @@ enum ElevatorState {
 # ----------------------------------------------------------------
 var elevator_direction: int = 0
 
+# This dictionary will map floor_number -> Dictionary with keys "upper_edge" and "lower_edge"
+var floor_boundaries = {}
+
 
 # Properties
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 2
+var current_floor: int = 1
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
 
@@ -25,7 +28,7 @@ var floor_to_elevator = {}
 var floor_to_target_position = {}
 
 const SCALE_FACTOR: float = 2.3
-const SPEED: float = 400.0  # Pixels per second
+const SPEED: float = 100.0  # Pixels per second
 
 var target_position: Vector2 = Vector2.ZERO
 var cabin_timer: Timer
@@ -83,7 +86,6 @@ func _on_sprite_entering():
 
 
 func move_elevator(delta: float) -> void:
-    # print("moving elevator")
     if target_position == Vector2.ZERO:
         return
 
@@ -91,14 +93,89 @@ func move_elevator(delta: float) -> void:
     var movement = SPEED * delta * direction
     var new_y = global_position.y + movement
 
-    # Check if we reach or pass the target position this frame
+    # Check if we reach or pass the target position
     if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
         global_position.y = target_position.y
         handle_arrival()
     else:
         global_position.y = new_y
-    # Emit the elevator's current global position so that sprites inside can follow
+
+    # *** 1) Check which floor we’re on now (NEW HELPER CALL) ***
+    check_current_floor()
+
+    # *** 2) Emit elevator position so sprites inside can follow ***
     SignalBus.elevator_position_updated.emit(global_position)
+
+
+
+
+#
+#func check_current_floor() -> void:
+    ## 1) Determine the top and bottom edges of the elevator in global space
+    #var cabin_half_height = get_cabin_height() * 0.5
+    #var cabin_top_edge    = global_position.y - cabin_half_height
+    #var cabin_bottom_edge = global_position.y + cabin_half_height
+#
+    ## 2) If we’re moving up, check if our top edge has passed the "upper_edge" boundary
+    #if elevator_direction == 1:        
+        #
+        #if floor_boundaries.has(current_floor):
+            #var current_floor_data = floor_boundaries[current_floor]
+            #var current_upper_edge = current_floor_data["upper_edge"]
+            ## If the top edge has moved ABOVE the current floors upper edge
+            ## it means we’ve effectively entered that next floor's region.
+            #if cabin_top_edge <= current_upper_edge:            # is mixed around. should be >= and the edge values in the cache function adjusted. ignore for now. 
+                #print("cabin top edge: ", cabin_top_edge)
+                #print("current_upper_edge: ", current_upper_edge)
+                #current_floor = current_floor + 1
+                #print("Elevator is now considered on floor:", current_floor)
+                #
+#
+    ## 3) If we’re moving down, check if our bottom edge has passed the "lower_edge" boundary
+    #elif elevator_direction == -1:
+        #
+        #var next_floor = current_floor - 1
+        #if floor_boundaries.has(current_floor):
+            #var prev_floor_data = floor_boundaries[current_floor]
+            #var current_lower_edge = prev_floor_data["lower_edge"]
+            ## If the bottom edge has moved ABOVE prev_floor's lower_edge,
+            ## it means we’ve effectively entered that floor's region.
+            #if cabin_bottom_edge >= current_lower_edge:
+                #current_floor = next_floor
+                #print("Elevator is now considered on floor:", current_floor)
+
+
+
+func check_current_floor() -> void:
+    # 1) Determine the top and bottom edges of the elevator in global space
+    var cabin_half_height = get_cabin_height() * 0.5
+    var cabin_top_edge    = global_position.y - cabin_half_height
+    var cabin_bottom_edge = global_position.y + cabin_half_height
+
+    # 2) If we’re moving up, check if our top edge has passed the "upper_edge" boundary
+    if elevator_direction == 1:
+        var next_floor = current_floor + 1
+        if floor_boundaries.has(next_floor):
+            var next_floor_data = floor_boundaries[next_floor]
+            var next_upper_edge = next_floor_data["upper_edge"]
+            # If the top edge has moved BELOW next_floor's upper_edge,
+            # it means we’ve effectively entered that next floor's region.
+            if cabin_top_edge <= next_upper_edge:
+                current_floor = next_floor
+                print("Elevator is now considered on floor:", current_floor)
+
+    # 3) If we’re moving down, check if our bottom edge has passed the "lower_edge" boundary
+    elif elevator_direction == -1:
+        var prev_floor = current_floor - 1
+        if floor_boundaries.has(prev_floor):
+            var prev_floor_data = floor_boundaries[prev_floor]
+            var prev_lower_edge = prev_floor_data["lower_edge"]
+            # If the bottom edge has moved ABOVE prev_floor's lower_edge,
+            # it means we’ve effectively entered that floor's region.
+            if cabin_bottom_edge >= prev_lower_edge:
+                current_floor = prev_floor
+                print("Elevator is now considered on floor:", current_floor)
+
 
 
 # we can treat 
@@ -312,14 +389,39 @@ func cache_elevators():
         if elevator.floor_instance:
             floor_to_elevator[elevator.floor_instance.floor_number] = elevator
 
+#func cache_floor_positions():
+    #var floors = get_tree().get_nodes_in_group("floors")
+    #for building_floor in floors:
+        #if building_floor.has_method("get_collision_edges"):
+            #var collision_edges = building_floor.get_collision_edges()
+            #var target_pos = get_elevator_position(collision_edges)
+            #floor_to_target_position[building_floor.floor_number] = target_pos
+ 
+
 func cache_floor_positions():
     var floors = get_tree().get_nodes_in_group("floors")
     for building_floor in floors:
         if building_floor.has_method("get_collision_edges"):
             var collision_edges = building_floor.get_collision_edges()
+
+            # Optional: store the elevator's center position (already done)
             var target_pos = get_elevator_position(collision_edges)
             floor_to_target_position[building_floor.floor_number] = target_pos
-            
+
+            # Compute 25% and 99% Y-coordinates for this floor's bounding area
+            var floor_bottom = collision_edges["bottom"]
+            var floor_top    = collision_edges["top"]
+            # Example:
+            var height = floor_bottom - floor_top
+            var lower_edge  = floor_top
+            var upper_edge  = floor_top    + (height * 1.25)  # 25% from top. We are using the next floor as reference in the check function. That's why we adjust by 125%, to account for the actual current floor. 
+
+            floor_boundaries[building_floor.floor_number] = {
+                "upper_edge": upper_edge,
+                "lower_edge": lower_edge
+            }
+
+           
 
 func get_elevator_for_floor(floor_number: int) -> Area2D:    
     return floor_to_elevator.get(floor_number, null)
