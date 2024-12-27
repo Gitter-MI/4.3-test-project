@@ -93,8 +93,6 @@ func _on_elevator_door_state_changed(new_state):
 
 
 
-
-
 func exiting_elevator() -> void:
     # We are exiting the elevator:
     # 1) Update floor and state

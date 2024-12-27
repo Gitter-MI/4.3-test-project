@@ -5,6 +5,16 @@ enum ElevatorState {
     IN_TRANSIT    # 1
 }
 
+
+# ----------------------------------------------------------------
+# Add a variable to store elevator direction.
+#   We'll treat  1  => going up
+#               -1 => going down
+#                0 => idle/no movement
+# ----------------------------------------------------------------
+var elevator_direction: int = 0
+
+
 # Properties
 var state: ElevatorState = ElevatorState.WAITING
 var current_floor: int = 2
@@ -119,20 +129,54 @@ func _on_sprite_exiting(sprite_name: String) -> void:
     
     
 func _on_elevator_door_state_changed(new_state):
-    # print("door_state_changed: ", new_state)
     var elevator = floor_to_elevator.get(current_floor, null)
     if elevator == null:
         return
-    
+
     match new_state:
         elevator.DoorState.OPEN:
-            state = ElevatorState.WAITING   # problem: elevator is waiting when the sprite has exited.
-        
+            state = ElevatorState.WAITING
+            reset_elevator_direction()   # Doors opened => elevator is now waiting.
+
         elevator.DoorState.CLOSED:
             state = ElevatorState.IN_TRANSIT
-            # print("new state is IN_TRANSIT")
+            set_elevator_direction()     # Doors closing => set direction for next ride.
             if destination_floor != current_floor:
-                initialize_target_position() 
+                initialize_target_position()
+
+
+func set_elevator_direction() -> void:
+    var new_direction: int = 0
+    if elevator_queue.size() > 0:
+        var next_floor = elevator_queue[0]["target_floor"]
+        if next_floor > current_floor:
+            new_direction = 1   # up
+        elif next_floor < current_floor:
+            new_direction = -1  # down
+        else:
+            new_direction = 0   # same floor
+    else:
+        new_direction = 0
+
+    # Check if the direction has changed before updating
+    if elevator_direction != new_direction:
+        elevator_direction = new_direction
+        _print_elevator_direction()
+
+func reset_elevator_direction() -> void:
+    if elevator_direction != 0:
+        elevator_direction = 0
+        _print_elevator_direction()
+
+
+func _print_elevator_direction() -> void:
+    match elevator_direction:
+        1:
+            print("Elevator direction changed to: UP")
+        -1:
+            print("Elevator direction changed to: DOWN")
+        0:
+            print("Elevator direction changed to: IDLE")
 
 
 func initialize_target_position() -> void:
@@ -190,14 +234,6 @@ func add_to_elevator_queue(request: Dictionary) -> void:
     # print("add_to_elevator_queue called")
     elevator_queue.append(request)
     # print("Current elevator queue:", elevator_queue)
-
-#func remove_from_elevator_queue(request: Dictionary) -> void:
-    #print("remove from elevator_queue called")
-    #if request in elevator_queue:
-        #elevator_queue.erase(request)
-        #print("Removed request:", request, "from queue:", elevator_queue)
-    #else:
-        #print("Request not found in queue:", request)
 
 
 
