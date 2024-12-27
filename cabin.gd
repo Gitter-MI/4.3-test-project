@@ -20,7 +20,7 @@ var floor_boundaries = {}
 
 # Properties
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 1
+var current_floor: int = 5
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
 
@@ -34,6 +34,7 @@ var target_position: Vector2 = Vector2.ZERO
 var cabin_timer: Timer
 
 func _ready():
+    add_to_group("cabin")
     SignalBus.elevator_request.connect(_on_elevator_request)
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.enter_animation_finished.connect(_on_sprite_entered)
@@ -105,44 +106,6 @@ func move_elevator(delta: float) -> void:
 
     # *** 2) Emit elevator position so sprites inside can follow ***
     SignalBus.elevator_position_updated.emit(global_position)
-
-
-
-
-#
-#func check_current_floor() -> void:
-    ## 1) Determine the top and bottom edges of the elevator in global space
-    #var cabin_half_height = get_cabin_height() * 0.5
-    #var cabin_top_edge    = global_position.y - cabin_half_height
-    #var cabin_bottom_edge = global_position.y + cabin_half_height
-#
-    ## 2) If we’re moving up, check if our top edge has passed the "upper_edge" boundary
-    #if elevator_direction == 1:        
-        #
-        #if floor_boundaries.has(current_floor):
-            #var current_floor_data = floor_boundaries[current_floor]
-            #var current_upper_edge = current_floor_data["upper_edge"]
-            ## If the top edge has moved ABOVE the current floors upper edge
-            ## it means we’ve effectively entered that next floor's region.
-            #if cabin_top_edge <= current_upper_edge:            # is mixed around. should be >= and the edge values in the cache function adjusted. ignore for now. 
-                #print("cabin top edge: ", cabin_top_edge)
-                #print("current_upper_edge: ", current_upper_edge)
-                #current_floor = current_floor + 1
-                #print("Elevator is now considered on floor:", current_floor)
-                #
-#
-    ## 3) If we’re moving down, check if our bottom edge has passed the "lower_edge" boundary
-    #elif elevator_direction == -1:
-        #
-        #var next_floor = current_floor - 1
-        #if floor_boundaries.has(current_floor):
-            #var prev_floor_data = floor_boundaries[current_floor]
-            #var current_lower_edge = prev_floor_data["lower_edge"]
-            ## If the bottom edge has moved ABOVE prev_floor's lower_edge,
-            ## it means we’ve effectively entered that floor's region.
-            #if cabin_bottom_edge >= current_lower_edge:
-                #current_floor = next_floor
-                #print("Elevator is now considered on floor:", current_floor)
 
 
 
@@ -268,24 +231,38 @@ func update_destination_floor() -> void:
 
 
 func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
+    
+    
+    
     var request_updated = false
     for i in range(elevator_queue.size()):
         var request = elevator_queue[i]
         if request['sprite_name'] == sprite_name:
             if request['target_floor'] == target_floor:
-                print("Duplicate request ignored for sprite: ", sprite_name, " to floor: ", target_floor)
+                print("Duplicate request ignored for sprite:", sprite_name, "to floor:", target_floor)
                 return
             else:
                 elevator_queue[i] = {'target_floor': target_floor, 'sprite_name': sprite_name}
-                print("Replaced request for sprite: ", sprite_name, " with new floor: ", target_floor)
+                print("Replaced request for sprite:", sprite_name, "with new floor:", target_floor)
                 request_updated = true
                 break
-    
+
     if not request_updated:
         add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
-        # print("Added new request for sprite: ", sprite_name, " to floor: ", target_floor)   
+        # print("Added new request for sprite:", sprite_name, "to floor:", target_floor)
 
     update_destination_floor()
+
+    # -------------------------------
+    # NEW: If we are already in transit, re-initialize target position
+    # so the elevator doesn't keep going to the old floor.
+    # -------------------------------
+    if request_updated and state == ElevatorState.IN_TRANSIT:
+        initialize_target_position()
+
+
+
+
 
 
 func _on_cabin_timer_timeout() -> void:
@@ -388,15 +365,6 @@ func cache_elevators():
     for elevator in elevators:
         if elevator.floor_instance:
             floor_to_elevator[elevator.floor_instance.floor_number] = elevator
-
-#func cache_floor_positions():
-    #var floors = get_tree().get_nodes_in_group("floors")
-    #for building_floor in floors:
-        #if building_floor.has_method("get_collision_edges"):
-            #var collision_edges = building_floor.get_collision_edges()
-            #var target_pos = get_elevator_position(collision_edges)
-            #floor_to_target_position[building_floor.floor_number] = target_pos
- 
 
 func cache_floor_positions():
     var floors = get_tree().get_nodes_in_group("floors")
