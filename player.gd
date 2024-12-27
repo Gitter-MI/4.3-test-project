@@ -73,28 +73,24 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
 
     # 2) Check if new_floor is on the way
     var is_on_the_way = false
-    if cabin_direction == 1:  # going up
-        
-        # "on the way" => new_floor between cabin_current_floor and cabin_destination_floor (inclusive)
-        print("!!!!!!!!!!!!!!!! is up")
-        print("new floor: ", new_floor)
-        print("cabin_current_floor: ", cabin_current_floor)
-        print("cabin_destination_floor: ", cabin_destination_floor)
-        
-        
+    if cabin_direction == 1:  # going up        
+        # "on the way" => new_floor between cabin_current_floor and cabin_destination_floor (inclusive)        
+        #print("new floor: ", new_floor)
+        #print("cabin_current_floor: ", cabin_current_floor)
+        #print("cabin_destination_floor: ", cabin_destination_floor)
         
         if new_floor >= cabin_current_floor:
             is_on_the_way = true
-            print("is on way, up")
+            # print("is on way, up")
     elif cabin_direction == -1:  # going down
         # "on the way" => new_floor between cabin_destination_floor and cabin_current_floor (inclusive)
         if new_floor <= cabin_current_floor:
             is_on_the_way = true
-            print("is on way, down")
+            # print("is on way, down")
 
     if is_on_the_way:
         # 3) On the way => update elevator request right now
-        print("update request immediately")
+        # print("update request immediately")
         SignalBus.elevator_request.emit(sprite_data.sprite_name, new_floor)
 
         # Also update sprite's target data
@@ -107,7 +103,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
         sprite_data.elevator_stored_target_position = new_position
         sprite_data.elevator_stored_target_room = new_room
         # Optionally log
-        print("Elevator has passed floor", new_floor, ". Will exit at next stop.")
+        # print("Elevator has passed floor", new_floor, ". Will exit at next stop.")
 
 
 
@@ -177,7 +173,7 @@ func _on_elevator_door_state_changed(new_state):
 
 
 func exiting_elevator() -> void:
-    print("exiting elevator ------------------------------")
+    # print("exiting elevator ------------------------------")
     # We are exiting the elevator:
     # 1) Update floor and state
     z_index = 0
