@@ -1,24 +1,16 @@
+# Move all state variables and properties to a cabin sprite resource
+
 extends Node2D
 
 enum ElevatorState {
     WAITING,       # 0
-    IN_TRANSIT    # 1
+    IN_TRANSIT     # 1
 }
 
-
-# ----------------------------------------------------------------
-# Add a variable to store elevator direction.
-#   We'll treat  1  => going up
-#               -1 => going down
-#                0 => idle/no movement
-# ----------------------------------------------------------------
-var elevator_direction: int = 0
-
-# This dictionary will map floor_number -> Dictionary with keys "upper_edge" and "lower_edge"
-var floor_boundaries = {}
+var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
+var floor_boundaries = {}  # used to determine which floor the elevator is on while in transit
 
 
-# Properties
 var state: ElevatorState = ElevatorState.WAITING
 var current_floor: int = 5
 var destination_floor: int = 1
@@ -28,10 +20,11 @@ var floor_to_elevator = {}
 var floor_to_target_position = {}
 
 const SCALE_FACTOR: float = 2.3
-const SPEED: float = 100.0  # Pixels per second
+const SPEED: float = 400.0  # Pixels per second
 
 var target_position: Vector2 = Vector2.ZERO
 var cabin_timer: Timer
+var cabin_timer_timeout: int = 2
 
 func _ready():
     add_to_group("cabin")
@@ -43,17 +36,13 @@ func _ready():
 
     apply_scale_factor()
     position_cabin()
-    z_index = -10
-    
+    z_index = -10    
     cache_elevators()
-    cache_floor_positions()
+    cache_floor_positions()    
 
+    var elevator = get_elevator_for_current_floor()    
+    elevator.set_door_state(elevator.DoorState.OPEN)
     # setup_cabin_timer(2.0)  ## timer functionality has been temporarily disabled
-
-    var elevator = get_elevator_for_current_floor()
-    if elevator:
-        elevator.set_door_state(elevator.DoorState.OPEN)
-        # print("Initial elevator doors opened at floor:", current_floor)
 
 
 func _process(delta: float) -> void:
@@ -81,32 +70,41 @@ func handle_same_floor_request() -> void:
     # print("SignalBus.elevator_arrived, handle_same_floor_request") 
 
 
-
 func _on_sprite_entering():
     state = ElevatorState.IN_TRANSIT
+
+
+func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
+    # cabin_timer.stop()    
+    var elevator = floor_to_elevator.get(current_floor, null)    
+    elevator.set_door_state(elevator.DoorState.CLOSING)        
+    update_elevator_queue(sprite_name, target_floor)
+    update_destination_floor()    
 
 
 func move_elevator(delta: float) -> void:
     if target_position == Vector2.ZERO:
         return
 
-    var direction = sign(target_position.y - global_position.y)
-    var movement = SPEED * delta * direction
-    var new_y = global_position.y + movement
+    var elevator = floor_to_elevator.get(current_floor, null)
+    
+    if elevator.door_state == elevator.DoorState.CLOSED:
 
-    # Check if we reach or pass the target position
-    if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
-        global_position.y = target_position.y
-        handle_arrival()
+        var direction = sign(target_position.y - global_position.y)
+        var movement = SPEED * delta * direction
+        var new_y = global_position.y + movement
+        
+        
+        if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
+            global_position.y = target_position.y
+            handle_arrival()
+        else:
+            global_position.y = new_y    
+        check_current_floor()    
+        SignalBus.elevator_position_updated.emit(global_position)
+
     else:
-        global_position.y = new_y
-
-    # *** 1) Check which floor we’re on now (NEW HELPER CALL) ***
-    check_current_floor()
-
-    # *** 2) Emit elevator position so sprites inside can follow ***
-    SignalBus.elevator_position_updated.emit(global_position)
-
+        return
 
 
 func check_current_floor() -> void:
@@ -121,8 +119,6 @@ func check_current_floor() -> void:
         if floor_boundaries.has(next_floor):
             var next_floor_data = floor_boundaries[next_floor]
             var next_upper_edge = next_floor_data["upper_edge"]
-            # If the top edge has moved BELOW next_floor's upper_edge,
-            # it means we’ve effectively entered that next floor's region.
             if cabin_top_edge <= next_upper_edge:
                 current_floor = next_floor
                 # print("Elevator is now considered on floor:", current_floor)
@@ -133,17 +129,12 @@ func check_current_floor() -> void:
         if floor_boundaries.has(prev_floor):
             var prev_floor_data = floor_boundaries[prev_floor]
             var prev_lower_edge = prev_floor_data["lower_edge"]
-            # If the bottom edge has moved ABOVE prev_floor's lower_edge,
-            # it means we’ve effectively entered that floor's region.
             if cabin_bottom_edge >= prev_lower_edge:
                 current_floor = prev_floor
                 # print("Elevator is now considered on floor:", current_floor)
 
 
-
-# we can treat 
-func handle_arrival() -> void:
-    # Elevator has arrived at the target floor
+func handle_arrival() -> void:    
     current_floor = destination_floor
     var completed_request = elevator_queue[0]
     var elevator = floor_to_elevator.get(current_floor, null)
@@ -152,17 +143,6 @@ func handle_arrival() -> void:
         elevator.set_door_state(elevator.DoorState.OPENING)
         SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
         # print("SignalBus.elevator_arrived, handle_arrival")         
-
-
-
-func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
-    # cabin_timer.stop()    
-    var elevator = floor_to_elevator.get(current_floor, null)    
-    elevator.set_door_state(elevator.DoorState.CLOSING)   
-    print("doors are closing") 
-    update_elevator_queue(sprite_name, target_floor)
-    update_destination_floor()
-    # print("sprite is entering")
 
 
 func _on_sprite_exiting(sprite_name: String) -> void:    
@@ -177,57 +157,14 @@ func _on_elevator_door_state_changed(new_state):
     match new_state:
         elevator.DoorState.OPEN:
             state = ElevatorState.WAITING
-            reset_elevator_direction()   # Doors opened => elevator is now waiting.
-
-        elevator.DoorState.CLOSED:
-            print("doors are closed")
+            reset_elevator_direction()
+            print("OPEN in Door State changed")
+        elevator.DoorState.CLOSED:            
             state = ElevatorState.IN_TRANSIT
-            set_elevator_direction()     # Doors closing => set direction for next ride.
+            set_elevator_direction()
+            print("CLOSED in Door State changed")
             if destination_floor != current_floor:
                 initialize_target_position()
-
-
-func set_elevator_direction() -> void:
-    var new_direction: int = 0
-    if elevator_queue.size() > 0:
-        var next_floor = elevator_queue[0]["target_floor"]
-        # If next_floor > current_floor => new_direction = 1, etc.
-        if next_floor > current_floor:
-            new_direction = 1   # up
-        elif next_floor < current_floor:
-            new_direction = -1  # down
-        else:
-            new_direction = 0   # same floor
-    else:
-        new_direction = 0
-
-    # If we are about to set direction=0 while elevator is IN_TRANSIT,
-    # that means the new request is effectively the same floor => treat as immediate arrival.
-    if new_direction == 0 and state == ElevatorState.IN_TRANSIT:
-        # We can do something like:
-        state = ElevatorState.WAITING
-        # This triggers "arrival" logic
-        handle_arrival()  # or open the doors directly
-        return
-
-    # Otherwise, normal logic
-    elevator_direction = new_direction
-
-
-func reset_elevator_direction() -> void:
-    if elevator_direction != 0:
-        elevator_direction = 0
-        # _print_elevator_direction()
-
-
-func _print_elevator_direction() -> void:
-    match elevator_direction:
-        1:
-            print("Elevator direction changed to: UP")
-        -1:
-            print("Elevator direction changed to: DOWN")
-        0:
-            print("Elevator direction changed to: IDLE")
 
 
 func initialize_target_position() -> void:
@@ -241,9 +178,7 @@ func update_destination_floor() -> void:
         destination_floor = elevator_queue[0]['target_floor']
 
 
-func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
-    
-    
+func _on_elevator_request(sprite_name: String, target_floor: int) -> void:        
     
     var request_updated = false
     for i in range(elevator_queue.size()):
@@ -264,17 +199,8 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
 
     update_destination_floor()
 
-    # -------------------------------
-    # NEW: If we are already in transit, re-initialize target position
-    # so the elevator doesn't keep going to the old floor.
-    # -------------------------------
-    if request_updated and state == ElevatorState.IN_TRANSIT:
+    if request_updated and state == ElevatorState.IN_TRANSIT: # If we are already in transit, re-initialize target position so the elevator doesn't keep going to the old floor.
         initialize_target_position()
-
-
-
-
-
 
 func _on_cabin_timer_timeout() -> void:
     ## Cabin timer has been temporarily removed
@@ -291,8 +217,44 @@ func _on_cabin_timer_timeout() -> void:
         #print("No action taken within 2 seconds, removed request:", timed_out_request)
 
 
+#region Elevator direction
+func set_elevator_direction() -> void:
+    var new_direction: int = 0
+    if elevator_queue.size() > 0:
+        var next_floor = elevator_queue[0]["target_floor"]        
+        if next_floor > current_floor:
+            new_direction = 1   # up
+        elif next_floor < current_floor:
+            new_direction = -1  # down
+        else:
+            new_direction = 0   # same floor
+    else:
+        new_direction = 0
+
+    # If we are about to set direction=0 while elevator is IN_TRANSIT,
+    # that means the new request is effectively the same floor => treat as immediate arrival.
+    if new_direction == 0 and state == ElevatorState.IN_TRANSIT:
+        state = ElevatorState.WAITING        
+        handle_arrival()
+        return    
+    elevator_direction = new_direction
 
 
+func reset_elevator_direction() -> void:
+    if elevator_direction != 0:
+        elevator_direction = 0
+        # _print_elevator_direction()
+
+
+func _print_elevator_direction() -> void:
+    match elevator_direction:
+        1:
+            print("Elevator direction changed to: UP")
+        -1:
+            print("Elevator direction changed to: DOWN")
+        0:
+            print("Elevator direction changed to: IDLE")
+#endregion
 
 #region elevator queue management
 func add_to_elevator_queue(request: Dictionary) -> void:

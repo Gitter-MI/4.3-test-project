@@ -167,4 +167,5 @@ shape = SubResource("RectangleShape2D_tyhfd")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_flxjs")
-animation = &"opening"
+animation = &"closing"
+speed_scale = 0.1

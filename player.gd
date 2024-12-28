@@ -25,7 +25,6 @@ func _ready():
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
     SignalBus.floor_clicked.connect(_on_floor_clicked)
     SignalBus.door_clicked.connect(_on_door_clicked)
-
     
     $AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
 
@@ -34,15 +33,7 @@ func _process(delta: float) -> void:
     if sprite_data.current_state != SpriteData.State.IN_ELEVATOR:
         movement_logic(delta)
 
-
-
-
-
-func get_elevator_cabin_script() -> Node:
-    var cabins = get_tree().get_nodes_in_group("cabin")
-    if cabins.size() > 0:
-        return cabins[0]  # we assume there's only one cabin in the scene
-    return null
+  
 
 func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: int) -> void:
     
