@@ -32,17 +32,19 @@ func _ready():
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.enter_animation_finished.connect(_on_sprite_entered)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
-    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
+    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
 
     apply_scale_factor()
     position_cabin()
-    z_index = -10    
+    z_index = -10
     cache_elevators()
-    cache_floor_positions()    
+    cache_floor_positions()
 
-    var elevator = get_elevator_for_current_floor()    
+    setup_cabin_timer(cabin_timer_timeout)
+
+    var elevator = get_elevator_for_current_floor()
     elevator.set_door_state(elevator.DoorState.OPEN)
-    # setup_cabin_timer(2.0)  ## timer functionality has been temporarily disabled
+
 
 
 func _process(delta: float) -> void:
@@ -89,7 +91,11 @@ func handle_same_floor_request() -> void:
 
 
 func _on_sprite_entering():
+    # If someone actually enters, cancel the "timeout"
+    if cabin_timer and not cabin_timer.is_stopped():
+        cabin_timer.stop()
     state = ElevatorState.IN_TRANSIT
+
 
 
 func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
@@ -175,13 +181,16 @@ func _on_elevator_door_state_changed(new_state):
         elevator.DoorState.OPEN:
             state = ElevatorState.WAITING
             reset_elevator_direction()
-            # print("OPEN in Door State changed")
-        elevator.DoorState.CLOSED:            
+            
+            if not elevator_queue.is_empty():
+                cabin_timer.start()
+
+        elevator.DoorState.CLOSED:
             state = ElevatorState.IN_TRANSIT
             set_elevator_direction()
-            # print("CLOSED in Door State changed")
             if destination_floor != current_floor:
                 initialize_target_position()
+
 
 
 func initialize_target_position() -> void:
@@ -234,18 +243,20 @@ func add_test_requests():
 #endregion
 
 func _on_cabin_timer_timeout() -> void:
-    ## Cabin timer has been temporarily removed
-    pass
-    ## If the queue is empty, do nothing
-    #if elevator_queue.size() == 0:
-        #print("Timer fired but queue was empty, ignoring.")
-        #return
-#
-    ## If we’re in WAITING state, remove the oldest request
-    #if state == ElevatorState.WAITING:
-        #var timed_out_request = elevator_queue[0]
-        #remove_from_elevator_queue(timed_out_request)
-        #print("No action taken within 2 seconds, removed request:", timed_out_request)
+    # If there’s nothing in the queue, or we’re no longer WAITING, do nothing.
+    if elevator_queue.is_empty():
+        return
+    
+    # Only remove if we're still WAITING (meaning door is open and no one entered).
+    if state == ElevatorState.WAITING:
+        var timed_out_request = elevator_queue[0]
+        
+        remove_from_elevator_queue(timed_out_request["sprite_name"])
+        print("No action taken within 2 seconds. Removed request:", timed_out_request)
+        
+        # Now move on to the next request, if any.
+        process_next_request()
+
 
 
 #region Elevator direction
@@ -360,6 +371,7 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.wait_time = wait_time
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
+
 
 
 func cache_elevators():
