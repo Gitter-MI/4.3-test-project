@@ -82,29 +82,27 @@ func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
     update_destination_floor()    
 
 
-func move_elevator(delta: float) -> void:
+func move_elevator(delta: float) -> void:    
     if target_position == Vector2.ZERO:
         return
 
-    var elevator = floor_to_elevator.get(current_floor, null)
-    
-    if elevator.door_state == elevator.DoorState.CLOSED:
-
-        var direction = sign(target_position.y - global_position.y)
-        var movement = SPEED * delta * direction
-        var new_y = global_position.y + movement
-        
-        
-        if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
-            global_position.y = target_position.y
-            handle_arrival()
-        else:
-            global_position.y = new_y    
-        check_current_floor()    
-        SignalBus.elevator_position_updated.emit(global_position)
-
-    else:
+    var elevator = floor_to_elevator.get(current_floor, null)    
+    if elevator.door_state != elevator.DoorState.CLOSED:
         return
+    
+    var direction = sign(target_position.y - global_position.y)
+    var movement = SPEED * delta * direction
+    var new_y = global_position.y + movement
+    
+    if (direction > 0 and new_y >= target_position.y) or (direction < 0 and new_y <= target_position.y):
+        global_position.y = target_position.y
+        handle_arrival()
+    else:
+        global_position.y = new_y
+    
+    check_current_floor()
+    SignalBus.elevator_position_updated.emit(global_position)
+
 
 
 func check_current_floor() -> void:

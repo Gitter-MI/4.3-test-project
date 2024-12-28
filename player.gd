@@ -9,8 +9,7 @@ var previous_elevator_position: Vector2 = Vector2.ZERO
 
 const PlayerSpriteData = preload("res://SpriteData.gd")
 
-enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
-
+const Elevator = preload("res://elevator.gd")
 
 func _ready():
     add_to_group("player_sprites")   
@@ -92,8 +91,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
         # 4) Already passed => store it for after next stop
         sprite_data.elevator_stored_target_floor_number = new_floor
         sprite_data.elevator_stored_target_position = new_position
-        sprite_data.elevator_stored_target_room = new_room
-        # Optionally log
+        sprite_data.elevator_stored_target_room = new_room        
         # print("Elevator has passed floor", new_floor, ". Will exit at next stop.")
 
 
@@ -101,7 +99,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
 func get_elevator_cabin() -> Node:
     var cabins = get_tree().get_nodes_in_group("cabin")
     if cabins.size() > 0:
-        return cabins[0]  # or handle multiple cabins as needed
+        return cabins[0]
     return null
 
 
@@ -116,8 +114,8 @@ func _on_elevator_arrived(sprite_name: String, _current_floor: int):
     and sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR:
         # print("Elevator arrived. Checking door state...")
         var elevator = get_elevator_for_current_floor()        
-        var current_door_state = elevator.get_door_state()
-        if current_door_state == DoorState.OPEN:                                    
+        var current_door_state = elevator.get_door_state()        
+        if current_door_state == Elevator.DoorState.OPEN:                                  
             entering_elevator()
             
 
@@ -144,8 +142,8 @@ func _on_sprite_entered_elevator():
 
 
 func _on_elevator_door_state_changed(new_state):
-    # print("Door state changed:", new_state)
-    if new_state == DoorState.OPEN:
+    # print("Door state changed:", new_state)    
+    if new_state == Elevator.DoorState.OPEN:
         # If player was waiting at the elevator, now it's safe to enter
         if sprite_data.current_state == SpriteData.State.WAITING_FOR_ELEVATOR \
         and sprite_data.current_position == sprite_data.current_elevator_position:            
