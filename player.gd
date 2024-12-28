@@ -93,7 +93,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
             sprite_data.elevator_stored_target_position = new_position
             sprite_data.elevator_stored_target_room = new_room
             # Decide the very next floor in the direction the elevator is traveling
-            var next_floor = cabin_current_floor + 1 if cabin_direction == 1 else cabin_current_floor - 1
+            var next_floor = cabin_current_floor if cabin_direction == 1 else cabin_current_floor
 
             # 1) Force the cabin to stop on next_floor
             SignalBus.elevator_request.emit(sprite_data.sprite_name, next_floor)
