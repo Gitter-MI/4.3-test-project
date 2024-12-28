@@ -156,11 +156,11 @@ func _on_elevator_door_state_changed(new_state):
         elevator.DoorState.OPEN:
             state = ElevatorState.WAITING
             reset_elevator_direction()
-            print("OPEN in Door State changed")
+            # print("OPEN in Door State changed")
         elevator.DoorState.CLOSED:            
             state = ElevatorState.IN_TRANSIT
             set_elevator_direction()
-            print("CLOSED in Door State changed")
+            # print("CLOSED in Door State changed")
             if destination_floor != current_floor:
                 initialize_target_position()
 
@@ -255,8 +255,7 @@ func _print_elevator_direction() -> void:
 #endregion
 
 #region elevator queue management
-func add_to_elevator_queue(request: Dictionary) -> void:
-    # print("add_to_elevator_queue called")
+func add_to_elevator_queue(request: Dictionary) -> void:    
     elevator_queue.append(request)
     # print("Current elevator queue:", elevator_queue)
 
@@ -277,11 +276,14 @@ func remove_from_elevator_queue(sprite_name: String) -> void:
 
 
 func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
-    # print("update_elevator_queue called")
+    print("update_elevator_queue called")
+    print("Current elevator queue:", elevator_queue)
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor
+            print("Current elevator queue after update:", elevator_queue)
             return
+    
 #endregion
 
 #region cabin Set-Up

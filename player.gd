@@ -47,7 +47,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
     var cabin_destination_floor = cabin_node.destination_floor
     var cabin_direction = cabin_node.elevator_direction  # +1 up, -1 down, 0 idle
     #print("in player script")
-    #print("cabin_current_floor: ", cabin_current_floor)
+    print("cabin_current_floor: ", cabin_current_floor)
     #print("cabin_destination_floor: ", cabin_destination_floor)
     #print("cabin_direction: ", cabin_direction)
 
@@ -88,12 +88,41 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
         sprite_data.target_position = new_position
         sprite_data.target_room = new_room
     else:
-        # 4) Already passed => store it for after next stop
-        sprite_data.elevator_stored_target_floor_number = new_floor
-        sprite_data.elevator_stored_target_position = new_position
-        sprite_data.elevator_stored_target_room = new_room        
-        # print("Elevator has passed floor", new_floor, ". Will exit at next stop.")
+            # 4) Already passed => store it for after next stop
+            sprite_data.elevator_stored_target_floor_number = new_floor
+            sprite_data.elevator_stored_target_position = new_position
+            sprite_data.elevator_stored_target_room = new_room
+            # Decide the very next floor in the direction the elevator is traveling
+            var next_floor = cabin_current_floor + 1 if cabin_direction == 1 else cabin_current_floor - 1
 
+            # 1) Force the cabin to stop on next_floor
+            SignalBus.elevator_request.emit(sprite_data.sprite_name, next_floor)
+
+            # 2) Update the sprite_data so that it believes it is traveling to next_floor
+            #    This ensures that once the passenger exits, they're actually on `next_floor`,
+            #    and will be waiting at that elevator (instead of some outdated floor).
+            sprite_data.current_floor_number = next_floor
+            sprite_data.current_elevator_position = get_elevator_position_for(next_floor) 
+                # We'll define a helper below so you can get elevator position for an arbitrary floor.
+
+            # Also set the passenger's immediate “target” to the new floor’s elevator position. 
+            # That way if they're forced out of the elevator, they'd remain at that floor's elevator. 
+            sprite_data.target_floor_number = next_floor
+            sprite_data.target_position = sprite_data.current_elevator_position
+            sprite_data.target_room = -1  # or however you prefer to indicate no specific room
+            sprite_data.needs_elevator = true  # ensures the logic in `movement_logic()` waits for elevator
+
+
+
+func get_elevator_position_for(floor_number: int) -> Vector2:
+    var target_floor = get_floor_by_number(floor_number)
+    if target_floor:
+        var edges = target_floor.get_collision_edges()
+        var center_x = (edges["left"] + edges["right"]) / 2
+        var sprite_height = sprite_data.sprite_height
+        var adjusted_y = edges["bottom"] - sprite_height / 2.0
+        return Vector2(center_x, adjusted_y)
+    return Vector2.ZERO
 
 
 func get_elevator_cabin() -> Node:
@@ -173,6 +202,7 @@ func exiting_elevator() -> void:
 
     # 2) Check if there's stored click info
     if sprite_data.elevator_stored_target_floor_number != -1:
+        print("stored click info exists")
         set_target_data(
             sprite_data.elevator_stored_target_floor_number,
             sprite_data.elevator_stored_target_position,
@@ -182,6 +212,8 @@ func exiting_elevator() -> void:
         sprite_data.elevator_stored_target_floor_number = -1
         sprite_data.elevator_stored_target_position = Vector2.ZERO
         sprite_data.elevator_stored_target_room = -1
+        
+        
 
     # when not IN_ELEVATOR the movement_logic() will handle the next action
     # print(sprite_data.sprite_name, " is now IDLE after exiting elevator")
@@ -240,6 +272,7 @@ func movement_logic(delta: float) -> void:
 
 
 func move_towards_position(target_position: Vector2, delta: float) -> void:
+    # print("move_towards_position")
     var direction: Vector2 = (target_position - global_position).normalized()
     var distance: float = global_position.distance_to(target_position)
 
@@ -325,6 +358,7 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
 
 
 func set_target_data(floor_number: int, adjusted_click_position: Vector2, target_room: int) -> void:
+    print("set target data called")
     # If already on the same floor, no elevator needed:
     if sprite_data.current_floor_number == floor_number:
         sprite_data.target_position = adjusted_click_position
@@ -413,6 +447,7 @@ func set_initial_position() -> void:
 func get_elevator_position() -> Vector2:   
     
     var current_floor = get_floor_by_number(sprite_data.current_floor_number)
+    print("§§§§§§§§§§§§§§§§§§ current floor in get_elevator position: ", sprite_data.current_floor_number )
     var current_edges = current_floor.get_collision_edges()
     
     var center_x: float = (current_edges["left"] + current_edges["right"]) / 2
