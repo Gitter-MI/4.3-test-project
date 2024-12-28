@@ -21,7 +21,7 @@ var sprite_height: int = -1
 var sprite_width: int = -1
 
 var current_position: Vector2 = Vector2.ZERO
-var current_floor_number: int = 5                   # initial spawn floor
+var current_floor_number: int = 2                   # initial spawn floor
 var target_position: Vector2 = Vector2.ZERO
 var target_floor_number: int = 1                    # initial spawn floor
 var stored_target_position: Vector2 = Vector2.ZERO

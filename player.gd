@@ -44,7 +44,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
         return
     
     var cabin_current_floor = cabin_node.current_floor
-    var cabin_destination_floor = cabin_node.destination_floor
+    var _cabin_destination_floor = cabin_node.destination_floor
     var cabin_direction = cabin_node.elevator_direction  # +1 up, -1 down, 0 idle
     #print("in player script")
     print("cabin_current_floor: ", cabin_current_floor)
@@ -358,7 +358,7 @@ func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, co
 
 
 func set_target_data(floor_number: int, adjusted_click_position: Vector2, target_room: int) -> void:
-    print("set target data called")
+    # print("set target data called")
     # If already on the same floor, no elevator needed:
     if sprite_data.current_floor_number == floor_number:
         sprite_data.target_position = adjusted_click_position
@@ -447,7 +447,7 @@ func set_initial_position() -> void:
 func get_elevator_position() -> Vector2:   
     
     var current_floor = get_floor_by_number(sprite_data.current_floor_number)
-    print("§§§§§§§§§§§§§§§§§§ current floor in get_elevator position: ", sprite_data.current_floor_number )
+    print("Current floor in get_elevator position: ", sprite_data.current_floor_number )
     var current_edges = current_floor.get_collision_edges()
     
     var center_x: float = (current_edges["left"] + current_edges["right"]) / 2
