@@ -32,19 +32,17 @@ func _ready():
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.enter_animation_finished.connect(_on_sprite_entered)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
-    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
+    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
 
     apply_scale_factor()
     position_cabin()
-    z_index = -10
+    z_index = -10    
     cache_elevators()
-    cache_floor_positions()
+    cache_floor_positions()    
 
-    setup_cabin_timer(cabin_timer_timeout)
-
-    var elevator = get_elevator_for_current_floor()
+    var elevator = get_elevator_for_current_floor()    
     elevator.set_door_state(elevator.DoorState.OPEN)
-
+    # setup_cabin_timer(2.0)  ## timer functionality has been temporarily disabled
 
 
 func _process(delta: float) -> void:
@@ -55,27 +53,9 @@ func _process(delta: float) -> void:
         ElevatorState.IN_TRANSIT:
             move_elevator(delta)
 
-
-func process_next_request():
-    # If queue is empty, do nothing
-    if elevator_queue.is_empty():
-        print("No requests left. Elevator is idle.")
-        return
-    
-    update_destination_floor()
-    if destination_floor != current_floor:
-        var elevator = floor_to_elevator.get(current_floor, null)
-        if elevator:
-            elevator.set_door_state(elevator.DoorState.CLOSING)
-    else:
-        handle_same_floor_request()
-
-
-
 func elevator_logic() -> void:
     
-    if elevator_queue.size() > 0:    
-        process_next_request()    
+    if elevator_queue.size() > 0:        
         if destination_floor != current_floor:
             var elevator = floor_to_elevator.get(current_floor, null)
             elevator.set_door_state(elevator.DoorState.CLOSING)
@@ -91,11 +71,7 @@ func handle_same_floor_request() -> void:
 
 
 func _on_sprite_entering():
-    # If someone actually enters, cancel the "timeout"
-    if cabin_timer and not cabin_timer.is_stopped():
-        cabin_timer.stop()
     state = ElevatorState.IN_TRANSIT
-
 
 
 func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
@@ -167,8 +143,7 @@ func handle_arrival() -> void:
         # print("SignalBus.elevator_arrived, handle_arrival")         
 
 
-func _on_sprite_exiting(sprite_name: String) -> void:   
-    print("remove_from_elevator_queue") 
+func _on_sprite_exiting(sprite_name: String) -> void:    
     remove_from_elevator_queue(sprite_name)
     
     
@@ -181,16 +156,13 @@ func _on_elevator_door_state_changed(new_state):
         elevator.DoorState.OPEN:
             state = ElevatorState.WAITING
             reset_elevator_direction()
-            
-            if not elevator_queue.is_empty():
-                cabin_timer.start()
-
-        elevator.DoorState.CLOSED:
+            # print("OPEN in Door State changed")
+        elevator.DoorState.CLOSED:            
             state = ElevatorState.IN_TRANSIT
             set_elevator_direction()
+            # print("CLOSED in Door State changed")
             if destination_floor != current_floor:
                 initialize_target_position()
-
 
 
 func initialize_target_position() -> void:
@@ -204,7 +176,8 @@ func update_destination_floor() -> void:
         destination_floor = elevator_queue[0]['target_floor']
 
 
-func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
+func _on_elevator_request(sprite_name: String, target_floor: int) -> void:        
+    
     var request_updated = false
     for i in range(elevator_queue.size()):
         var request = elevator_queue[i]
@@ -220,43 +193,26 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
 
     if not request_updated:
         add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
-        # --- TEST SCENARIO START ---
-        # Add random requests for Player_2, Player_3, Player_4:
-        add_test_requests()
-        # --- TEST SCENARIO END ---
-    
+        # print("Added new request for sprite:", sprite_name, "to floor:", target_floor)
+
     update_destination_floor()
 
-    if request_updated and state == ElevatorState.IN_TRANSIT:
+    if request_updated and state == ElevatorState.IN_TRANSIT: # If we are already in transit, re-initialize target position so the elevator doesn't keep going to the old floor.
         initialize_target_position()
 
-#region TEST SCENARIO
-func add_test_requests():
-    # This function adds a random floor request for each "AI" player.
-    # Remove or comment out this function call when you no longer need the test scenario.
-    var random_floor2 = int(randf_range(0, 6))  # floors 0..5
-    var random_floor3 = int(randf_range(0, 6))
-    var random_floor4 = int(randf_range(0, 6))
-    add_to_elevator_queue({'target_floor': random_floor2, 'sprite_name': "Player_2"})
-    add_to_elevator_queue({'target_floor': random_floor3, 'sprite_name': "Player_3"})
-    add_to_elevator_queue({'target_floor': random_floor4, 'sprite_name': "Player_4"})
-#endregion
-
 func _on_cabin_timer_timeout() -> void:
-    # If there’s nothing in the queue, or we’re no longer WAITING, do nothing.
-    if elevator_queue.is_empty():
-        return
-    
-    # Only remove if we're still WAITING (meaning door is open and no one entered).
-    if state == ElevatorState.WAITING:
-        var timed_out_request = elevator_queue[0]
-        
-        remove_from_elevator_queue(timed_out_request["sprite_name"])
-        print("No action taken within 2 seconds. Removed request:", timed_out_request)
-        
-        # Now move on to the next request, if any.
-        process_next_request()
-
+    ## Cabin timer has been temporarily removed
+    pass
+    ## If the queue is empty, do nothing
+    #if elevator_queue.size() == 0:
+        #print("Timer fired but queue was empty, ignoring.")
+        #return
+#
+    ## If we’re in WAITING state, remove the oldest request
+    #if state == ElevatorState.WAITING:
+        #var timed_out_request = elevator_queue[0]
+        #remove_from_elevator_queue(timed_out_request)
+        #print("No action taken within 2 seconds, removed request:", timed_out_request)
 
 
 #region Elevator direction
@@ -305,19 +261,23 @@ func add_to_elevator_queue(request: Dictionary) -> void:
 
 
 
-func remove_from_elevator_queue(sprite_name: String) -> void:    
+func remove_from_elevator_queue(sprite_name: String) -> void:
+    
     for i in range(elevator_queue.size()):
-        var queue_req = elevator_queue[i]    
+        var queue_req = elevator_queue[i]
+    
         if queue_req.has("sprite_name") and queue_req["sprite_name"] == sprite_name:
             elevator_queue.remove_at(i)
             # print("Removed request for:", sprite_name, ", updated queue:", elevator_queue)
-            return    
+            return
+    
     print("No elevator request found for:", sprite_name)
 
 
+
 func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
-    print("update_elevator_queue called")
-    print("Current elevator queue:", elevator_queue)
+    # print("update_elevator_queue called")
+    # print("Current elevator queue:", elevator_queue)
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor
@@ -371,7 +331,6 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.wait_time = wait_time
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
-
 
 
 func cache_elevators():
