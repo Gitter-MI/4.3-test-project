@@ -1,10 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://c1voqfl0thkhx"]
+[gd_scene load_steps=4 format=3 uid="uid://c1voqfl0thkhx"]
 
 [ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="1_l3g6p"]
 [ext_resource type="Script" path="res://cabin.gd" id="2_enpm1"]
+[ext_resource type="Script" path="res://testing_requests.gd" id="3_t2mhh"]
 
 [node name="Cabin" type="Node2D"]
 script = ExtResource("2_enpm1")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_l3g6p")
+
+[node name="TestingRequests" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_t2mhh")

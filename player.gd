@@ -1,4 +1,10 @@
 # player.gd
+
+
+# needs to re-implement the timer once again
+# needs heavy re-factoring
+
+
 extends Node2D
 
 const SCALE_FACTOR = 2.3
@@ -32,88 +38,14 @@ func _process(delta: float) -> void:
     if sprite_data.current_state != SpriteData.State.IN_ELEVATOR:
         movement_logic(delta)
 
+    # move actions from movement logic here?
+    # if not moving because sprite is at target then do action
   
 
-func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: int) -> void:
-    
-    # conversation id: 676e7af0-f1b4-800a-b2fe-bba51b5db358
-    
-    var cabin_node = get_elevator_cabin()
-    if cabin_node == null:
-        push_warning("No elevator cabin node found.")
-        return
-    
-    var cabin_current_floor = cabin_node.current_floor
-    var cabin_destination_floor = cabin_node.destination_floor
-    var cabin_direction = cabin_node.elevator_direction  # +1 up, -1 down, 0 idle
-    #print("in player script")
-    print("cabin_current_floor: ", cabin_current_floor)
-    #print("cabin_destination_floor: ", cabin_destination_floor)
-    #print("cabin_direction: ", cabin_direction)
-
-    # 1) If the elevator isn't actually moving, or if the new_floor == cabin_current_floor
-    #    we can treat that as "on the way" because we can just exit now or soon.
-    if cabin_direction == 0 or new_floor == cabin_current_floor:
-        # Immediately update request
-        SignalBus.elevator_request.emit(sprite_data.sprite_name, new_floor)
-        sprite_data.target_floor_number = new_floor
-        sprite_data.target_position = new_position
-        sprite_data.target_room = new_room
-        return
-
-    # 2) Check if new_floor is on the way
-    var is_on_the_way = false
-    if cabin_direction == 1:  # going up        
-        # "on the way" => new_floor between cabin_current_floor and cabin_destination_floor (inclusive)        
-        #print("new floor: ", new_floor)
-        #print("cabin_current_floor: ", cabin_current_floor)
-        #print("cabin_destination_floor: ", cabin_destination_floor)
-        
-        if new_floor >= cabin_current_floor:
-            is_on_the_way = true
-            # print("is on way, up")
-    elif cabin_direction == -1:  # going down
-        # "on the way" => new_floor between cabin_destination_floor and cabin_current_floor (inclusive)
-        if new_floor <= cabin_current_floor:
-            is_on_the_way = true
-            # print("is on way, down")
-
-    if is_on_the_way:
-        # 3) On the way => update elevator request right now
-        # print("update request immediately")
-        SignalBus.elevator_request.emit(sprite_data.sprite_name, new_floor)
-
-        # Also update sprite's target data
-        sprite_data.target_floor_number = new_floor
-        sprite_data.target_position = new_position
-        sprite_data.target_room = new_room
-    else:
-            # 4) Already passed => store it for after next stop
-            sprite_data.elevator_stored_target_floor_number = new_floor
-            sprite_data.elevator_stored_target_position = new_position
-            sprite_data.elevator_stored_target_room = new_room
-            # Decide the very next floor in the direction the elevator is traveling
-            var next_floor = cabin_current_floor if cabin_direction == 1 else cabin_current_floor
-
-            # 1) Force the cabin to stop on next_floor
-            SignalBus.elevator_request.emit(sprite_data.sprite_name, next_floor)
-
-            # 2) Update the sprite_data so that it believes it is traveling to next_floor
-            #    This ensures that once the passenger exits, they're actually on `next_floor`,
-            #    and will be waiting at that elevator (instead of some outdated floor).
-            sprite_data.current_floor_number = next_floor
-            sprite_data.current_elevator_position = get_elevator_position_for(next_floor) 
-                # We'll define a helper below so you can get elevator position for an arbitrary floor.
-
-            # Also set the passenger's immediate “target” to the new floor’s elevator position. 
-            # That way if they're forced out of the elevator, they'd remain at that floor's elevator. 
-            sprite_data.target_floor_number = next_floor
-            sprite_data.target_position = sprite_data.current_elevator_position
-            sprite_data.target_room = -1  # or however you prefer to indicate no specific room
-            sprite_data.needs_elevator = true  # ensures the logic in `movement_logic()` waits for elevator
 
 
 
+# helper function needed when target is on another floor
 func get_elevator_position_for(floor_number: int) -> Vector2:
     var target_floor = get_floor_by_number(floor_number)
     if target_floor:
@@ -123,13 +55,6 @@ func get_elevator_position_for(floor_number: int) -> Vector2:
         var adjusted_y = edges["bottom"] - sprite_height / 2.0
         return Vector2(center_x, adjusted_y)
     return Vector2.ZERO
-
-
-func get_elevator_cabin() -> Node:
-    var cabins = get_tree().get_nodes_in_group("cabin")
-    if cabins.size() > 0:
-        return cabins[0]
-    return null
 
 
 #####################################################################################################
@@ -251,18 +176,32 @@ func movement_logic(delta: float) -> void:
     if sprite_data.current_position != sprite_data.target_position:
 
         if sprite_data.target_floor_number == sprite_data.current_floor_number:
-            print("+++++++++++++++++++++++++++++++++")
-            print("we are in movement logic")
-            print("+++++++++++++++++++++++++++++++++")
+            #print("+++++++++++++++++++++++++++++++++")
+            #print("we are in movement logic")
+            #print("+++++++++++++++++++++++++++++++++")
             move_towards_position(sprite_data.target_position, delta)            
         else:
+            # if arrived at the elevator no movement needed, which is the first if block 
+            # else is moving the sprite to the current floor elevator. 
+            
+            
+            # should be invoked once, can be replaced with a getter/setter or a simple check if target floor == current floor
+            # then can remove the variable
             sprite_data.needs_elevator = true
+            
+            # can be moved to a helper function: create elevator request        
             if sprite_data.current_position == sprite_data.current_elevator_position:
                 var current_request = {
                     "sprite_name": sprite_data.sprite_name,
                     "floor_number": sprite_data.target_floor_number
                 }
 
+                # can be moved to a helper function: call elevator
+                # these are actions!
+                # consider creating a helper function to inform the elevator if the sprite is moving away from the elevator so that another can take the spot in the queue. 
+                
+                
+                # checking for duplicate requests is a premature optimization and should be removed
                 if current_request != last_elevator_request:
                     SignalBus.elevator_request.emit(sprite_data.sprite_name, sprite_data.current_floor_number)
                     # print("signal emitted: elevator requested")
@@ -270,13 +209,19 @@ func movement_logic(delta: float) -> void:
                     sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
                     # print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
             else:
+                # Maybe move this clause up. 
+                
+                # invoke the elevator call if no movement needed
+                # invoke the room-door check if no movement needed
+                # => move all non movement related stuff to another function
+                
                 # Keep moving towards the elevator
+                
                 move_towards_position(sprite_data.current_elevator_position, delta)
 
 
 
-func move_towards_position(target_position: Vector2, delta: float) -> void:
-    # print("move_towards_position")
+func move_towards_position(target_position: Vector2, delta: float) -> void:    
     var direction: Vector2 = (target_position - global_position).normalized()
     var distance: float = global_position.distance_to(target_position)
 
@@ -339,8 +284,8 @@ func adjust_click_position(collision_edges: Dictionary, click_position: Vector2,
 
 func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
     var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
-    print("-------------------------------------------------------")
-    print("clicked floor_number: ", floor_number)
+    #print("-------------------------------------------------------")
+    #print("clicked floor_number: ", floor_number)
     if sprite_data.current_state == SpriteData.State.IN_ELEVATOR:
         # Instead of simply storing, call a helper that decides whether to update the queue
         handle_in_elevator_click(floor_number, adjusted_click_position, -1)
@@ -349,12 +294,11 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
         var door_index = -1            
         
         set_target_data(floor_number, adjusted_click_position, door_index)
-        sprite_data.current_state = SpriteData.State.IDLE
-        sprite_data.needs_elevator = false
-        print("current_position: ", sprite_data.current_position)
-        print("target_position: ", sprite_data.target_position)
-        print("current_floor_number: ", sprite_data.current_floor_number)
-        print("target_floor_number: ", sprite_data.target_floor_number)
+
+        #print("current_position: ", sprite_data.current_position)
+        #print("target_position: ", sprite_data.target_position)
+        #print("current_floor_number: ", sprite_data.current_floor_number)
+        #print("target_floor_number: ", sprite_data.target_floor_number)
 
 
 func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
@@ -376,6 +320,10 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_room = target_room
+        sprite_data.current_state = SpriteData.State.IDLE
+        sprite_data.needs_elevator = false
+        last_elevator_request.clear()
+
     else:
         # Change floors, so update elevator position & floor number
         sprite_data.target_floor_number = floor_number
@@ -384,6 +332,98 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         sprite_data.current_elevator_position = get_elevator_position()
 
 
+
+func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: int) -> void:
+    
+    # conversation id: 676e7af0-f1b4-800a-b2fe-bba51b5db358
+    
+    # can we get the cabin node once during ready?    
+    var cabin_node = get_elevator_cabin()
+    if cabin_node == null:
+        push_warning("No elevator cabin node found.")
+        return
+    
+    var cabin_current_floor = cabin_node.current_floor
+    var cabin_destination_floor = cabin_node.destination_floor
+    var cabin_direction = cabin_node.elevator_direction  # +1 up, -1 down, 0 idle
+    #print("in player script")
+    # print("cabin_current_floor: ", cabin_current_floor)
+    #print("cabin_destination_floor: ", cabin_destination_floor)
+    #print("cabin_direction: ", cabin_direction)
+
+    # 1) If the elevator isn't actually moving, or if the new_floor == cabin_current_floor
+    #    we can treat that as "on the way" because we can just exit now or soon.
+    if cabin_direction == 0 or new_floor == cabin_current_floor:
+        # Immediately update request
+        SignalBus.elevator_request.emit(sprite_data.sprite_name, new_floor)
+        sprite_data.target_floor_number = new_floor
+        sprite_data.target_position = new_position
+        sprite_data.target_room = new_room
+        return
+
+    # 2) Check if new_floor is on the way
+    var is_on_the_way = false
+    if cabin_direction == 1:  # going up        
+        # "on the way" => new_floor between cabin_current_floor and cabin_destination_floor (inclusive)        
+        #print("new floor: ", new_floor)
+        #print("cabin_current_floor: ", cabin_current_floor)
+        #print("cabin_destination_floor: ", cabin_destination_floor)
+        
+        if new_floor >= cabin_current_floor:
+            is_on_the_way = true
+            # print("is on way, up")
+    elif cabin_direction == -1:  # going down
+        # "on the way" => new_floor between cabin_destination_floor and cabin_current_floor (inclusive)
+        if new_floor <= cabin_current_floor:
+            is_on_the_way = true
+            # print("is on way, down")
+
+    if is_on_the_way:
+        # 3) On the way => update elevator request right now
+        # print("update request immediately")
+        SignalBus.elevator_request.emit(sprite_data.sprite_name, new_floor)
+
+        # Also update sprite's target data
+        
+        # create a sprite update function or use the update target function
+        sprite_data.target_floor_number = new_floor
+        sprite_data.target_position = new_position
+        sprite_data.target_room = new_room
+    else:
+            # 4) Already passed => store it for after next stop
+            sprite_data.elevator_stored_target_floor_number = new_floor
+            sprite_data.elevator_stored_target_position = new_position
+            sprite_data.elevator_stored_target_room = new_room
+            # Decide the very next floor in the direction the elevator is traveling
+            var next_floor = cabin_current_floor if cabin_direction == 1 else cabin_current_floor
+
+            # 1) Force the cabin to stop on next_floor
+            SignalBus.elevator_request.emit(sprite_data.sprite_name, next_floor)
+
+            # 2) Update the sprite_data so that it believes it is traveling to next_floor
+            #    This ensures that once the passenger exits, they're actually on `next_floor`,
+            #    and will be waiting at that elevator (instead of some outdated floor).
+            sprite_data.current_floor_number = next_floor
+            sprite_data.current_elevator_position = get_elevator_position_for(next_floor) 
+                # We'll define a helper below so you can get elevator position for an arbitrary floor.
+
+            # Also set the passenger's immediate “target” to the new floor’s elevator position. 
+            # That way if they're forced out of the elevator, they'd remain at that floor's elevator. 
+            sprite_data.target_floor_number = next_floor
+            sprite_data.target_position = sprite_data.current_elevator_position
+            sprite_data.target_room = -1  # or however you prefer to indicate no specific room
+            sprite_data.needs_elevator = true  # ensures the logic in `movement_logic()` waits for elevator
+
+
+
+
+
+# helper function needed when controlling the elevator from inside the elevator
+func get_elevator_cabin() -> Node:    
+    var cabins = get_tree().get_nodes_in_group("cabin")
+    if cabins.size() > 0:
+        return cabins[0]
+    return null
 
 #####################################################################################################
 ##################              Basic Sprite Component                        #######################  
