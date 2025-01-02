@@ -15,7 +15,7 @@ func add_dummy_requests(cabin_script: Node) -> void:
     
     if added == 0:
     
-        cabin_script.add_to_elevator_queue({'target_floor': 2, 'sprite_name': "Player_2"})
+        # cabin_script.add_to_elevator_queue({'target_floor': 2, 'sprite_name': "Player_2"})
         #cabin_script.add_to_elevator_queue({'target_floor': 3, 'sprite_name': "Player_3"})
         #cabin_script.add_to_elevator_queue({'target_floor': 4, 'sprite_name': "Player_4"})
         #print("Dummy test requests added.")

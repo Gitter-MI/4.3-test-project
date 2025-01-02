@@ -1,6 +1,6 @@
-# SpriteData.gd
+# SpriteData_new.gd
 extends Resource
-class_name SpriteData
+class_name SpriteDataNew
 
 # Define the possible states a sprite can be in
 enum State {
@@ -15,15 +15,15 @@ enum State {
 }
 
 # Sprite properties
-var sprite_name: String = "Player_1"
+var sprite_name: String = "Player_2"
 
 var sprite_height: int = -1
 var sprite_width: int = -1
 
 var current_position: Vector2 = Vector2.ZERO
-var current_floor_number: int = 2                   # initial spawn floor
+var current_floor_number: int = 3                   # initial spawn floor
 var target_position: Vector2 = Vector2.ZERO
-var target_floor_number: int = 2                   # initial spawn floor
+var target_floor_number: int = 3                    # initial spawn floor
 var stored_target_position: Vector2 = Vector2.ZERO
 var speed: float = 400.0
 

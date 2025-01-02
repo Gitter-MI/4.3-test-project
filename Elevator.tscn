@@ -152,7 +152,7 @@ animations = [{
 }],
 "loop": false,
 "name": &"opening",
-"speed": 10.0
+"speed": 15.0
 }]
 
 [node name="Elevator" type="Area2D"]
@@ -167,4 +167,4 @@ shape = SubResource("RectangleShape2D_tyhfd")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_flxjs")
-animation = &"closing"
+animation = &"opening"

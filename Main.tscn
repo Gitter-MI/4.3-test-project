@@ -1,11 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://dauc0o8e2gap3"]
+[gd_scene load_steps=9 format=3 uid="uid://dauc0o8e2gap3"]
 
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Building.tscn" id="1_avx81"]
 [ext_resource type="PackedScene" uid="uid://bnwlyobcdo1lq" path="res://Player.tscn" id="2_1vbnd"]
 [ext_resource type="PackedScene" uid="uid://c1voqfl0thkhx" path="res://Cabin.tscn" id="2_kci24"]
 [ext_resource type="Script" path="res://player.gd" id="3_gsbds"]
 [ext_resource type="Script" path="res://camera_2d.gd" id="4_a875k"]
-[ext_resource type="PackedScene" uid="uid://ds5teq2o2urx5" path="res://actor.tscn" id="6_10bhy"]
+[ext_resource type="PackedScene" uid="uid://boabwgamfwv0b" path="res://player_new.tscn" id="5_ft0ge"]
+[ext_resource type="Script" path="res://player_new.gd" id="7_s7vbf"]
+[ext_resource type="Script" path="res://navigation_controller.gd" id="8_7c7ne"]
 
 [node name="Main" type="Node2D"]
 
@@ -18,10 +20,14 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 script = ExtResource("3_gsbds")
 
+[node name="Player_new" parent="." instance=ExtResource("5_ft0ge")]
+script = ExtResource("7_s7vbf")
+
 [node name="Camera" type="Node2D" parent="."]
 metadata/_edit_group_ = true
 
 [node name="Camera2D" type="Camera2D" parent="Camera"]
 script = ExtResource("4_a875k")
 
-[node name="Actor" parent="." instance=ExtResource("6_10bhy")]
+[node name="Navigation_Controller" type="Node" parent="."]
+script = ExtResource("8_7c7ne")

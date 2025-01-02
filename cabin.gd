@@ -70,14 +70,12 @@ func process_next_request():
             elevator.set_door_state(elevator.DoorState.CLOSING)
     else:
         handle_same_floor_request()
-        
+        # if elevator is waiting at the same floor as before then start the timer again. Could be necesary only because of the test case. Otherwise the second sprite could just enter.
         if cabin_timer.is_stopped():
             cabin_timer.start()
         else:
             # push_warning("Cabin timer is already running.")
             pass
-
-
 
 
 func elevator_logic() -> void:
@@ -118,8 +116,8 @@ func move_elevator(delta: float) -> void:
 
     # Only stop if it's actually running:
     if not cabin_timer.is_stopped():
-        push_warning("Cabin timer is running while cabin is moving. Stopping it now.")
-        cabin_timer.stop() # attempt to stop the timer from removing requests while the current request is being processed, which could lead to an out-of-bounds error in on_arrival
+        # push_warning("Cabin timer is running while cabin is moving. Stopping it now.")
+        cabin_timer.stop() # attempt to prevent the timer from removing requests while the current request is being processed, which could lead to an out-of-bounds error in on_arrival
 
 
 

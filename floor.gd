@@ -23,13 +23,17 @@ func _ready():
     input_pickable = true    
     floor_sprite = $FloorSprite
     set_floor_image(floor_image_path)    
-    collision_layer = 1        
-    
+    collision_layer = 1    
+    # configure_collision_shape()    
+    #var coll_edges = get_collision_edges()
+    #print("collision_edges: ", coll_edges)  
+  
 func get_collision_edges() -> Dictionary:    
     # is called when a sprite moves to a new floor to determine the y-coordinate    
     return collision_edges
     
-    
+
+# floor
 func _input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
         var floor_collision_edges = get_collision_edges()        
@@ -69,7 +73,9 @@ func position_floor(previous_floor_top_y_position, is_first_floor):
     # Return the y position of the top of this floor for the next calculation
     return y_position
 
+
 func configure_collision_shape():
+    
     var collision_shape = $CollisionShape2D
     if not (floor_sprite and collision_shape):
         push_warning("Missing nodes for collision shape configuration")

@@ -11,6 +11,7 @@ signal elevator_position_updated(global_pos: Vector2)   # used to move sprites a
 signal door_state_changed(new_state)
 
 signal entering_elevator()
+
 signal enter_animation_finished(sprite_name: String, target_floor: int)
 
 
