@@ -3,6 +3,8 @@
 
 extends Node
 
+signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)
+
 signal elevator_request(sprite_name: String, target_floor: int)
 signal elevator_arrived(sprite_name: String, current_floor: int)
 

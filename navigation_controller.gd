@@ -7,7 +7,28 @@ var doors: Dictionary = {}
 func _ready():    
     register_all_floors()
     register_all_doors()
-    # print_all_registered()
+    # print_all_registered()    
+    SignalBus.navigation_click.connect(_on_navigation_click)
+
+func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:
+    # For now, just print to console for debugging
+    print("navigation_click => Global:", global_position, 
+          " Floor:", floor_number, 
+          " DoorIndex:", door_index)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #region Register Floors and Doors

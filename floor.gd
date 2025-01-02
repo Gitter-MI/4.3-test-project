@@ -24,9 +24,18 @@ func _ready():
     floor_sprite = $FloorSprite
     set_floor_image(floor_image_path)    
     collision_layer = 1    
-    # configure_collision_shape()    
-    #var coll_edges = get_collision_edges()
-    #print("collision_edges: ", coll_edges)  
+
+func _input_event(_viewport, event, _shape_idx):
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+        # Instead of calling floor_clicked, we call navigation_click
+        SignalBus.navigation_click.emit(
+            event.global_position,
+            floor_number,
+            -1  # We use -1 since this is not a door
+        )
+
+
+
   
 func get_collision_edges() -> Dictionary:    
     # is called when a sprite moves to a new floor to determine the y-coordinate    
@@ -34,16 +43,16 @@ func get_collision_edges() -> Dictionary:
     
 
 # floor
-func _input_event(_viewport, event, _shape_idx):
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
-        var floor_collision_edges = get_collision_edges()        
-        var bottom_edge_y = collision_edges["bottom"]
-        SignalBus.floor_clicked.emit(
-            floor_number,
-            event.global_position,
-            bottom_edge_y,
-            floor_collision_edges
-        )
+#func _input_event(_viewport, event, _shape_idx):
+    #if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
+        #var floor_collision_edges = get_collision_edges()        
+        #var bottom_edge_y = collision_edges["bottom"]
+        #SignalBus.floor_clicked.emit(
+            #floor_number,
+            #event.global_position,
+            #bottom_edge_y,
+            #floor_collision_edges
+        #)
 
 
 #region set-up methods

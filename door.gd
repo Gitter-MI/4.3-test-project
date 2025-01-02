@@ -26,16 +26,28 @@ func _ready():
 
 func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        var parent_collision_edges = get_parent().collision_edges
-        print("door_clicked. Center:", door_center_x, ", Floor:", door_data.floor_number, ", Index:", door_data.index)        
-        SignalBus.door_clicked.emit(
-            door_center_x,
+        SignalBus.navigation_click.emit(
+            event.global_position,
             door_data.floor_number,
-            door_data.index,
-            parent_collision_edges,
-            event.global_position
+            door_data.index
         )
         get_viewport().set_input_as_handled()
+
+
+
+
+#func _on_input_event(_viewport, event, _shape_idx):
+    #if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+        #var parent_collision_edges = get_parent().collision_edges
+        #print("door_clicked. Center:", door_center_x, ", Floor:", door_data.floor_number, ", Index:", door_data.index)        
+        #SignalBus.door_clicked.emit(
+            #door_center_x,
+            #door_data.floor_number,
+            #door_data.index,
+            #parent_collision_edges,
+            #event.global_position
+        #)
+        #get_viewport().set_input_as_handled()
 
 func set_door_state(new_state: DoorState) -> void:
     current_state = new_state
