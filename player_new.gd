@@ -8,9 +8,18 @@ var sprite_data_new: SpriteDataNew
 var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
 var previous_elevator_position: Vector2 = Vector2.ZERO
 
-const PlayerSpriteData = preload("res://SpriteData_new.gd")
+# const PlayerSpriteData = preload("res://SpriteData_new.gd")
 
 const Elevator = preload("res://elevator.gd")
+
+
+#SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
+    #SignalBus.elevator_position_updated.connect(_on_elevator_ride)
+    #SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
+    #SignalBus.floor_clicked.connect(_on_floor_clicked)
+    #SignalBus.door_clicked.connect(_on_door_clicked)
+    #$AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
+
 
 func _ready():
     add_to_group("player_sprites")   
@@ -20,14 +29,39 @@ func _ready():
     update_sprite_dimensions()
     set_initial_position()
 
-    #SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
-    #SignalBus.elevator_position_updated.connect(_on_elevator_ride)
-    #SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
-    #SignalBus.floor_clicked.connect(_on_floor_clicked)
-    #SignalBus.door_clicked.connect(_on_door_clicked)
-    #
-    #$AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
+    # SignalBus.navigation_click.connect(_on_navigation_click)
 
+    
+
+#func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:
+    #if door_index == -1:
+        ## 1) It's a floor click
+        #var floor_data = floors.get(floor_number, null)
+        #if floor_data:
+            #var collision_edges = floor_data["edges"]
+            #var bottom_edge_y = collision_edges["bottom"]
+#
+            ## Optionally clamp X, or do some game logic:
+            ## e.g., `final_x = clamp(global_position.x, collision_edges["left"], collision_edges["right"])`
+            #
+            ## 2) Construct the final position
+            ## Here, we assume we subtract half the player's height
+            ## But the actual logic can remain in the player's script if you prefer
+            #var final_position = Vector2(global_position.x, bottom_edge_y)
+#
+            ## 3) Pass the result to the player (or store it)
+            #player.request_move(
+                #floor_number,
+                #final_position,
+                #-1  # door index -1 means "no door"
+            #)
+    #else:
+        ## door click logic...
+        #pass
+
+
+
+#region Set-Up
 
 
 #####################################################################################################
@@ -93,3 +127,4 @@ func get_floor_by_number(floor_number: int) -> Node2D:
         if building_floor.floor_number == floor_number:
             return building_floor
     return null
+#endregion

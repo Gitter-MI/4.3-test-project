@@ -336,10 +336,6 @@ func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y
 
 
 
-
-
-
-
 func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
     var bottom_edge_y = collision_edges["bottom"]
     var door_click_position: Vector2 = Vector2(door_center_x, bottom_edge_y)
