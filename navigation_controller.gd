@@ -38,6 +38,7 @@ func register_floor(floor_number: int, floor_edges: Dictionary, floor_ref: Node)
 
 
 #--- Doors ---
+#--- Doors ---
 func register_all_doors():
     var door_nodes = get_tree().get_nodes_in_group("doors")
     for door_node in door_nodes:
@@ -45,16 +46,27 @@ func register_all_doors():
             var door_index = door_node.door_data.index
             var floor_number = door_node.door_data.floor_number
             var door_center_x = door_node.door_center_x  # global X
-            var parent_collision_edges = door_node.get_parent().collision_edges
-            register_door(door_index, floor_number, door_center_x, parent_collision_edges, door_node)
 
-func register_door(door_index: int, floor_number: int, center_x: float, parent_edges: Dictionary, door_ref: Node):
+            # Use the door node's own collision edges, not the parent's
+            var door_edges = door_node.get_collision_edges()
+
+            register_door(door_index, floor_number, door_center_x, door_edges, door_node)
+
+
+func register_door(
+    door_index: int,
+    floor_number: int,
+    center_x: float,
+    door_edges: Dictionary,
+    door_ref: Node
+):
     doors[door_index] = {
         "floor_number": floor_number,
         "center_x": center_x,
-        "parent_edges": parent_edges,
+        "edges": door_edges,    # store the door's collision edges
         "ref": door_ref
     }
+
 
 
 #--- Player Sprites ---
@@ -75,10 +87,9 @@ func register_player_sprite(player_node: Node2D):
         }
 
 
-
 func print_all_registered():
-    print("Floors: ", floors.keys())
-    print("Doors: ", doors.keys())
-    print("Player: ", player)
+    print("Floors: ", floors) #.keys()
+    print("Doors: ", doors) #.keys()
+    # print("Player: ", player)
     
 #endregion

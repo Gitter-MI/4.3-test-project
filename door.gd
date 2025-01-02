@@ -64,6 +64,31 @@ func _on_mouse_entered():
 func _on_mouse_exited():
     tooltip_background.hide_tooltip()
 
+
+
+func get_collision_edges() -> Dictionary:
+    # Get the CollisionShape2D node
+    var collision_shape = $CollisionShape2D  # Adjust if your node has a different name
+    if not collision_shape:
+        push_error("No CollisionShape2D found in door")
+        return {}
+        
+    # Get the shape extents (assuming a RectangleShape2D)
+    var shape = collision_shape.shape
+    if not shape is RectangleShape2D:
+        push_error("Door collision shape must be RectangleShape2D")
+        return {}
+        
+    # Calculate global positions of the edges
+    var extents = shape.extents
+    var global_pos = collision_shape.global_position
+    
+    return {
+        "left": global_pos.x - extents.x,
+        "right": global_pos.x + extents.x
+    }
+
+
 #region door setup
 func setup_door_instance(p_door_data, p_floor_instance):
     door_data = p_door_data    
