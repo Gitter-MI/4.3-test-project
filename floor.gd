@@ -26,14 +26,21 @@ func _ready():
     collision_layer = 1    
 
 func _input_event(_viewport, event, _shape_idx):
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        # Instead of calling floor_clicked, we call navigation_click
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
         SignalBus.navigation_click.emit(
             event.global_position,
             floor_number,
             -1  # We use -1 since this is not a door
         )
-
+    #if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
+        #var floor_collision_edges = get_collision_edges()        
+        #var bottom_edge_y = collision_edges["bottom"]
+        #SignalBus.floor_clicked.emit(
+            #floor_number,
+            #event.global_position,
+            #bottom_edge_y,
+            #floor_collision_edges
+        #)
 
 
   

@@ -389,7 +389,7 @@ func handle_in_elevator_click(new_floor: int, new_position: Vector2, new_room: i
         return
     
     var cabin_current_floor = cabin_node.current_floor
-    var cabin_destination_floor = cabin_node.destination_floor
+    # var cabin_destination_floor = cabin_node.destination_floor
     var cabin_direction = cabin_node.elevator_direction  # +1 up, -1 down, 0 idle
     #print("in player script")
     # print("cabin_current_floor: ", cabin_current_floor)

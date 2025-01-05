@@ -7,7 +7,7 @@ extends Node
 
 var added: int = 0
 
-func add_dummy_requests(cabin_script: Node) -> void:
+func add_dummy_requests(_cabin_script: Node) -> void:
     # If you only want to do this conditionally (e.g. once, or in debug mode), 
     # you can wrap it in an `if is_debug:` check or something similar.
     

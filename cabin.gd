@@ -394,7 +394,7 @@ func get_cabin_height():
 func get_elevator_position(collision_edges: Dictionary) -> Vector2:        
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
     var sprite_height: float = get_cabin_height()
-    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2
+    var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2    
     return Vector2(center_x, adjusted_y)
 
 func setup_cabin_timer(wait_time: float) -> void:

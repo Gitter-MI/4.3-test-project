@@ -68,8 +68,8 @@ func _on_mouse_exited():
 
 func get_collision_edges() -> Dictionary:
     # Get the CollisionShape2D node
-    var collision_shape = $CollisionShape2D  # Adjust if your node has a different name
-    if not collision_shape:
+    var door_collision_shape = $CollisionShape2D  # Adjust if your node has a different name
+    if not door_collision_shape:
         push_error("No CollisionShape2D found in door")
         return {}
         
@@ -85,7 +85,9 @@ func get_collision_edges() -> Dictionary:
     
     return {
         "left": global_pos.x - extents.x,
-        "right": global_pos.x + extents.x
+        "right": global_pos.x + extents.x,
+        "top": global_pos.y - extents.y,
+        "bottom": global_pos.y + extents.y
     }
 
 

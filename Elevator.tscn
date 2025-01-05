@@ -168,3 +168,5 @@ shape = SubResource("RectangleShape2D_tyhfd")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_flxjs")
 animation = &"opening"
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]

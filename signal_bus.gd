@@ -46,7 +46,15 @@ func _ready():
     floor_clicked.connect(_on_floor_clicked)
     door_clicked.connect(_on_door_clicked)
     enter_animation_finished.connect(_on_enter_animation_finished)
+    
+    
+    navigation_click.connect(_on_navigation_click)
 
+
+
+
+func _on_navigation_click(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
+    pass
 
 
 

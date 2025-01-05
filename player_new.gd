@@ -29,36 +29,12 @@ func _ready():
     update_sprite_dimensions()
     set_initial_position()
 
-    # SignalBus.navigation_click.connect(_on_navigation_click)
+    SignalBus.navigation_click.connect(_on_navigation_click)
 
     
 
-#func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:
-    #if door_index == -1:
-        ## 1) It's a floor click
-        #var floor_data = floors.get(floor_number, null)
-        #if floor_data:
-            #var collision_edges = floor_data["edges"]
-            #var bottom_edge_y = collision_edges["bottom"]
-#
-            ## Optionally clamp X, or do some game logic:
-            ## e.g., `final_x = clamp(global_position.x, collision_edges["left"], collision_edges["right"])`
-            #
-            ## 2) Construct the final position
-            ## Here, we assume we subtract half the player's height
-            ## But the actual logic can remain in the player's script if you prefer
-            #var final_position = Vector2(global_position.x, bottom_edge_y)
-#
-            ## 3) Pass the result to the player (or store it)
-            #player.request_move(
-                #floor_number,
-                #final_position,
-                #-1  # door index -1 means "no door"
-            #)
-    #else:
-        ## door click logic...
-        #pass
-
+func _on_navigation_click(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
+    print("Navigation click received in player script")
 
 
 #region Set-Up
