@@ -5,7 +5,7 @@
 # needs heavy re-factoring
 
 
-extends Node2D
+extends Area2D
 
 const SCALE_FACTOR = 2.3
 
@@ -32,7 +32,14 @@ func _ready():
     SignalBus.door_clicked.connect(_on_door_clicked)
     
     $AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)
 
+
+func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:            
+    if area == $".": # If the area that triggered the signal is our own area
+        # print("I, %s, have entered floor #%d" % [name, floor_number])
+        sprite_data.current_floor_number = floor_number
+        
 
 func _process(delta: float) -> void:
     if sprite_data.current_state != SpriteData.State.IN_ELEVATOR:
@@ -474,14 +481,31 @@ func get_elevator_cabin() -> Node:
 ##################              Basic Sprite Component                        #######################  
 #####################################################################################################
 
+#func update_sprite_dimensions():
+    #var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
+    #if idle_texture:
+        #sprite_data.sprite_width = (idle_texture.get_width() * $AnimatedSprite2D.scale.x)
+        #sprite_data.sprite_height = (idle_texture.get_height() * $AnimatedSprite2D.scale.y)
+    #else:
+        #print("Warning: 'idle' animation (frame 0) not found.")
+
+
 func update_sprite_dimensions():
     var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
     if idle_texture:
         sprite_data.sprite_width = (idle_texture.get_width() * $AnimatedSprite2D.scale.x)
         sprite_data.sprite_height = (idle_texture.get_height() * $AnimatedSprite2D.scale.y)
+        
+        # Update collision shape to match sprite dimensions
+        var collision_shape = $CollisionShape2D
+        if collision_shape:
+            var rect_shape = RectangleShape2D.new()
+            rect_shape.size = Vector2(sprite_data.sprite_width, sprite_data.sprite_height)
+            collision_shape.shape = rect_shape
+            # Center the collision shape
+            collision_shape.position = Vector2.ZERO
     else:
         print("Warning: 'idle' animation (frame 0) not found.")
-
 
 
 func apply_scale_factor_to_sprite():

@@ -26,9 +26,7 @@ func _ready():
 
 
 func _on_input_event(_viewport, event, _shape_idx):
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        print("elevator input signal")
-        # Emit the same type of signal as floors and doors:
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
         SignalBus.navigation_click.emit(
             event.global_position,
             floor_instance.floor_number,

@@ -1,5 +1,5 @@
 # player_new.gd
-extends Node2D
+extends Area2D
 
 const SCALE_FACTOR = 2.3
 
@@ -29,12 +29,19 @@ func _ready():
     update_sprite_dimensions()
     set_initial_position()
 
-    SignalBus.navigation_click.connect(_on_navigation_click)
+    SignalBus.navigation_click.connect(_on_navigation_click)    
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)
 
+
+func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:            
+    if area == $".": # If the area that triggered the signal is our own area
+        # print("I, %s, have entered floor #%d" % [name, floor_number])
+        sprite_data_new.current_floor_number = floor_number
     
 
 func _on_navigation_click(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
-    print("Navigation click received in player script")
+    # print("Navigation click received in player script")
+    pass
 
 
 #region Set-Up
@@ -49,8 +56,17 @@ func update_sprite_dimensions():
     if idle_texture:
         sprite_data_new.sprite_width = (idle_texture.get_width() * $AnimatedSprite2D.scale.x)
         sprite_data_new.sprite_height = (idle_texture.get_height() * $AnimatedSprite2D.scale.y)
+        
+        # Update collision shape to match sprite dimensions
+        var collision_shape = $CollisionShape2D
+        if collision_shape:
+            var rect_shape = RectangleShape2D.new()
+            rect_shape.size = Vector2(sprite_data_new.sprite_width, sprite_data_new.sprite_height)
+            collision_shape.shape = rect_shape
+            # Center the collision shape
+            collision_shape.position = Vector2.ZERO
     else:
-        push_warning("Warning: 'idle' animation (frame 0) not found.")
+        print("Warning: 'idle' animation (frame 0) not found.")
 
 
 

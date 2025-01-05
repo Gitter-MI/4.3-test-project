@@ -22,6 +22,19 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
           " DoorIndex:", door_index)
 
 
+
+        
+        
+        
+func print_all_registered():
+    print("Print only the keys or the full dictionaries")
+    print("Floors: ", floors)
+    print("Doors: ", doors)
+    print("Player: ", player.keys())
+    print("Elevators: ", elevators)
+
+#region Register Areas
+
 #--- Floors ---
 func register_all_floors():
     var floor_nodes = get_tree().get_nodes_in_group("floors")
@@ -127,13 +140,4 @@ func register_player_sprite(player_node: Node2D):
             "height": data.sprite_height,
             "ref": player_node
         }
-
-
-func print_all_registered():
-    print("Print only the keys or the full dictionaries")
-    print("Floors: ", floors)
-    print("Doors: ", doors)
-    print("Player: ", player.keys())
-    print("Elevators: ", elevators)
-    
 #endregion
