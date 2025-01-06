@@ -44,15 +44,15 @@ func _input_event(_viewport, event, _shape_idx):
             floor_number,
             -1  # We use -1 since this is not a door
         )
-    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
-        var floor_collision_edges = get_collision_edges()        
-        var bottom_edge_y = collision_edges["bottom"]
-        SignalBus.floor_clicked.emit(
-            floor_number,
-            event.global_position,
-            bottom_edge_y,
-            floor_collision_edges
-        )
+    #if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
+        #var floor_collision_edges = get_collision_edges()        
+        #var bottom_edge_y = collision_edges["bottom"]
+        #SignalBus.floor_clicked.emit(
+            #floor_number,
+            #event.global_position,
+            #bottom_edge_y,
+            #floor_collision_edges
+        #)
 
 
   

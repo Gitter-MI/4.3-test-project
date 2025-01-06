@@ -33,6 +33,8 @@ func _ready():
     
     $AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
+    
+    SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)
 
 
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:            
@@ -304,54 +306,39 @@ func update_state_after_horizontal_movement() -> void:
 #####################################################################################################
 
 
-func adjust_click_position(collision_edges: Dictionary, click_position: Vector2, bottom_edge_y: float) -> Vector2:
-    var sprite_width: float = sprite_data.sprite_width
-    var sprite_height: float = sprite_data.sprite_height
-
-    # sprite cannot move into the bounding walls to the left and right of the building
-    var adjusted_x: float = click_position.x
-    var left_bound: float = collision_edges["left"]
-    var right_bound: float = collision_edges["right"]    
-    if click_position.x < left_bound + sprite_width / 2:
-        adjusted_x = left_bound + sprite_width / 2
-    elif click_position.x > right_bound - sprite_width / 2:
-        adjusted_x = right_bound - sprite_width / 2
-    
-    # sprite can only move on the ground
-    var adjusted_y: float = bottom_edge_y - sprite_height / 2
-
-    return Vector2(adjusted_x, adjusted_y)
-
-
-func _on_floor_clicked(floor_number: int, click_position: Vector2, bottom_edge_y: float, collision_edges: Dictionary) -> void:
-    var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, click_position, bottom_edge_y)
-    #print("-------------------------------------------------------")
-    #print("clicked floor_number: ", floor_number)
-    if sprite_data.current_state in [SpriteData.State.IN_ELEVATOR, SpriteData.State.EXITING_ELEVATOR, SpriteData.State.ENTERING_ELEVATOR]:
-        # Instead of simply storing, call a helper that decides whether to update the queue
-        handle_in_elevator_click(floor_number, adjusted_click_position, -1)
+func _on_adjusted_navigation_click(floor_number: int, door_index: int, adjusted_position: Vector2) -> void:
+    # Decide if it’s a floor or door based on door_index
+    if door_index == -1:
+        # Floor click
+        _on_floor_clicked(floor_number, adjusted_position)
     else:
-        # If not in elevator, set target data immediately
-        var door_index = -1            
-        
-        set_target_data(floor_number, adjusted_click_position, door_index)
-
-        #print("current_position: ", sprite_data.current_position)
-        #print("target_position: ", sprite_data.target_position)
-        #print("current_floor_number: ", sprite_data.current_floor_number)
-        #print("target_floor_number: ", sprite_data.target_floor_number)
+        # Door click
+        _on_door_clicked(door_index, floor_number, adjusted_position)
 
 
-
-func _on_door_clicked(door_center_x: int, floor_number: int, door_index: int, collision_edges: Dictionary, _click_position: Vector2) -> void:
-    var bottom_edge_y = collision_edges["bottom"]
-    var door_click_position: Vector2 = Vector2(door_center_x, bottom_edge_y)
-    var adjusted_click_position: Vector2 = adjust_click_position(collision_edges, door_click_position, bottom_edge_y)
-
-    if sprite_data.current_state in [SpriteData.State.IN_ELEVATOR, SpriteData.State.EXITING_ELEVATOR, SpriteData.State.ENTERING_ELEVATOR]:        
-        handle_in_elevator_click(floor_number, adjusted_click_position, door_index)
+func _on_floor_clicked(floor_number: int, click_position: Vector2) -> void:
+    # We skip `_adjust_click_position` because the nav controller already did it!
+    # The rest of your logic remains the same:
+    if sprite_data.current_state in [
+        SpriteData.State.IN_ELEVATOR,
+        SpriteData.State.EXITING_ELEVATOR,
+        SpriteData.State.ENTERING_ELEVATOR
+    ]:
+        handle_in_elevator_click(floor_number, click_position, -1)
     else:
-        set_target_data(floor_number, adjusted_click_position, door_index)
+        set_target_data(floor_number, click_position, -1)
+
+
+func _on_door_clicked(door_index: int, floor_number: int, click_position: Vector2) -> void:
+    # Again, skip `_adjust_click_position`. Use the existing logic:
+    if sprite_data.current_state in [
+        SpriteData.State.IN_ELEVATOR,
+        SpriteData.State.EXITING_ELEVATOR,
+        SpriteData.State.ENTERING_ELEVATOR
+    ]:
+        handle_in_elevator_click(floor_number, click_position, door_index)
+    else:
+        set_target_data(floor_number, click_position, door_index)
 
 
 
