@@ -28,8 +28,8 @@ func _ready():
     SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
-    SignalBus.floor_clicked.connect(_on_floor_clicked)
-    SignalBus.door_clicked.connect(_on_door_clicked)
+    # SignalBus.floor_clicked.connect(_on_floor_clicked)
+    # SignalBus.door_clicked.connect(_on_door_clicked)
     
     $AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
@@ -307,38 +307,15 @@ func update_state_after_horizontal_movement() -> void:
 
 
 func _on_adjusted_navigation_click(floor_number: int, door_index: int, adjusted_position: Vector2) -> void:
-    # Decide if it’s a floor or door based on door_index
-    if door_index == -1:
-        # Floor click
-        _on_floor_clicked(floor_number, adjusted_position)
-    else:
-        # Door click
-        _on_door_clicked(door_index, floor_number, adjusted_position)
-
-
-func _on_floor_clicked(floor_number: int, click_position: Vector2) -> void:
-    # We skip `_adjust_click_position` because the nav controller already did it!
-    # The rest of your logic remains the same:
     if sprite_data.current_state in [
         SpriteData.State.IN_ELEVATOR,
         SpriteData.State.EXITING_ELEVATOR,
         SpriteData.State.ENTERING_ELEVATOR
     ]:
-        handle_in_elevator_click(floor_number, click_position, -1)
+        handle_in_elevator_click(floor_number, adjusted_position, door_index)
     else:
-        set_target_data(floor_number, click_position, -1)
+        set_target_data(floor_number, adjusted_position, door_index)
 
-
-func _on_door_clicked(door_index: int, floor_number: int, click_position: Vector2) -> void:
-    # Again, skip `_adjust_click_position`. Use the existing logic:
-    if sprite_data.current_state in [
-        SpriteData.State.IN_ELEVATOR,
-        SpriteData.State.EXITING_ELEVATOR,
-        SpriteData.State.ENTERING_ELEVATOR
-    ]:
-        handle_in_elevator_click(floor_number, click_position, door_index)
-    else:
-        set_target_data(floor_number, click_position, door_index)
 
 
 
@@ -468,16 +445,7 @@ func get_elevator_cabin() -> Node:
 ##################              Basic Sprite Component                        #######################  
 #####################################################################################################
 
-#func update_sprite_dimensions():
-    #var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
-    #if idle_texture:
-        #sprite_data.sprite_width = (idle_texture.get_width() * $AnimatedSprite2D.scale.x)
-        #sprite_data.sprite_height = (idle_texture.get_height() * $AnimatedSprite2D.scale.y)
-    #else:
-        #print("Warning: 'idle' animation (frame 0) not found.")
-
-
-func update_sprite_dimensions():
+func update_sprite_dimensions():   # also sets the collsion shape. 
     var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
     if idle_texture:
         sprite_data.sprite_width = (idle_texture.get_width() * $AnimatedSprite2D.scale.x)

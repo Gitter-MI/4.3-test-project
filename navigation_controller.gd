@@ -16,13 +16,9 @@ func _ready():
 
 
 func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:
-    # Get sprite dimensions from your stored data
-
-
     var edges: Dictionary
     var initial_click_pos: Vector2
-
-    # Decide which data to use:
+    
     if door_index >= 0:     # Door Click        
         edges = doors[door_index]["edges"]
         var door_center_x = doors[door_index]["center_x"]
@@ -38,8 +34,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     else:   # Floor Click (door_index == -1)        
         edges = floors[floor_number]["edges"]
         initial_click_pos = global_position
-
-    # Now clamp/adjust the click so the sprite won’t go out of bounds
+    
     var adjusted_click_position: Vector2 = _adjust_click_position(
         edges,
         initial_click_pos
