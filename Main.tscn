@@ -13,6 +13,9 @@
 
 [node name="Building" parent="." instance=ExtResource("1_avx81")]
 
+[node name="Navigation_Controller" type="Node" parent="."]
+script = ExtResource("8_7c7ne")
+
 [node name="Cabin" parent="." instance=ExtResource("2_kci24")]
 unique_name_in_owner = true
 
@@ -28,6 +31,3 @@ metadata/_edit_group_ = true
 
 [node name="Camera2D" type="Camera2D" parent="Camera"]
 script = ExtResource("4_a875k")
-
-[node name="Navigation_Controller" type="Node" parent="."]
-script = ExtResource("8_7c7ne")

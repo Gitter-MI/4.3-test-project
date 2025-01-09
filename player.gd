@@ -86,7 +86,8 @@ func entering_elevator():
     var old_state = sprite_data.current_state
     sprite_data.current_state = SpriteData.State.ENTERING_ELEVATOR
     if old_state != sprite_data.current_state:
-        print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+        # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+        pass
 
     var elevator = get_elevator_for_current_floor()
     sprite_data.elevator_y_offset = global_position.y - elevator.global_position.y
@@ -104,7 +105,8 @@ func _on_sprite_entered_elevator():
         var old_state = sprite_data.current_state
         sprite_data.current_state = SpriteData.State.IN_ELEVATOR
         if old_state != sprite_data.current_state:
-            print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            pass
 
         SignalBus.enter_animation_finished.emit(sprite_data.sprite_name, sprite_data.target_floor_number)
         _update_animation(Vector2.ZERO)
@@ -120,7 +122,8 @@ func exiting_elevator() -> void:
     var old_state = sprite_data.current_state
     # sprite_data.current_state = SpriteData.State.IDLE
     if old_state != sprite_data.current_state:
-        print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+        # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+        pass
     $AnimatedSprite2D.play("exit")
     SignalBus.exiting_elevator.emit(sprite_data.sprite_name)
 
@@ -153,7 +156,8 @@ func _on_elevator_door_state_changed(new_state):
             var old_state = sprite_data.current_state
             sprite_data.current_state = SpriteData.State.EXITING_ELEVATOR
             if old_state != sprite_data.current_state:
-                print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                pass
             exiting_elevator()
 
 
@@ -230,7 +234,8 @@ func movement_logic(delta: float) -> void:
                     var old_state = sprite_data.current_state
                     sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
                     if old_state != sprite_data.current_state:
-                        print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                        # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                        pass
                     sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
                     # print(sprite_data.sprite_name, " is now WAITING_FOR_ELEVATOR. In movement logic")
             else:
@@ -259,7 +264,8 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
             var old_state = sprite_data.current_state
             sprite_data.current_state = SpriteData.State.WALKING
             if old_state != sprite_data.current_state:
-                print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                pass
 
         global_position += direction * sprite_data.speed * delta
     else:
@@ -278,24 +284,27 @@ func update_state_after_horizontal_movement() -> void:
         if sprite_data.current_state != SpriteData.State.WAITING_FOR_ELEVATOR:
             var old_state = sprite_data.current_state
             sprite_data.current_state = SpriteData.State.WAITING_FOR_ELEVATOR
-            if old_state != sprite_data.current_state:
-                print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            if old_state != sprite_data.current_state:                
+                # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                pass
     elif sprite_data.target_room >= 0:
         if sprite_data.current_state != SpriteData.State.ENTERING_ROOM:
             var old_state = sprite_data.current_state
             sprite_data.current_state = SpriteData.State.ENTERING_ROOM
             if old_state != sprite_data.current_state:
-                print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                pass
     else:
         if sprite_data.current_state != SpriteData.State.IDLE:
             var old_state = sprite_data.current_state
             sprite_data.current_state = SpriteData.State.IDLE
             if old_state != sprite_data.current_state:
-                print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+                pass
 
             last_elevator_request = {"sprite_name": "", "floor_number": -1}
             sprite_data.needs_elevator = false
-            print("update after horizontal movement")
+            # print("update after horizontal movement")
 
 
 
@@ -328,7 +337,8 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         var old_state = sprite_data.current_state
         sprite_data.current_state = SpriteData.State.IDLE
         if old_state != sprite_data.current_state:
-            print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            pass
 
         sprite_data.needs_elevator = false
         last_elevator_request.clear()
@@ -342,7 +352,8 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         var old_state = sprite_data.current_state
         sprite_data.current_state = SpriteData.State.IDLE
         if old_state != sprite_data.current_state:
-            print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            # print("Sprite state changed from %s to %s" % [old_state, sprite_data.current_state])
+            pass
 
         sprite_data.needs_elevator = true
         last_elevator_request.clear()

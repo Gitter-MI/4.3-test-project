@@ -241,11 +241,11 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
         var request = elevator_queue[i]
         if request['sprite_name'] == sprite_name:
             if request['target_floor'] == target_floor:
-                print("Duplicate request ignored for sprite:", sprite_name, "to floor:", target_floor)
+                # print("Duplicate request ignored for sprite: ", sprite_name, " to floor: ", target_floor)
                 return
             else:
                 elevator_queue[i] = {'target_floor': target_floor, 'sprite_name': sprite_name}
-                print("Replaced request for sprite:", sprite_name, "with new floor:", target_floor)
+                # print("Replaced request for sprite:", sprite_name, "with new floor:", target_floor)
                 request_updated = true
                 break
 
@@ -273,17 +273,18 @@ func start_waiting_timer() -> void:
     if not elevator_queue.is_empty():
         # queue has not been emptied because the sprite didn't exit yet. Start timer when the sprite exited. 
         cabin_timer.start()
-        print("Waiting timer started.")
+        # print("Waiting timer started.")
 
 
 func _on_cabin_timer_timeout() -> void:
-    print("Cabin timer timed out!")
+    # print("Cabin timer timed out!")
     if not elevator_queue.is_empty():
-        var removed_request = elevator_queue[0]
+        var _removed_request = elevator_queue[0]
         elevator_queue.remove_at(0)
-        print("Removed oldest request due to inactivity: ", removed_request)
+        # print("Removed oldest request due to inactivity: ", removed_request)
     else:
-        print("Elevator queue is empty, nothing to remove.")
+        # print("Elevator queue is empty, nothing to remove.")
+        pass
 
 
 
@@ -329,7 +330,7 @@ func _print_elevator_direction() -> void:
 #region elevator queue management
 func add_to_elevator_queue(request: Dictionary) -> void:    
     elevator_queue.append(request)
-    print("Current elevator queue:", elevator_queue)
+    # print("Current elevator queue:", elevator_queue)
 
 
 
@@ -353,7 +354,7 @@ func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor
-            print("Current elevator queue after update:", elevator_queue)
+            # print("Current elevator queue after update:", elevator_queue)
             return
     
 #endregion

@@ -11,36 +11,18 @@ func _ready():
     register_all_doors()
     register_all_player_sprites()
     register_all_elevators()
+        
+    # print_all_registered()
 
     SignalBus.navigation_click.connect(_on_navigation_click)
 
 
-func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:
-    var edges: Dictionary
-    var initial_click_pos: Vector2
+func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:    
+    var click_data: Dictionary = _determine_click_type(door_index, floor_number, global_position)
+    var edges: Dictionary = click_data["edges"]
+    var initial_click_pos: Vector2 = click_data["initial_click_pos"]
+    var adjusted_click_position: Vector2 = _adjust_click_position(edges, initial_click_pos)
     
-    if door_index >= 0:     # Door Click        
-        edges = doors[door_index]["edges"]
-        var door_center_x = doors[door_index]["center_x"]
-        var bottom_edge_y = edges["bottom"]
-        initial_click_pos = Vector2(door_center_x, bottom_edge_y)
-
-    elif door_index == -2:  # Elevator Click        
-        edges = elevators[floor_number]["edges"]
-        var elevator_center_x = elevators[floor_number]["position"].x
-        var bottom_edge_y_elev = edges["bottom"]
-        initial_click_pos = Vector2(elevator_center_x, bottom_edge_y_elev)
-
-    else:   # Floor Click (door_index == -1)        
-        edges = floors[floor_number]["edges"]
-        initial_click_pos = global_position
-    
-    var adjusted_click_position: Vector2 = _adjust_click_position(
-        edges,
-        initial_click_pos
-    )
-
-    # Finally, emit our adjusted signal.
     SignalBus.emit_signal(
         "adjusted_navigation_click",
         floor_number,
@@ -49,32 +31,55 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     )
 
 
-func _adjust_click_position(
-    collision_edges: Dictionary,
-    click_position: Vector2
-) -> Vector2:
+func _determine_click_type(door_index: int, floor_number: int, global_position: Vector2) -> Dictionary:
+    var edges: Dictionary
+    var initial_click_pos: Vector2
+
+    if door_index >= 0:
+        # Door Click
+        edges = doors[door_index]["edges"]
+        var door_center_x = doors[door_index]["center_x"]
+        var bottom_edge_y = edges["bottom"]
+        initial_click_pos = Vector2(door_center_x, bottom_edge_y)
+
+    elif door_index == -2:
+        # Elevator Click
+        edges = elevators[floor_number]["edges"]
+        var elevator_center_x = elevators[floor_number]["position"].x
+        var bottom_edge_y_elev = edges["bottom"]
+        initial_click_pos = Vector2(elevator_center_x, bottom_edge_y_elev)
+
+    else:
+        # Floor Click (door_index == -1)
+        edges = floors[floor_number]["edges"]
+        initial_click_pos = global_position
+
+    return {
+        "edges": edges,
+        "initial_click_pos": initial_click_pos
+    }
+
+
+func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2) -> Vector2:
+    # For clarity, you can still fetch sprite size if needed:
     var sprite_width: float = player["Player_new"].width
     var sprite_height: float = player["Player_new"].height
+
     var left_bound: float = collision_edges["left"]
     var right_bound: float = collision_edges["right"]
     var bottom_edge_y: float = collision_edges["bottom"]
 
     # Horizontal clamp
-    var adjusted_x = click_position.x
+    var adjusted_x: float = click_position.x
     if adjusted_x < left_bound + sprite_width / 2:
         adjusted_x = left_bound + sprite_width / 2
     elif adjusted_x > right_bound - sprite_width / 2:
         adjusted_x = right_bound - sprite_width / 2
 
-    # Vertical position: sprite stands on top of bottom edge
-    var adjusted_y = bottom_edge_y - sprite_height / 2
+    # Vertical alignment (sprite stands on top of the bottom edge)
+    var adjusted_y: float = bottom_edge_y - sprite_height / 2
 
     return Vector2(adjusted_x, adjusted_y)
-
-
-
-        
- 
 
 
 
