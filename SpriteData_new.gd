@@ -35,9 +35,89 @@ var nav_target_floor: int = -1
 var nav_target_room: int = -1
 
 
+# sprite_data_new.set_elevator_state(SpriteDataNew.ElevatorState.WAITING_FOR_ELEVATOR)
+
+
+
+func get_active_state() -> String:    
+    if movement_state != MovementState.NONE:
+        return "movement:%s" % movement_state
+    if room_state != RoomState.NONE:
+        return "room:%s" % room_state
+    if elevator_state != ElevatorState.NONE:
+        return "elevator:%s" % elevator_state
+    return "none"
+
+
+func set_movement_state(new_state: MovementState) -> void:    
+    movement_state = new_state
+    room_state = RoomState.NONE
+    elevator_state = ElevatorState.NONE
+
+
+func set_room_state(new_state: RoomState) -> void:    
+    room_state = new_state
+    movement_state = MovementState.NONE
+    elevator_state = ElevatorState.NONE
+
+
+func set_elevator_state(new_state: ElevatorState) -> void:    
+    elevator_state = new_state
+    movement_state = MovementState.NONE
+    room_state = RoomState.NONE
+
+
+
+func needs_elevator(destination_floor: int) -> bool:
+    return current_floor_number != destination_floor
+
+
+
+func set_current_position(new_position: Vector2, floor_number: int, room_index: int) -> void:
+    current_position = new_position
+    current_floor_number = floor_number
+    current_room = room_index
+
+func set_target_position(new_position: Vector2, floor_number: int, room_index: int) -> void:
+    target_position = new_position
+    target_floor_number = floor_number
+    target_room = room_index
+
+func set_stored_position(new_position: Vector2, floor_number: int, room_index: int) -> void:
+    has_stored_data = true
+    stored_target_position = new_position
+    stored_target_floor = floor_number
+    stored_target_room = room_index
+
+func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
+    
+    print("Setting sprite nav data...")
+    has_nav_data = true
+    nav_target_position = _click_global_position
+    nav_target_floor    = _floor_number
+    nav_target_room     = _door_index
+    
+    print("nav data has been set to: ")
+    print("nav_target_position: ",nav_target_position)
+    print("nav_target_floor: ",nav_target_floor)
+    print("nav_target_room: ",nav_target_room)
+    
+func reset_nav_data() -> void:
+    has_nav_data = false
+    nav_target_position = Vector2.ZERO
+    nav_target_floor = -1
+    nav_target_room = -1
+
+func reset_stored_data() -> void:
+    has_stored_data = false
+    stored_target_position = Vector2.ZERO
+    stored_target_floor = -1
+    stored_target_room = -1
+
+
 
 # old helper variables
-var needs_elevator: bool = false  # may not be needed anymore with the stored position indicating elevator need
+# var needs_elevator: bool = false  # may not be needed anymore with the stored position indicating elevator need
 # var current_elevator_position: Vector2 = Vector2.ZERO   # needed for sync movement with the elevator # may be redundant with the navigation controller in place
 var elevator_y_offset # needed for sync elevator movement, # may be redundant with the navigation controller in place
 

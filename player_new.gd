@@ -25,13 +25,12 @@ func _ready():
 func _process(_delta: float) -> void:    
 
     # process_input
+    if sprite_data_new.has_nav_data:
+        pathfinder.determine_path(sprite_data_new)
+
     # process_commands
     # process_state
     
-    
-    if sprite_data_new.nav_target_position != Vector2.ZERO:        
-        pathfinder.determine_path(sprite_data_new)
-    pass    
 
 
 
@@ -49,7 +48,11 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
 
 func _on_navigation_click(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
     # print("Navigation click received in player script")
-    pass
+    
+    # print("sprite has nav data?: ", sprite_data_new.has_nav_data)
+    sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, _door_index)
+
+
 
 
 

@@ -8,13 +8,14 @@ Pathfinder
 Invoke when nav / command exists
 Or
 at target location and stored exists
+(has_nav_data = true)
 
-Invoke from _progress, not from the other functions
+Invoke from _progress in player script, not from the other functions (done)
 
 
 ```
 Sets target and stored position 
-Inputs: nav or command, stored position 
+Inputs: nav or command or stored position  (in this case we are looking at the nav position)
 Find path from nav [given destination]
 Assumes in elevator target is elevator position on destination floor 
 ***
@@ -44,6 +45,8 @@ Set target to next floor
 Set stored position to nav target 
 Set nav target to null
 
+when done set has_nav_data to false
+
 '''
 
 
@@ -52,8 +55,11 @@ func _ready():
     pass
     
 
-func determine_path(sprite_data_new):        
+func determine_path(_sprite_data_new):      
     
-    print("determining path for")
-    print("sprite_data_new.sprite_name: ", sprite_data_new.sprite_name)
+    # 1st determine the sprite's current state. 
+      
+    
+    # print("determining path for")
+    # print("sprite_data_new.sprite_name: ", sprite_data_new.sprite_name)
     pass

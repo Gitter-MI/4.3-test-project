@@ -56,8 +56,12 @@ func _ready():
     
     navigation_click.connect(_on_navigation_click)
     adjusted_navigation_click.connect(_on_adjusted_navigation_click)
+    player_sprite_ready.connect(_on_player_sprite_ready)
 
 
+
+func _on_player_sprite_ready():
+    pass
 
 
 func _on_navigation_click(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
