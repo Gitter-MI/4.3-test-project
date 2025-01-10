@@ -19,7 +19,7 @@ func _ready():
 
 
 func _on_player_sprite_ready():
-    # print("signal received")
+    print("signal received")  # is being printed once
     register_all_player_sprites()
     # print_all_registered()
 
@@ -193,16 +193,18 @@ func register_elevator(floor_number: int, edges: Dictionary, elevator_ref: Node)
 
 #--- Player Sprites ---
 func register_all_player_sprites():
-    # print("registering player sprites in nav controller")
-    var sprite_nodes = get_tree().get_nodes_in_group("player_sprites")
+    print("registering player sprites in nav controller") # is printed once
+    var sprite_nodes = get_tree().get_nodes_in_group("player_sprites_new")
     # print("sprite_nodes: ", sprite_nodes)  # sprite_nodes is empty
-    for node in sprite_nodes:
-        if node is Area2D:
+    for node in sprite_nodes:    
+        if node is Area2D:    # Player_new is an Area2D, all other nodes are not Area2D
+            print("node in register_all_player_sprites: ", node)
             # print("registering player sprite in register_all_player_sprites")
             register_player_sprite(node)
 
 func register_player_sprite(player_node: Area2D):
-    # print("in register player sprite")
+    
+    print("in register player sprite") # is being printed twice
     # Fetch the correct property from player_node
     var data = player_node.get("sprite_data_new")
     # print("var data: ", data)
@@ -212,6 +214,7 @@ func register_player_sprite(player_node: Area2D):
             "height": data.sprite_height,
             "ref": player_node
         }
+        print("player dict in nav controller: ", player)  # prints the expected values
     else:
         push_warning(
             "The node '%s' does not have a valid sprite_data_new property of type SpriteDataNew."
@@ -220,13 +223,5 @@ func register_player_sprite(player_node: Area2D):
 
 
 
-#func register_player_sprite(player_node: Node2D):
-    ## Check if sprite_data_new exists and is of the correct type
-    #var data = player_node.get("Player_new")
-    #if data is SpriteDataNew:
-        #player[player_node.name] = {
-            #"width": data.sprite_width,
-            #"height": data.sprite_height,
-            #"ref": player_node
-        #}
+
 #endregion

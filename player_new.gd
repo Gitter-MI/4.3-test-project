@@ -95,7 +95,7 @@ func connect_to_signals():
 #####################################################################################################
 
 func instantiate_sprite():
-    add_to_group("player_sprites")
+    add_to_group("player_sprites_new")
     # print("player is in group player_sprites")
     sprite_data_new = SpriteDataNew.new()    
     apply_scale_factor_to_sprite()
