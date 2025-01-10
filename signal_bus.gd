@@ -6,6 +6,9 @@ extends Node
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)
 signal adjusted_navigation_click(floor_number: int, door_index: int, adjusted_position: Vector2)
 
+signal player_sprite_ready()
+
+
 signal floor_area_entered(area: Area2D, floor_number: int)
 
 signal elevator_request(sprite_name: String, target_floor: int)

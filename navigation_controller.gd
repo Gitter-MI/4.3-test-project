@@ -7,14 +7,21 @@ var player: Dictionary = {}
 var elevators: Dictionary = {}
 
 func _ready():
+    
     register_all_floors()
-    register_all_doors()
-    register_all_player_sprites()
+    register_all_doors()    
     register_all_elevators()
-        
     # print_all_registered()
 
     SignalBus.navigation_click.connect(_on_navigation_click)
+    SignalBus.player_sprite_ready.connect(_on_player_sprite_ready)
+
+
+
+func _on_player_sprite_ready():
+    # print("signal received")
+    register_all_player_sprites()
+    # print_all_registered()
 
 
 func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:    
@@ -61,9 +68,9 @@ func _determine_click_type(door_index: int, floor_number: int, global_position: 
 
 
 func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2) -> Vector2:
-    # For clarity, you can still fetch sprite size if needed:
-    var sprite_width: float = player["Player_new"].width
-    var sprite_height: float = player["Player_new"].height
+    # Correct way to access sprite dimensions from the nested dictionary
+    var sprite_width: float = player["Player_new"]["width"]
+    var sprite_height: float = player["Player_new"]["height"]
 
     var left_bound: float = collision_edges["left"]
     var right_bound: float = collision_edges["right"]
@@ -87,11 +94,11 @@ func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2
 
        
 func print_all_registered():
-    print("Print only the keys or the full dictionaries")
-    print("Floors: ", floors)
-    print("Doors: ", doors)
+    #print("Print only the keys or the full dictionaries")
+    #print("Floors: ", floors)
+    #print("Doors: ", doors)
     print("Player: ", player.keys())
-    print("Elevators: ", elevators)
+    #print("Elevators: ", elevators)
 
 #region Register Areas
 
@@ -186,18 +193,40 @@ func register_elevator(floor_number: int, edges: Dictionary, elevator_ref: Node)
 
 #--- Player Sprites ---
 func register_all_player_sprites():
+    # print("registering player sprites in nav controller")
     var sprite_nodes = get_tree().get_nodes_in_group("player_sprites")
+    # print("sprite_nodes: ", sprite_nodes)  # sprite_nodes is empty
     for node in sprite_nodes:
-        if node is Node2D:
+        if node is Area2D:
+            # print("registering player sprite in register_all_player_sprites")
             register_player_sprite(node)
 
-func register_player_sprite(player_node: Node2D):
-    # Check if sprite_data_new exists and is of the correct type
+func register_player_sprite(player_node: Area2D):
+    # print("in register player sprite")
+    # Fetch the correct property from player_node
     var data = player_node.get("sprite_data_new")
+    # print("var data: ", data)
     if data is SpriteDataNew:
         player[player_node.name] = {
             "width": data.sprite_width,
             "height": data.sprite_height,
             "ref": player_node
         }
+    else:
+        push_warning(
+            "The node '%s' does not have a valid sprite_data_new property of type SpriteDataNew."
+            % player_node.name
+        )
+
+
+
+#func register_player_sprite(player_node: Node2D):
+    ## Check if sprite_data_new exists and is of the correct type
+    #var data = player_node.get("Player_new")
+    #if data is SpriteDataNew:
+        #player[player_node.name] = {
+            #"width": data.sprite_width,
+            #"height": data.sprite_height,
+            #"ref": player_node
+        #}
 #endregion

@@ -16,19 +16,21 @@ func _ready():
     instantiate_sprite()
     connect_to_signals()
     set_initial_position()
-
+    # print("Player sprite ready")
+    SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
     
 
 
 
-func _process(delta: float) -> void:    
+func _process(_delta: float) -> void:    
 
     # process_input
     # process_commands
     # process_state
     
-    # pathfinder.determine_path() # (sprite_data_new, sprite_data_new.sprite_name)
-
+    
+    if sprite_data_new.nav_target_position != Vector2.ZERO:        
+        pathfinder.determine_path(sprite_data_new)
     pass    
 
 
@@ -80,7 +82,7 @@ func connect_to_signals():
     #SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     #SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
     #SignalBus.floor_clicked.connect(_on_floor_clicked)
-    #SignalBus.door_clicked.connect(_on_door_clicked)
+    #SignalBus.door_clicked.connect(_on_door_clicked)player_sprite_ready
     #$AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)   
 #endregion
 
@@ -94,6 +96,7 @@ func connect_to_signals():
 
 func instantiate_sprite():
     add_to_group("player_sprites")
+    # print("player is in group player_sprites")
     sprite_data_new = SpriteDataNew.new()    
     apply_scale_factor_to_sprite()
     update_sprite_dimensions()

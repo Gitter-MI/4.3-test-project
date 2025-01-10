@@ -24,13 +24,16 @@ var target_position: Vector2 = Vector2.ZERO
 var target_floor_number: int = 3                    # initial spawn floor
 var target_room: int = -1
 
+var has_stored_data: bool = false
 var stored_target_position: Vector2 = Vector2.ZERO
 var stored_target_floor: int = -1
 var stored_target_room: int = -1
 
+var has_nav_data: bool = false
 var nav_target_position: Vector2 = Vector2.ZERO
 var nav_target_floor: int = -1
 var nav_target_room: int = -1
+
 
 
 # old helper variables
