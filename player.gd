@@ -34,7 +34,7 @@ func _ready():
     $AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
     
-    SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)
+    # SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)
 
 
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:            

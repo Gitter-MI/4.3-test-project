@@ -44,6 +44,7 @@ func _input_event(_viewport, event, _shape_idx):
             floor_number,
             -1  # We use -1 since this is not a door
         )
+        # print("_input_event: click_global_position: ", event.global_position)   # is the wrong value, but that's ok, we will adjust it
     #if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
         #var floor_collision_edges = get_collision_edges()        
         #var bottom_edge_y = collision_edges["bottom"]

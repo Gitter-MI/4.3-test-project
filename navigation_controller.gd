@@ -31,6 +31,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     var edges: Dictionary = click_data["edges"]
     var initial_click_pos: Vector2 = click_data["initial_click_pos"]
     var adjusted_click_position: Vector2 = _adjust_click_position(edges, initial_click_pos)
+    # print("_on_navigation_click: global_position: ", global_position)
     
     SignalBus.emit_signal(
         "adjusted_navigation_click",
@@ -38,7 +39,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
         door_index,
         adjusted_click_position
     )
-    # print("adjusted click data in _on_navigation_click: ", adjusted_click_position)
+    # print("!!!! adjusted click data in _on_navigation_click: ", adjusted_click_position)   # has the correct value! 128
 
 
 func _determine_click_type(door_index: int, floor_number: int, global_position: Vector2) -> Dictionary:
@@ -62,6 +63,7 @@ func _determine_click_type(door_index: int, floor_number: int, global_position: 
     else:
         # Floor Click (door_index == -1)
         edges = floors[floor_number]["edges"]
+        # print("edges of floor 3 in nav controller: ", edges)  178
         initial_click_pos = global_position
 
     return {
@@ -102,10 +104,10 @@ func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2
        
 func print_all_registered():
     #print("Print only the keys or the full dictionaries")
-    #print("Floors: ", floors)
+    print("Floors: ", floors)
     #print("Doors: ", doors)
     # print("Player: ", player.keys())
-    print("Elevators: ", elevators)
+    # print("Elevators: ", elevators)
 
 #region Register Areas
 

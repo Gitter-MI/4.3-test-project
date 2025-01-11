@@ -83,6 +83,7 @@ func set_elevator_state(new_state: ElevatorState) -> void:
 
 #region Set and Re-Set Position Data
 func set_current_position(new_position: Vector2, floor_number: int, room_index: int) -> void:
+    # print("set_current_position")
     current_position = new_position
     current_floor_number = floor_number
     current_room = room_index
@@ -91,6 +92,7 @@ func set_target_position(new_position: Vector2, floor_number: int, room_index: i
     target_position = new_position
     target_floor_number = floor_number
     target_room = room_index
+    # print("set_target_position: ", target_position)
 
 func set_stored_position(new_position: Vector2, floor_number: int, room_index: int) -> void:
     has_stored_data = true
@@ -99,6 +101,7 @@ func set_stored_position(new_position: Vector2, floor_number: int, room_index: i
     stored_target_room = room_index
 
 func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
+                        # should be adjusted click position!
     
     # print("Setting sprite nav data...")
     has_nav_data = true
@@ -107,7 +110,7 @@ func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _d
     nav_target_room     = _door_index
     
     # print("nav data has been set to: ")
-    #print("nav_target_position: ",nav_target_position)
+    # print("nav_target_position: ",nav_target_position)
     #print("nav_target_floor: ",nav_target_floor)
     #print("nav_target_room: ",nav_target_room)
     

@@ -27,6 +27,9 @@ func _ready():
 func _process(delta: float) -> void:
     
     # process_input
+    # process_commands    
+    # process_state
+    
     if sprite_data_new.has_nav_data:
         pathfinder.determine_path(sprite_data_new)
         
@@ -36,10 +39,10 @@ func _process(delta: float) -> void:
         sprite_data_new.ActiveState.MOVEMENT:
             _process_movement_state(delta)  # for later
             # print("sprite is in MOVEMENT state")
-        # sprite_data_new.ActiveState.ROOM:
-            # print("sprite is in ROOM state")
-        # sprite_data_new.ActiveState.ELEVATOR:
-            # print("sprite is in ELEVATOR state")
+        sprite_data_new.ActiveState.ROOM:
+            print("sprite is in ROOM state")
+        sprite_data_new.ActiveState.ELEVATOR:
+            print("sprite is in ELEVATOR state")
         _:
             push_warning("Sprite is in no recognized state!")
 
@@ -55,7 +58,7 @@ func _process_movement_state(delta: float) -> void:
             push_warning("Unknown movement sub-state: %s" % str(sprite_data_new.movement_state))
 
 
-func _process_movement_idle(delta: float) -> void:
+func _process_movement_idle(_delta: float) -> void:
     # print("sprite is in MovementState.IDLE state")
 
     var target_differs = (sprite_data_new.target_position != sprite_data_new.current_position)
@@ -70,23 +73,25 @@ func _process_movement_idle(delta: float) -> void:
     else:
         push_warning("Unexpected condition in IDLE state!")
 
-func _process_movement_walking(delta) -> void:
-    # print("sprite is in MovementState.WALKING state")
-    
-    if sprite_data_new.current_position == sprite_data_new.target_position:
-        _update_movement_state()        
+       
+
+
+func _process_movement_walking(delta: float) -> void:
+    # print("Sprite is in MovementState.WALKING state")    
+    if sprite_data_new.current_position.x == sprite_data_new.target_position.x:
+        print("_process_movement_walking -> _update_movement_state")
+        _update_movement_state()
     else:
         move_towards_position(sprite_data_new.target_position, delta)
-        print("Moving sprite... (placeholder)")
-
+        # print("Moving sprite... (placeholder)")
 
 func _update_movement_state() -> void:
-    var target_differs = (sprite_data_new.target_position != sprite_data_new.current_position)
+    var x_differs = (sprite_data_new.current_position.x != sprite_data_new.target_position.x)
     var has_stored = sprite_data_new.has_stored_data
     var room_index = sprite_data_new.target_room
-    
-    # 1) at target and no stored target = arrived at final destination
-    if not target_differs and not has_stored:
+
+    # 1) X matches and no stored target = arrived at final destination
+    if not x_differs and not has_stored:
         if room_index < 0 and room_index != -2:
             sprite_data_new.set_movement_state(sprite_data_new.MovementState.IDLE)
             print("Update: sprite is now in MovementState.IDLE")
@@ -98,128 +103,121 @@ func _update_movement_state() -> void:
             print("Update: sprite is now in ElevatorState.WAITING_FOR_ELEVATOR")
         else:
             push_warning("Unhandled target_room value: %d" % room_index)
-    
-    # 2) At target position and has stored data
-    elif not target_differs and has_stored:
+
+    # 2) X matches and has stored data
+    elif not x_differs and has_stored:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR)
-        print("Update: sprite is now in ElevatorState.WAITING_FOR_ELEVATOR")        
-    
-    # 3) Not at target position. 
-    elif target_differs:
+        print("Update: sprite is now in ElevatorState.WAITING_FOR_ELEVATOR")
+
+    # 3) X does not match
+    elif x_differs:
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         print("Update: sprite is now in MovementState.WALKING")
-    
+
     # 4) Fallback
     else:
         push_warning("Bad error in _update_movement_state!")
 
 
-func move_towards_position(target_position: Vector2, delta: float) -> void:
-    # Force y to remain at current_position.y (horizontal-only movement)
-    target_position.y = sprite_data_new.current_position.y
 
+
+func move_towards_position(target_position: Vector2, delta: float) -> void:
+    # Force horizontal-only movement by locking the target's Y to current_position.y
+    target_position.y = sprite_data_new.current_position.y
+    
     var direction = (target_position - sprite_data_new.current_position).normalized()
     var distance = sprite_data_new.current_position.distance_to(target_position)
 
-    # If we're more than 1 pixel away, keep moving
-    if distance > 1:
-        if sprite_data_new.movement_state != sprite_data_new.MovementState.WALKING:
-            var old_state = sprite_data_new.movement_state
-            sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
-            if old_state != sprite_data_new.movement_state:
-                print("Movement state changed from %s to %s" % [old_state, sprite_data_new.movement_state])
-
-        sprite_data_new.current_position.x += direction.x * sprite_data_new.speed * delta
-        global_position.x = sprite_data_new.current_position.x
+    
+    if distance > 1.0:
+        var new_x = sprite_data_new.current_position.x + direction.x * sprite_data_new.speed * delta
+        sprite_data_new.set_current_position(
+            Vector2(new_x, sprite_data_new.current_position.y),
+            sprite_data_new.current_floor_number,
+            sprite_data_new.current_room
+        )
+        global_position.x = new_x
     else:
-        # Snap to target        
-        sprite_data_new.current_position = sprite_data_new.target_position
-        global_position = target_position
+        # print("distance: ", distance)
+        var new_x = sprite_data_new.target_position.x
+        sprite_data_new.set_current_position(
+            Vector2(new_x, sprite_data_new.current_position.y),
+            sprite_data_new.current_floor_number,
+            sprite_data_new.current_room
+        )
+        global_position.x = new_x
 
+    _update_animation(direction)
 
-#     _update_animation(direction)
-
-
-
-
-
-
-     # process_commands    
+### NEEDS TO BE CORRECTED/SIMPLIFIED
+func _update_animation(direction: Vector2) -> void:
+    var main_state = sprite_data_new.get_active_state()
     
-    # process_state
-    # implement this basic check: 
-    # if sprite is in movement state then call _process_movement
-    
-# func process movement
-    #if idle then	_process_movement_idle
-    #if walking then	_process_movement_walking
-    #else 	error
-    
-    
-# func _process_movement_idle	
-    #if target pos != current pos 	
-    #or stored pos exists then	_update_movement_state
-    #if target pos == current pos	
-    #and no stored pos	keep idling (animation)
-    #else	error
+    match main_state:
+        sprite_data_new.ActiveState.MOVEMENT:
+            match sprite_data_new.movement_state:
+                sprite_data_new.MovementState.WALKING:
+                    if direction.x > 0:
+                        $AnimatedSprite2D.play("walk_to_right")
+                    else:
+                        $AnimatedSprite2D.play("walk_to_left")
+                sprite_data_new.MovementState.IDLE:
+                    $AnimatedSprite2D.play("idle")
+                _:
+                    # e.g., MovementState.NONE or future expansions
+                    $AnimatedSprite2D.play("idle")
+        
+        sprite_data_new.ActiveState.ROOM:
+            match sprite_data_new.room_state:
+                sprite_data_new.RoomState.ENTERING_ROOM:
+                    $AnimatedSprite2D.play("enter")
+                sprite_data_new.RoomState.EXITING_ROOM:
+                    $AnimatedSprite2D.play("exit")
+                sprite_data_new.RoomState.IN_ROOM:
+                    $AnimatedSprite2D.play("idle")
+                # etc.
+                _:
+                    $AnimatedSprite2D.play("idle")
+        
+        sprite_data_new.ActiveState.ELEVATOR:
+            match sprite_data_new.elevator_state:
+                sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
+                    $AnimatedSprite2D.play("enter")
+                sprite_data_new.ElevatorState.ENTERING_ELEVATOR:
+                    $AnimatedSprite2D.play("enter")
+                sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:
+                    $AnimatedSprite2D.play("idle")
+                sprite_data_new.ElevatorState.EXITING_ELEVATOR:
+                    $AnimatedSprite2D.play("exit")
+                # For IN_ELEVATOR_TRANSIT or other states:
+                # $AnimatedSprite2D.play("idle") # or something else
+                _:
+                    $AnimatedSprite2D.play("idle")
 
+        _:
+            # Fallback if none of the above states apply
+            $AnimatedSprite2D.play("idle")
 
-# func _process_movement_walking	
-    #if target pos = current pos	
-    #and no stored pos	_check_for_category_switch
-       #
-    #if target pos == current pos 	_check_for_category_switch
-    #and stored pos exists	
-    #if target pos != current pos	move_sprite_horizontally
-
-
-#func _update_movement_state	
-    #if target pos == current pos 	
-    #and no stored pos exists	
-    #and target is not room or elevator room	set state to idle
-       #
-    #if target pos == current pos 	
-    #and no stored pos exists	
-    #and target is room (door index >=0) or elevator room ( door index == -2)	set state to Room (CHECKING_ROOM_STATE)
-       #or set state to Elevator (WAITING_FOR_ELEVATOR)
-       #
-    #if target == current pos	
-    #and stored pos exists	set state to Elevator (WAITING_FOR_ELEVATOR)
-       #call Pathfinder instead 
-       #
-    #if target != current pos	set state to walking
-       #
-    #else	error
-
-
-
-##
-## add debug print statements with the new sprite state
-##
-
-
-func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:            
-    if area == $".": # If the area that triggered the signal belongs to excactly this sprite
+func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
+    if area == self:
+        sprite_data_new.set_current_position(
+            sprite_data_new.current_position,  # keep the same position
+            floor_number,                      # update floor
+            sprite_data_new.current_room       # keep the same room index
+        )
         # print("I, %s, have entered floor #%d" % [name, floor_number])
-        sprite_data_new.current_floor_number = floor_number
-    
 
-func _on_navigation_click(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
-    # print("Navigation click received in player script")
-    
-    # print("sprite has nav data?: ", sprite_data_new.has_nav_data)
+func _on_adjusted_navigation_click(_floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:
+    # print("Navigation click received in player script")            
     sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, _door_index)
 
 
-
-
-
 #region set_initial_position
-func set_initial_position() -> void:    
+func set_initial_position() -> void:
     var current_floor_number: int = sprite_data_new.current_floor_number
     var floor_info: Dictionary = navigation_controller.floors[current_floor_number]
 
-    var edges: Dictionary = floor_info["edges"]  # floors[floor_number]["edges"]
+    var edges: Dictionary = floor_info["edges"]
     var center_x = (edges["left"] + edges["right"]) / 2.0
     var bottom_edge_y = edges["bottom"]
     var sprite_height = sprite_data_new.sprite_height
@@ -227,17 +225,24 @@ func set_initial_position() -> void:
 
     global_position = Vector2(center_x, y_position)
 
-    
-    sprite_data_new.current_position = global_position
-    sprite_data_new.target_position = global_position
-    sprite_data_new.current_floor_number = current_floor_number
-    sprite_data_new.target_floor_number = current_floor_number
+    # Use setter functions to update current and target positions/floors
+    sprite_data_new.set_current_position(
+        global_position,
+        current_floor_number,
+        sprite_data_new.current_room
+    )
+    sprite_data_new.set_target_position(
+        global_position,
+        current_floor_number,
+        sprite_data_new.target_room
+    )
+    # print("in set_initial_position: ", global_position)
 #endregion
 
 
 #region connect_to_signals
 func connect_to_signals():
-    SignalBus.navigation_click.connect(_on_navigation_click)    
+    SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
     #SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
     #SignalBus.elevator_position_updated.connect(_on_elevator_ride)

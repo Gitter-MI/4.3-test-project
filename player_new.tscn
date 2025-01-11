@@ -101,7 +101,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_meo52")
 }],
 "loop": true,
-"name": &"walk_left",
+"name": &"walk_to_left",
 "speed": 5.0
 }, {
 "frames": [{
@@ -118,7 +118,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_qt28u")
 }],
 "loop": true,
-"name": &"walk_right",
+"name": &"walk_to_right",
 "speed": 5.0
 }]
 
@@ -128,7 +128,7 @@ animations = [{
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_h05dm")
-animation = &"exit"
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
