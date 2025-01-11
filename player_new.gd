@@ -59,26 +59,31 @@ func _process_movement_state(delta: float) -> void:
 
 
 func _process_movement_idle(_delta: float) -> void:
-    # print("sprite is in MovementState.IDLE state")
-
     var target_differs = (sprite_data_new.target_position != sprite_data_new.current_position)
     var has_stored = sprite_data_new.has_stored_data
+    var room_index = sprite_data_new.target_room
 
     if target_differs or has_stored:
-        # if the sprite has a target different from the current position, or is at the target but has a stored position
+        # If position differs or we have stored data, proceed with movement.
         _update_movement_state()
-    elif not target_differs and not has_stored:        
-        # Keep idling: do nothing, or play idle animation
-        pass
+
+    elif not target_differs and not has_stored:
+        # If the position is the same and we have no pending data,
+        # check if the room_index indicates we want to do something (e.g., elevator or real room).
+        if room_index >= 0 or room_index == -2:
+            # For example, we assume we still want to trigger walking or an elevator action.
+            _update_movement_state()
+        else:
+            # Otherwise, we continue to idle.
+            _update_animation(Vector2.ZERO)
+
     else:
         push_warning("Unexpected condition in IDLE state!")
-
-       
 
 
 func _process_movement_walking(delta: float) -> void:
     # print("Sprite is in MovementState.WALKING state")    
-    if sprite_data_new.current_position.x == sprite_data_new.target_position.x:
+    if sprite_data_new.current_position == sprite_data_new.target_position:
         print("_process_movement_walking -> _update_movement_state")
         _update_movement_state()
     else:
@@ -86,7 +91,7 @@ func _process_movement_walking(delta: float) -> void:
         # print("Moving sprite... (placeholder)")
 
 func _update_movement_state() -> void:
-    var x_differs = (sprite_data_new.current_position.x != sprite_data_new.target_position.x)
+    var x_differs = (sprite_data_new.current_position != sprite_data_new.target_position)
     var has_stored = sprite_data_new.has_stored_data
     var room_index = sprite_data_new.target_room
 
@@ -149,7 +154,7 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
 
     _update_animation(direction)
 
-### NEEDS TO BE CORRECTED/SIMPLIFIED
+
 func _update_animation(direction: Vector2) -> void:
     var main_state = sprite_data_new.get_active_state()
     

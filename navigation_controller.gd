@@ -39,7 +39,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
         door_index,
         adjusted_click_position
     )
-    # print("!!!! adjusted click data in _on_navigation_click: ", adjusted_click_position)   # has the correct value! 128
+   # print("!!!! adjusted click data in _on_navigation_click: ", adjusted_click_position)
 
 
 func _determine_click_type(door_index: int, floor_number: int, global_position: Vector2) -> Dictionary:

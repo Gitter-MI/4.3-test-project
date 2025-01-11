@@ -109,10 +109,10 @@ func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _d
     nav_target_floor    = _floor_number
     nav_target_room     = _door_index
     
-    # print("nav data has been set to: ")
-    # print("nav_target_position: ",nav_target_position)
-    #print("nav_target_floor: ",nav_target_floor)
-    #print("nav_target_room: ",nav_target_room)
+    print("nav data has been set to: ")
+    print("nav_target_position: ",nav_target_position)
+    print("nav_target_floor: ",nav_target_floor)
+    print("nav_target_room: ",nav_target_room)
     
 func reset_nav_data() -> void:
     has_nav_data = false
