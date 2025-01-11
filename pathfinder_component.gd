@@ -21,6 +21,10 @@ func _ready():
 
 func determine_path(sprite: SpriteDataNew) -> void:
     
+    if not sprite.has_nav_data:        
+        return    
+    
+    
     if sprite.needs_elevator(sprite.nav_target_floor):
         # print("Elevator needed to reach floor:", sprite.nav_target_floor)        
         var elevator_info = navigation_controller.elevators.get(sprite.current_floor_number, null)        

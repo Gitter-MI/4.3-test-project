@@ -11,7 +11,7 @@ const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
 const ELEVATOR_SCENE = preload("res://Elevator.tscn")
 
 const BOUNDARIES = {
-    "x1": 0.0695,  # Left boundary
+    "x1": 0.0715,  # Left boundary
     "x2": 0.929,   # Right boundary
     "y1": 0.0760,  # Top boundary
     "y2": 1   # Bottom boundary

@@ -3,6 +3,7 @@ extends Resource
 
 
 # new state machine
+# remains in sprite data
 enum MovementState { IDLE, WALKING, NONE }
 enum RoomState { CHECKING_ROOM_STATE, ENTERING_ROOM, IN_ROOM, EXITING_ROOM, NONE }
 enum ElevatorState { WAITING_FOR_ELEVATOR, ENTERING_ELEVATOR, IN_ELEVATOR_ROOM, IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR, NONE }
@@ -40,6 +41,9 @@ var nav_target_room: int = -1
 func needs_elevator(destination_floor: int) -> bool:
     return current_floor_number != destination_floor
 
+#region Set States
+# move to state machine script
+
 func get_active_state() -> ActiveState:
     if movement_state != MovementState.NONE:
         return ActiveState.MOVEMENT
@@ -61,7 +65,7 @@ func get_active_sub_state() -> String:
         return "elevator:%s" % elevator_state
     return "none"
 
-#region Set States
+
 
 func set_movement_state(new_state: MovementState) -> void:    
     movement_state = new_state

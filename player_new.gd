@@ -1,6 +1,7 @@
 # player_new.gd
 extends Area2D
 
+@onready var state_manager: Node = $StateManager
 @onready var navigation_controller: Node = get_parent().get_node("Navigation_Controller")
 @onready var pathfinder: Pathfinder = $Pathfinder_Component
 
@@ -26,105 +27,24 @@ func _ready():
 
 func _process(delta: float) -> void:
     
-    # process_input
-    # process_commands    
-    # process_state
     
-    if sprite_data_new.has_nav_data:
-        pathfinder.determine_path(sprite_data_new)
-        
-    var state = sprite_data_new.get_active_state()
-    
-    match state:
-        sprite_data_new.ActiveState.MOVEMENT:
-            _process_movement_state(delta)  # for later
-            # print("sprite is in MOVEMENT state")
-        sprite_data_new.ActiveState.ROOM:
-            print("sprite is in ROOM state")
-        sprite_data_new.ActiveState.ELEVATOR:
-            print("sprite is in ELEVATOR state")
-        _:
-            push_warning("Sprite is in no recognized state!")
-
-
-func _process_movement_state(delta: float) -> void:
-    # print("in _process_movement_state")
-    match sprite_data_new.movement_state:
-        sprite_data_new.MovementState.IDLE:
-            _process_movement_idle(delta)
-        sprite_data_new.MovementState.WALKING:
-            _process_movement_walking(delta)
-        _:
-            push_warning("Unknown movement sub-state: %s" % str(sprite_data_new.movement_state))
-
-
-func _process_movement_idle(_delta: float) -> void:
-    var target_differs = (sprite_data_new.target_position != sprite_data_new.current_position)
-    var has_stored = sprite_data_new.has_stored_data
-    var room_index = sprite_data_new.target_room
-
-    if target_differs or has_stored:
-        # If position differs or we have stored data, proceed with movement.
-        _update_movement_state()
-
-    elif not target_differs and not has_stored:
-        # If the position is the same and we have no pending data,
-        # check if the room_index indicates we want to do something (e.g., elevator or real room).
-        if room_index >= 0 or room_index == -2:
-            # For example, we assume we still want to trigger walking or an elevator action.
-            _update_movement_state()
-        else:
-            # Otherwise, we continue to idle.
-            _update_animation(Vector2.ZERO)
-
-    else:
-        push_warning("Unexpected condition in IDLE state!")
-
-
-func _process_movement_walking(delta: float) -> void:
-    # print("Sprite is in MovementState.WALKING state")    
-    if sprite_data_new.current_position == sprite_data_new.target_position:
-        print("_process_movement_walking -> _update_movement_state")
-        _update_movement_state()
-    else:
-        move_towards_position(sprite_data_new.target_position, delta)
-        # print("Moving sprite... (placeholder)")
-
-func _update_movement_state() -> void:
-    var x_differs = (sprite_data_new.current_position != sprite_data_new.target_position)
-    var has_stored = sprite_data_new.has_stored_data
-    var room_index = sprite_data_new.target_room
-
-    # 1) X matches and no stored target = arrived at final destination
-    if not x_differs and not has_stored:
-        if room_index < 0 and room_index != -2:
-            sprite_data_new.set_movement_state(sprite_data_new.MovementState.IDLE)
-            print("Update: sprite is now in MovementState.IDLE")
-        elif room_index >= 0:
-            sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)
-            print("Update: sprite is now in RoomState.CHECKING_ROOM_STATE")
-        elif room_index == -2:
-            sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR)
-            print("Update: sprite is now in ElevatorState.WAITING_FOR_ELEVATOR")
-        else:
-            push_warning("Unhandled target_room value: %d" % room_index)
-
-    # 2) X matches and has stored data
-    elif not x_differs and has_stored:
-        sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR)
-        print("Update: sprite is now in ElevatorState.WAITING_FOR_ELEVATOR")
-
-    # 3) X does not match
-    elif x_differs:
-        sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
-        print("Update: sprite is now in MovementState.WALKING")
-
-    # 4) Fallback
-    else:
-        push_warning("Bad error in _update_movement_state!")
+    pathfinder.determine_path(sprite_data_new)
+    state_manager.process_state(sprite_data_new)
+    move_sprite(delta)
+    _animate_sprite()
 
 
 
+
+func move_sprite(delta: float) -> void:
+    # You can read the current active state and sub-state to decide movement
+    var active_state = sprite_data_new.get_active_state()
+    if active_state == sprite_data_new.ActiveState.MOVEMENT:
+        if sprite_data_new.movement_state == sprite_data_new.MovementState.WALKING:
+            move_towards_position(sprite_data_new.target_position, delta)
+        # e.g. do nothing if IDLE
+
+    # Possibly handle other states that need special movement...
 
 func move_towards_position(target_position: Vector2, delta: float) -> void:
     # Force horizontal-only movement by locking the target's Y to current_position.y
@@ -132,7 +52,6 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
     
     var direction = (target_position - sprite_data_new.current_position).normalized()
     var distance = sprite_data_new.current_position.distance_to(target_position)
-
     
     if distance > 1.0:
         var new_x = sprite_data_new.current_position.x + direction.x * sprite_data_new.speed * delta
@@ -151,11 +70,9 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
             sprite_data_new.current_room
         )
         global_position.x = new_x
-
-    _update_animation(direction)
-
-
-func _update_animation(direction: Vector2) -> void:
+    
+func _animate_sprite() -> void:
+    var direction = (sprite_data_new.target_position - sprite_data_new.current_position).normalized()
     var main_state = sprite_data_new.get_active_state()
     
     match main_state:
