@@ -24,8 +24,6 @@ func _ready():
     
 
 
-
-
 func _process(delta: float) -> void:
     
     # process_input
@@ -78,7 +76,7 @@ func _process_movement_walking(delta) -> void:
     if sprite_data_new.current_position == sprite_data_new.target_position:
         _update_movement_state()        
     else:
-        # Keep walking
+        move_towards_position(sprite_data_new.target_position, delta)
         print("Moving sprite... (placeholder)")
 
 
@@ -116,6 +114,30 @@ func _update_movement_state() -> void:
         push_warning("Bad error in _update_movement_state!")
 
 
+func move_towards_position(target_position: Vector2, delta: float) -> void:
+    # Force y to remain at current_position.y (horizontal-only movement)
+    target_position.y = sprite_data_new.current_position.y
+
+    var direction = (target_position - sprite_data_new.current_position).normalized()
+    var distance = sprite_data_new.current_position.distance_to(target_position)
+
+    # If we're more than 1 pixel away, keep moving
+    if distance > 1:
+        if sprite_data_new.movement_state != sprite_data_new.MovementState.WALKING:
+            var old_state = sprite_data_new.movement_state
+            sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+            if old_state != sprite_data_new.movement_state:
+                print("Movement state changed from %s to %s" % [old_state, sprite_data_new.movement_state])
+
+        sprite_data_new.current_position.x += direction.x * sprite_data_new.speed * delta
+        global_position.x = sprite_data_new.current_position.x
+    else:
+        # Snap to target        
+        sprite_data_new.current_position = sprite_data_new.target_position
+        global_position = target_position
+
+
+#     _update_animation(direction)
 
 
 
