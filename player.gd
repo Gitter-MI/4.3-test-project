@@ -333,7 +333,15 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         sprite_data.target_floor_number = floor_number
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_room = target_room
-
+        
+        # --- print debug info
+        #print(
+            #"[DEBUG] set_target_data: ",
+            #"Floor: ", floor_number,
+            #", Position: ", adjusted_click_position,
+            #", Room: ", target_room
+        #)
+        
         var old_state = sprite_data.current_state
         sprite_data.current_state = SpriteData.State.IDLE
         if old_state != sprite_data.current_state:
@@ -348,6 +356,14 @@ func set_target_data(floor_number: int, adjusted_click_position: Vector2, target
         sprite_data.target_position = adjusted_click_position
         sprite_data.target_room = target_room
         sprite_data.current_elevator_position = get_elevator_position()
+
+        ## --- print debug info
+        #print(
+            #"[DEBUG] set_target_data: ",
+            #"Floor: ", floor_number,
+            #", Position: ", adjusted_click_position,
+            #", Room: ", target_room
+        #)
 
         var old_state = sprite_data.current_state
         sprite_data.current_state = SpriteData.State.IDLE

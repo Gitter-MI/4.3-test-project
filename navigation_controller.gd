@@ -1,6 +1,8 @@
 # navigation_controller.gd
 extends Node
 
+const SpriteDataNew = preload("res://SpriteData_new.gd")
+
 var floors: Dictionary = {}
 var doors: Dictionary = {}
 var player: Dictionary = {}
@@ -36,6 +38,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
         door_index,
         adjusted_click_position
     )
+    # print("adjusted click data in _on_navigation_click: ", adjusted_click_position)
 
 
 func _determine_click_type(door_index: int, floor_number: int, global_position: Vector2) -> Dictionary:
@@ -67,6 +70,9 @@ func _determine_click_type(door_index: int, floor_number: int, global_position: 
     }
 
 
+
+
+
 func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2) -> Vector2:
     # Correct way to access sprite dimensions from the nested dictionary
     var sprite_width: float = player["Player_new"]["width"]
@@ -75,6 +81,7 @@ func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2
     var left_bound: float = collision_edges["left"]
     var right_bound: float = collision_edges["right"]
     var bottom_edge_y: float = collision_edges["bottom"]
+    # print("bottom_edge_y in _adjust_click_position: ", bottom_edge_y)
 
     # Horizontal clamp
     var adjusted_x: float = click_position.x
@@ -97,8 +104,8 @@ func print_all_registered():
     #print("Print only the keys or the full dictionaries")
     #print("Floors: ", floors)
     #print("Doors: ", doors)
-    print("Player: ", player.keys())
-    #print("Elevators: ", elevators)
+    # print("Player: ", player.keys())
+    print("Elevators: ", elevators)
 
 #region Register Areas
 
@@ -208,7 +215,7 @@ func register_player_sprite(player_node: Area2D):
     # Fetch the correct property from player_node
     var data = player_node.get("sprite_data_new")
     # print("var data: ", data)
-    if data is SpriteDataNew:
+    if data is Resource:
         player[player_node.name] = {
             "width": data.sprite_width,
             "height": data.sprite_height,

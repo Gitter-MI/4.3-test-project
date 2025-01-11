@@ -1,11 +1,13 @@
 # SpriteData_new.gd
 extends Resource
-class_name SpriteDataNew
+
 
 # new state machine
 enum MovementState { IDLE, WALKING, NONE }
 enum RoomState { CHECKING_ROOM_STATE, ENTERING_ROOM, IN_ROOM, EXITING_ROOM, NONE }
 enum ElevatorState { WAITING_FOR_ELEVATOR, ENTERING_ELEVATOR, IN_ELEVATOR_ROOM, IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR, NONE }
+enum ActiveState { NONE, MOVEMENT, ROOM, ELEVATOR }
+
 
 var movement_state: MovementState = MovementState.IDLE
 var room_state: RoomState = RoomState.NONE
@@ -35,11 +37,22 @@ var nav_target_floor: int = -1
 var nav_target_room: int = -1
 
 
+func needs_elevator(destination_floor: int) -> bool:
+    return current_floor_number != destination_floor
+
+func get_active_state() -> ActiveState:
+    if movement_state != MovementState.NONE:
+        return ActiveState.MOVEMENT
+    if room_state != RoomState.NONE:
+        return ActiveState.ROOM
+    if elevator_state != ElevatorState.NONE:
+        return ActiveState.ELEVATOR
+    
+    return ActiveState.NONE
+
+
 # sprite_data_new.set_elevator_state(SpriteDataNew.ElevatorState.WAITING_FOR_ELEVATOR)
-
-
-
-func get_active_state() -> String:    
+func get_active_sub_state() -> String:    
     if movement_state != MovementState.NONE:
         return "movement:%s" % movement_state
     if room_state != RoomState.NONE:
@@ -48,6 +61,7 @@ func get_active_state() -> String:
         return "elevator:%s" % elevator_state
     return "none"
 
+#region Set States
 
 func set_movement_state(new_state: MovementState) -> void:    
     movement_state = new_state
@@ -65,14 +79,9 @@ func set_elevator_state(new_state: ElevatorState) -> void:
     elevator_state = new_state
     movement_state = MovementState.NONE
     room_state = RoomState.NONE
+#endregion
 
-
-
-func needs_elevator(destination_floor: int) -> bool:
-    return current_floor_number != destination_floor
-
-
-
+#region Set and Re-Set Position Data
 func set_current_position(new_position: Vector2, floor_number: int, room_index: int) -> void:
     current_position = new_position
     current_floor_number = floor_number
@@ -91,16 +100,16 @@ func set_stored_position(new_position: Vector2, floor_number: int, room_index: i
 
 func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:
     
-    print("Setting sprite nav data...")
+    # print("Setting sprite nav data...")
     has_nav_data = true
     nav_target_position = _click_global_position
     nav_target_floor    = _floor_number
     nav_target_room     = _door_index
     
-    print("nav data has been set to: ")
-    print("nav_target_position: ",nav_target_position)
-    print("nav_target_floor: ",nav_target_floor)
-    print("nav_target_room: ",nav_target_room)
+    # print("nav data has been set to: ")
+    #print("nav_target_position: ",nav_target_position)
+    #print("nav_target_floor: ",nav_target_floor)
+    #print("nav_target_room: ",nav_target_room)
     
 func reset_nav_data() -> void:
     has_nav_data = false
@@ -113,15 +122,4 @@ func reset_stored_data() -> void:
     stored_target_position = Vector2.ZERO
     stored_target_floor = -1
     stored_target_room = -1
-
-
-
-# old helper variables
-# var needs_elevator: bool = false  # may not be needed anymore with the stored position indicating elevator need
-# var current_elevator_position: Vector2 = Vector2.ZERO   # needed for sync movement with the elevator # may be redundant with the navigation controller in place
-var elevator_y_offset # needed for sync elevator movement, # may be redundant with the navigation controller in place
-
-# Old variables for storing the click data while IN_ELEVATOR
-var elevator_stored_target_position: Vector2 = Vector2.ZERO
-var elevator_stored_target_floor_number: int = -1
-var elevator_stored_target_room: int = -1
+#endregion
