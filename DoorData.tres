@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="DoorData" load_steps=2 format=3 uid="uid://novorky384y7"]
 
-[ext_resource type="Script" path="res://DoorData.gd" id="1"]
+[ext_resource type="Script" path="res://Scripts/DoorData.gd" id="1"]
 
 [resource]
 script = ExtResource("1")

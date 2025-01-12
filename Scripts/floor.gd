@@ -7,8 +7,8 @@ var floor_sprite: Sprite2D
 var collision_edges: Dictionary = {}
 
 
-const DOOR_SCENE = preload("res://Door.tscn")  # Preload the Door scene
-const ELEVATOR_SCENE = preload("res://Elevator.tscn")
+const DOOR_SCENE = preload("res://Scenes/Door.tscn")  # Preload the Door scene
+const ELEVATOR_SCENE = preload("res://Scenes/Elevator.tscn")
 
 const BOUNDARIES = {
     "x1": 0.0715,  # Left boundary

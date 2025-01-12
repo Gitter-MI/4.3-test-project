@@ -1,11 +1,11 @@
 # player_new.gd
 extends Area2D
 
-@onready var state_manager: Node = $StateManager
+@onready var state_manager: Node = $State_Component
 @onready var navigation_controller: Node = get_parent().get_node("Navigation_Controller")
 @onready var pathfinder: Pathfinder = $Pathfinder_Component
 
-const SpriteDataScript = preload("res://SpriteData_new.gd")
+const SpriteDataScript = preload("res://Scripts/SpriteData_new.gd")
 
 const SCALE_FACTOR = 2.3
 # var sprite_data_new: SpriteDataNew
@@ -24,15 +24,131 @@ func _ready():
     SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
     
 
-
 func _process(delta: float) -> void:
-    
-    
     pathfinder.determine_path(sprite_data_new)
     state_manager.process_state(sprite_data_new)
-    move_sprite(delta)
-    _animate_sprite()
+    var active_state = sprite_data_new.get_active_state()
+    
+    if active_state == sprite_data_new.ActiveState.MOVEMENT:
+        move_sprite(delta)
+        _animate_sprite()
 
+    if active_state == sprite_data_new.ActiveState.ELEVATOR:
+        _process_elevator_actions()
+
+
+
+func _process_elevator_actions() -> void:
+    # print(" in elevator state in player script")
+    match sprite_data_new.elevator_state:
+        
+        sprite_data_new.ElevatorState.CALLING_ELEVATOR:
+            
+            # If we have not yet requested => do it now
+            if not sprite_data_new.elevator_requested:
+                call_elevator()
+                
+        
+        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
+            # print("what??? why???")
+            # Maybe just show an idle/waiting animation, do nothing else
+            # The state manager will handle the transition to ENTERING_ELEVATOR
+            pass
+
+        sprite_data_new.ElevatorState.ENTERING_ELEVATOR:
+            # If we haven't started entering yet => start
+            if not sprite_data_new.entering_elevator:
+                enter_elevator()
+                
+
+        # Possibly handle other states (IN_ELEVATOR_TRANSIT, etc.)
+        _:
+            
+            pass
+
+
+func call_elevator():
+    print("sprite is calling the elevator: elevator_requested = true")
+    # 1) Emit the signal that we want to call the elevator
+    # nobody is connecting to the signal right now. We will implement this in a second step
+    SignalBus.elevator_called.emit(
+        sprite_data_new.sprite_name,
+        sprite_data_new.current_floor_number
+    )
+    _animate_sprite()
+    print("Details of the elevator request: ")
+    print("Sprite_Name: ",sprite_data_new.sprite_name)
+    print("Pick-Up floor: ", sprite_data_new.current_floor_number)
+    
+
+    # 2) Set the flag so the state manager knows we've requested it
+    sprite_data_new.elevator_requested = true
+    # we skip the integration into the elevator script for now to confirm this part of the implementation is working as expected. 
+    #print("setting request to confirmed for debugging purposes: .elevator_request_confirmed = true")
+    #sprite_data_new.elevator_request_confirmed = true
+    #print("setting elevator to ready for debugging purposes: .elevator_ready = true")
+    #sprite_data_new.elevator_ready = true
+
+
+
+func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int) -> void:
+    print("signal received: _on_elevator_request_confirmed")
+    # 1) Check if this signal is meant for our sprite
+    if incoming_sprite_name == sprite_data_new.sprite_name:
+        # 2) Optionally check if the floor matches the floor where we called the elevator
+        if incoming_floor == sprite_data_new.current_floor_number:
+            # 3) If it's indeed for this sprite on this floor, set the flag
+            sprite_data_new.elevator_request_confirmed = true
+    
+
+func _on_elevator_ready(incoming_sprite_name: String):
+    if incoming_sprite_name == sprite_data_new.sprite_name:
+        sprite_data_new.elevator_ready = true
+
+
+func enter_elevator():
+    # Mark that we are in the process of entering the elevator
+    print("sprite is entering the elevator")
+    sprite_data_new.entering_elevator = true
+
+    # Possibly play an "enter elevator" animation
+    # When animation ends, you can set sprite_data_new.entering_elevator = false
+    # so the state manager transitions from ENTERING_ELEVATOR -> next state
+
+
+
+
+
+
+
+
+
+# func call elevator
+    # if the elevator has not been called
+    # emit signal
+    # set flag that the elevator has been called
+
+# connect to signal that the elevator request has been received from the elevator 
+
+# on _request_received signal 
+    # set flag that we have received the confirmation
+    
+# func wait_for_elevator    
+    # keep playing the waiting animation
+    # do nothing else
+    
+# connect to signal that the elevator has arrived
+
+# _on elevator ready signal  (elevator is at the requested floor and the doors are open but these details are not relevant for this script)
+    # set flag that elevator_arrived = true
+    
+        
+# enter elevator function
+    # play enter animation
+    # set z-index to -5
+    # set flag for entering elevator
+
+# wait for entering animation to finish
 
 
 
@@ -103,6 +219,8 @@ func _animate_sprite() -> void:
         
         sprite_data_new.ActiveState.ELEVATOR:
             match sprite_data_new.elevator_state:
+                sprite_data_new.ElevatorState.CALLING_ELEVATOR:
+                    $AnimatedSprite2D.play("enter")
                 sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
                     $AnimatedSprite2D.play("enter")
                 sprite_data_new.ElevatorState.ENTERING_ELEVATOR:
@@ -118,6 +236,7 @@ func _animate_sprite() -> void:
 
         _:
             # Fallback if none of the above states apply
+            push_warning("in _animate_sprite: Sprite is in no recognized state!")
             $AnimatedSprite2D.play("idle")
 
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
@@ -165,7 +284,10 @@ func set_initial_position() -> void:
 #region connect_to_signals
 func connect_to_signals():
     SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
-    SignalBus.floor_area_entered.connect(_on_floor_area_entered)
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)    
+    SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
+    SignalBus.elevator_ready.connect(_on_elevator_ready)    
+    
     #SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
     #SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     #SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)

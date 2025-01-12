@@ -3,13 +3,20 @@
 
 extends Node
 
+signal elevator_called(sprite_name: String, target_floor: int)  #the target floor is the current floor of the sprite, the pick-up location
+
+signal elevator_request_confirmed(sprite_name: String, floor_number: int)
+signal elevator_ready(sprite_name: String) # ensures that the correct sprite will enter the elevator next
+
+
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)
 signal adjusted_navigation_click(floor_number: int, door_index: int, adjusted_position: Vector2)
-
 signal player_sprite_ready()
-
-
 signal floor_area_entered(area: Area2D, floor_number: int)
+
+
+
+
 
 signal elevator_request(sprite_name: String, target_floor: int)
 signal elevator_arrived(sprite_name: String, current_floor: int)

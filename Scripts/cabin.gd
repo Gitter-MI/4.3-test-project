@@ -31,6 +31,7 @@ var cabin_timer_timeout: int = 2
 
 func _ready():
     add_to_group("cabin")
+    SignalBus.elevator_called.connect(_on_elevator_request)
     SignalBus.elevator_request.connect(_on_elevator_request)
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.enter_animation_finished.connect(_on_sprite_entered)
@@ -179,6 +180,7 @@ func handle_arrival() -> void:
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPENING)
         SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
+        SignalBus.elevator_ready.emit(completed_request['sprite_name'])
         # print("SignalBus.elevator_arrived, handle_arrival")         
 
 
@@ -234,7 +236,8 @@ func update_destination_floor() -> void:
         destination_floor = elevator_queue[0]['target_floor']
 
 
-func _on_elevator_request(sprite_name: String, target_floor: int) -> void:        
+func _on_elevator_request(sprite_name: String, target_floor: int) -> void: 
+    print("_on_elevator_request")       
     
     var request_updated = false
     for i in range(elevator_queue.size()):
@@ -251,13 +254,14 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
 
     if not request_updated:
         add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
-        # print("Added new request for sprite:", sprite_name, "to floor:", target_floor)
+        print("Added new request for sprite:", sprite_name, "to floor:", target_floor)
+        SignalBus.elevator_request_confirmed.emit(sprite_name, target_floor)
 
-    # <--- After the player has added a request, add your 3 dummy requests.
-    if testing_requests_node:
-        testing_requests_node.add_dummy_requests(self)
-    else:
-        push_warning("TestingRequests node not found - cannot add dummy requests")
+    ## <--- After the player has added a request, add your 3 dummy requests.
+    #if testing_requests_node:
+        #testing_requests_node.add_dummy_requests(self)
+    #else:
+        #push_warning("TestingRequests node not found - cannot add dummy requests")
 
 
     update_destination_floor()
@@ -331,6 +335,10 @@ func _print_elevator_direction() -> void:
 func add_to_elevator_queue(request: Dictionary) -> void:    
     elevator_queue.append(request)
     # print("Current elevator queue:", elevator_queue)
+    
+    
+
+
 
 
 

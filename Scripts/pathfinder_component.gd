@@ -1,7 +1,7 @@
 # Pathfinder.gd
 extends Node
 class_name Pathfinder
-const SpriteDataNew = preload("res://SpriteData_new.gd")
+const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 #
 #@onready var data: Resource = SpriteDataNew.new()

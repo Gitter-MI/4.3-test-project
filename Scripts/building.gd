@@ -1,8 +1,8 @@
 # building.gd
 extends Node2D
 
-const FLOOR_SCENE = preload("res://Floor.tscn")
-const ELEVATOR_SCENE = preload("res://Elevator.tscn")
+const FLOOR_SCENE = preload("res://Scenes/Floor.tscn")
+const ELEVATOR_SCENE = preload("res://Scenes/Elevator.tscn")
 const DOOR_DATA_RESOURCE = preload("res://DoorData.tres")
 const NUM_FLOORS = 14  # Total number of floors
 

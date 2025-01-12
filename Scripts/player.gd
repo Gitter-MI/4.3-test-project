@@ -13,9 +13,9 @@ var sprite_data: PlayerSpriteData
 var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
 var previous_elevator_position: Vector2 = Vector2.ZERO
 
-const PlayerSpriteData = preload("res://SpriteData.gd")
+const PlayerSpriteData = preload("res://Scripts/SpriteData.gd")
 
-const Elevator = preload("res://elevator.gd")
+const Elevator = preload("res://Scripts/elevator.gd")
 
 func _ready():
     add_to_group("player_sprites")   

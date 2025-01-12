@@ -1,12 +1,16 @@
 # SpriteData_new.gd
 extends Resource
 
+var elevator_requested: bool = false
+var elevator_request_confirmed: bool = false
+var elevator_ready: bool = false
+var entering_elevator: bool = false
 
 # new state machine
 # remains in sprite data
 enum MovementState { IDLE, WALKING, NONE }
 enum RoomState { CHECKING_ROOM_STATE, ENTERING_ROOM, IN_ROOM, EXITING_ROOM, NONE }
-enum ElevatorState { WAITING_FOR_ELEVATOR, ENTERING_ELEVATOR, IN_ELEVATOR_ROOM, IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR, NONE }
+enum ElevatorState { CALLING_ELEVATOR, WAITING_FOR_ELEVATOR, ENTERING_ELEVATOR, IN_ELEVATOR_ROOM, IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR, NONE }
 enum ActiveState { NONE, MOVEMENT, ROOM, ELEVATOR }
 
 
@@ -40,6 +44,12 @@ var nav_target_room: int = -1
 
 func needs_elevator(destination_floor: int) -> bool:
     return current_floor_number != destination_floor
+    
+    
+
+    
+    
+    
 
 #region Set States
 # move to state machine script
@@ -113,10 +123,10 @@ func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _d
     nav_target_floor    = _floor_number
     nav_target_room     = _door_index
     
-    print("nav data has been set to: ")
-    print("nav_target_position: ",nav_target_position)
-    print("nav_target_floor: ",nav_target_floor)
-    print("nav_target_room: ",nav_target_room)
+    #print("nav data has been set to: ")
+    #print("nav_target_position: ",nav_target_position)
+    #print("nav_target_floor: ",nav_target_floor)
+    #print("nav_target_room: ",nav_target_room)
     
 func reset_nav_data() -> void:
     has_nav_data = false

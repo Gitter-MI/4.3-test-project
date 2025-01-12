@@ -1,7 +1,7 @@
 # navigation_controller.gd
 extends Node
 
-const SpriteDataNew = preload("res://SpriteData_new.gd")
+const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
 
 var floors: Dictionary = {}
 var doors: Dictionary = {}
