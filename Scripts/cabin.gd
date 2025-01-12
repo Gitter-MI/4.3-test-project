@@ -180,7 +180,7 @@ func handle_arrival() -> void:
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPENING)
         SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-        SignalBus.elevator_ready.emit(completed_request['sprite_name'])
+        # 
         # print("SignalBus.elevator_arrived, handle_arrival")         
 
 
@@ -217,12 +217,18 @@ func _on_elevator_door_state_changed(new_state):
             # Start the timer only if there is at least one request waiting
             if not elevator_queue.is_empty():
                 start_waiting_timer()
+                # Get the first request in the queue
+                var first_request = elevator_queue[0]
+                # Emit the signal using the sprite name from the first request
+                SignalBus.elevator_ready.emit(first_request["sprite_name"])
+                print("!!!!!!!!!!!!ready signal")
 
         elevator.DoorState.CLOSED:
             state = ElevatorState.IN_TRANSIT
             set_elevator_direction()
             if destination_floor != current_floor:
                 initialize_target_position()
+
 
 
 func initialize_target_position() -> void:

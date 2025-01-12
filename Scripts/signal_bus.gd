@@ -7,6 +7,8 @@ signal elevator_called(sprite_name: String, target_floor: int)  #the target floo
 
 signal elevator_request_confirmed(sprite_name: String, floor_number: int)
 signal elevator_ready(sprite_name: String) # ensures that the correct sprite will enter the elevator next
+signal entering_elevator()
+signal enter_animation_finished(sprite_name: String, target_floor: int)
 
 
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)
@@ -25,9 +27,7 @@ signal exiting_elevator(sprite_name: String)
 signal elevator_position_updated(global_pos: Vector2)   # used to move sprites along with the elevator cabin
 signal door_state_changed(new_state)
 
-signal entering_elevator()
 
-signal enter_animation_finished(sprite_name: String, target_floor: int)
 
 
 signal floor_clicked(

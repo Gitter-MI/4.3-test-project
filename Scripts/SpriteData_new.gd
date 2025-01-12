@@ -5,6 +5,11 @@ var elevator_requested: bool = false
 var elevator_request_confirmed: bool = false
 var elevator_ready: bool = false
 var entering_elevator: bool = false
+var entered_elevator: bool = false
+var elevator_destination_reached = false
+ 
+var elevator_y_offset  # probably an int
+
 
 # new state machine
 # remains in sprite data
