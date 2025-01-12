@@ -36,6 +36,7 @@ func process_state(sprite_data_new: Resource) -> void:
     
     pass
 
+#region Elevator State
 func _process_elevator_state(sprite_data_new: Resource) -> void:
     # print("state: ", sprite_data_new.elevator_state)
     match sprite_data_new.elevator_state:
@@ -122,7 +123,9 @@ func _process_exiting_elevator(sprite_data_new: Resource) -> void:
     if sprite_data_new.exited_elevator:
         
         sprite_data_new.set_movement_state(SpriteDataNew.MovementState.IDLE)
+        
         # switch to movement state idle
+#endregion
 
 #region Movement State
 func _process_movement_state(sprite_data_new: Resource) -> void:
@@ -160,9 +163,16 @@ func _process_movement_walking(sprite_data_new: Resource) -> void:
         pass
 
 func _update_movement_state(sprite_data_new: Resource) -> void:
+    print("update movement state")
     var x_differs = (sprite_data_new.current_position != sprite_data_new.target_position)
     var has_stored = sprite_data_new.has_stored_data
     var room_index = sprite_data_new.target_room
+    #print("x_differs: ", x_differs)
+    #print("has_stored: ", has_stored)
+    #
+    #print("sprite_data_new.current_position: ", sprite_data_new.current_position)
+    #print("sprite_data_new.target_position: ", sprite_data_new.target_position)
+    
 
     if not x_differs and not has_stored:
         # Arrived at final destination
@@ -172,13 +182,14 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
             sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)
         elif room_index == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
-            print("!!!! sprite is now calling elevator")
+            # print("!!!! sprite is now calling elevator")
         else:
             push_warning("_update_movement_state: Unhandled target_room value: %d" % room_index)
 
     elif not x_differs and has_stored:
+        
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
-    elif x_differs:
+    elif x_differs:        
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
     else:
         push_warning("_update_movement_state: Bad error in _update_movement_state!")

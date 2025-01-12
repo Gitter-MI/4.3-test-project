@@ -156,13 +156,24 @@ func _on_elevator_at_destination(incoming_sprite_name: String):
         # sprite_data_new.exiting_elevator = true
 
 func exit_elevator():
-#     print("exit_elevator, exit_elevator,exit_elevator")
     _animate_sprite()
     var current_anim = $AnimatedSprite2D.animation
+
+    # Make sure we only do exit logic if "exit" anim is playing & we've arrived
     if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
-        z_index = -9
+        z_index = 0
         SignalBus.exit_animation_finished.emit()
         sprite_data_new.exited_elevator = true
+
+        # 1) Update the sprite’s target with whatever you had stored
+        sprite_data_new.set_target_position(
+            sprite_data_new.stored_target_position,
+            sprite_data_new.stored_target_floor,
+            sprite_data_new.stored_target_room
+        )
+
+        # 2) Optionally reset the stored data if you only need it once
+        sprite_data_new.reset_stored_data()
         
         
 
