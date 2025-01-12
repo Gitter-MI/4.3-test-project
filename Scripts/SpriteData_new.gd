@@ -7,6 +7,8 @@ var elevator_ready: bool = false
 var entering_elevator: bool = false
 var entered_elevator: bool = false
 var elevator_destination_reached = false
+var exiting_elevator: bool = false
+var exited_elevator: bool = false 
  
 var elevator_y_offset  # probably an int
 

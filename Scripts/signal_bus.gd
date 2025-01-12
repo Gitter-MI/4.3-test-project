@@ -9,6 +9,7 @@ signal elevator_request_confirmed(sprite_name: String, floor_number: int)
 signal elevator_ready(sprite_name: String) # ensures that the correct sprite will enter the elevator next
 signal entering_elevator()
 signal enter_animation_finished(sprite_name: String, target_floor: int)
+signal exit_animation_finished()
 
 
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)

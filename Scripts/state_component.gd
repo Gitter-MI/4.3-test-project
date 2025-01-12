@@ -53,7 +53,13 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
             _process_in_elevator_transit(sprite_data_new)
         sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:
             print("In elevator room")
+        
+        #sprite_data_new.ElevatorState.AT_ELEVATOR_DESTINATION:
+            #_process_exiting_elevator(sprite_data_new)    
             
+        sprite_data_new.ElevatorState.EXITING_ELEVATOR:
+            _process_exiting_elevator(sprite_data_new)
+        
         _:
             push_warning("_process_elevator_state: Unknown elevator sub-state!")
 
@@ -103,9 +109,20 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
 
 func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
     # print("_process_in_elevator_transit: in elevator transit")
-    if sprite_data_new.elevator_destination_reached:
+    if sprite_data_new.elevator_destination_reached:  
+        # print("sprite is now exiting the elevator")      
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
 
+
+#func _process_exiting_elevator(sprite_data_new: Resource) -> void:
+    
+
+func _process_exiting_elevator(sprite_data_new: Resource) -> void:
+    # print("in exiting elevator in state ")
+    if sprite_data_new.exited_elevator:
+        
+        sprite_data_new.set_movement_state(SpriteDataNew.MovementState.IDLE)
+        # switch to movement state idle
 
 #region Movement State
 func _process_movement_state(sprite_data_new: Resource) -> void:

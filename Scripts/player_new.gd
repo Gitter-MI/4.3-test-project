@@ -29,7 +29,7 @@ func _process(delta: float) -> void:
     state_manager.process_state(sprite_data_new)
     var active_state = sprite_data_new.get_active_state()
     
-    if active_state == sprite_data_new.ActiveState.MOVEMENT:
+    if active_state == sprite_data_new.ActiveState.MOVEMENT:        
         move_sprite(delta)
         _animate_sprite()
 
@@ -61,6 +61,8 @@ func _process_elevator_actions() -> void:
             else: 
                 on_sprite_entered_elevator()
 
+        sprite_data_new.ElevatorState.EXITING_ELEVATOR:
+            exit_elevator()
         # Possibly handle other states (IN_ELEVATOR_TRANSIT, etc.)
         _:
             
@@ -89,8 +91,6 @@ func call_elevator():
     #print("setting elevator to ready for debugging purposes: .elevator_ready = true")
     #sprite_data_new.elevator_ready = true
 
-
-
 func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int) -> void:
     print("signal received: _on_elevator_request_confirmed")
     # 1) Check if this signal is meant for our sprite
@@ -99,22 +99,10 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor
         if incoming_floor == sprite_data_new.current_floor_number:
             # 3) If it's indeed for this sprite on this floor, set the flag
             sprite_data_new.elevator_request_confirmed = true
-            
-    
 
 func _on_elevator_ready(incoming_sprite_name: String):
-    if incoming_sprite_name == sprite_data_new.sprite_name:
+    if incoming_sprite_name == sprite_data_new.sprite_name and sprite_data_new.entered_elevator == false:
         sprite_data_new.elevator_ready = true
-
-
-#func enter_elevator():
-    ## Mark that we are in the process of entering the elevator
-    #print("sprite is entering the elevator")
-    #sprite_data_new.entering_elevator = true
-    #z_index = -9
-    #SignalBus.entering_elevator.emit()
-    #_animate_sprite()
-
 
 func enter_elevator():
     # print("Sprite is entering the elevator.")
@@ -144,8 +132,6 @@ func enter_elevator():
     SignalBus.entering_elevator.emit()
     _animate_sprite()
 
-
-
 func on_sprite_entered_elevator():
     var current_anim = $AnimatedSprite2D.animation
     
@@ -153,7 +139,6 @@ func on_sprite_entered_elevator():
         sprite_data_new.entered_elevator = true
         SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
         _animate_sprite()
-
 
 func _on_elevator_ride(elevator_pos: Vector2) -> void:
     if sprite_data_new.entered_elevator:
@@ -163,22 +148,23 @@ func _on_elevator_ride(elevator_pos: Vector2) -> void:
         
         sprite_data_new.current_position = global_position
 
+func _on_elevator_at_destination(incoming_sprite_name: String):
+    
+    if incoming_sprite_name == sprite_data_new.sprite_name and sprite_data_new.entered_elevator == true:
+        # print("!!!!!  destination signal received")
+        sprite_data_new.elevator_destination_reached = true
+        # sprite_data_new.exiting_elevator = true
 
-#func _on_elevator_ride(elevator_pos: Vector2) -> void:
-    #if sprite_data_new.entered_elevator:
-        #
-        ## This is logically dependent on the move_elevator() in cabin.gd
-        ## Both sprites need to move in sync but they have a function each.     
-        #
-        ## var elevator = get_elevator_for_current_floor()
-        ## sprite_data_new.elevator_y_offset = global_position.y - elevator.global_position.y   
-            #
-        #global_position.x = elevator_pos.x
-        #global_position.y = elevator_pos.y + 0 #sprite_data_new.elevator_y_offset
-#
-    #sprite_data_new.current_position = global_position
-
-
+func exit_elevator():
+#     print("exit_elevator, exit_elevator,exit_elevator")
+    _animate_sprite()
+    var current_anim = $AnimatedSprite2D.animation
+    if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
+        z_index = -9
+        SignalBus.exit_animation_finished.emit()
+        sprite_data_new.exited_elevator = true
+        
+        
 
 func _animate_sprite() -> void:
     var direction = (sprite_data_new.target_position - sprite_data_new.current_position).normalized()
@@ -223,7 +209,7 @@ func _animate_sprite() -> void:
                 sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:
                     $AnimatedSprite2D.play("idle")
                 sprite_data_new.ElevatorState.EXITING_ELEVATOR:
-                    $AnimatedSprite2D.play("idle")
+                    $AnimatedSprite2D.play("exit")                    
                 _:
                     $AnimatedSprite2D.play("idle")
 
@@ -317,6 +303,7 @@ func connect_to_signals():
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)    
     SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
     SignalBus.elevator_ready.connect(_on_elevator_ready)
+    SignalBus.elevator_ready.connect(_on_elevator_at_destination)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  
     
     #SignalBus.elevator_arrived.connect(_on_elevator_arrived)   

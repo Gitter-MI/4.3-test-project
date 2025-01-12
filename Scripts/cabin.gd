@@ -220,8 +220,9 @@ func _on_elevator_door_state_changed(new_state):
                 # Get the first request in the queue
                 var first_request = elevator_queue[0]
                 # Emit the signal using the sprite name from the first request
+                
                 SignalBus.elevator_ready.emit(first_request["sprite_name"])
-                print("!!!!!!!!!!!!ready signal")
+                
 
         elevator.DoorState.CLOSED:
             state = ElevatorState.IN_TRANSIT
