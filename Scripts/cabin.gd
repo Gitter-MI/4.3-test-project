@@ -1,9 +1,9 @@
-# Move all state variables and properties to a cabin sprite resource
-
+# cabin.gd
 extends Node2D
 
 
 @onready var testing_requests_node = %TestingRequests
+@onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 
 enum ElevatorState {
     WAITING,       # 0
@@ -11,7 +11,7 @@ enum ElevatorState {
 }
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
-var floor_boundaries = {}  # used to determine which floor the elevator is on while in transit
+var floor_boundaries = {}
 
 
 var state: ElevatorState = ElevatorState.WAITING
@@ -30,6 +30,9 @@ var cabin_timer: Timer
 var cabin_timer_timeout: int = 2
 
 func _ready():
+    
+    
+    
     add_to_group("cabin")
     SignalBus.elevator_called.connect(_on_elevator_request)
     SignalBus.elevator_request.connect(_on_elevator_request)
@@ -86,8 +89,7 @@ func process_next_request():
 
 func elevator_logic() -> void:
     
-    if elevator_queue.size() > 0:    
-        # confirmed the second request is seemingly properly proecessed
+    if elevator_queue.size() > 0:            
         # print("in process next request")
         process_next_request()    
         if destination_floor != current_floor:
@@ -99,12 +101,8 @@ func elevator_logic() -> void:
 
 func handle_same_floor_request() -> void:
     # print("handle_same_floor_request")
-    var request = elevator_queue[0]
-    # SignalBus.elevator_arrived.emit(request['sprite_name'], current_floor)
+    var request = elevator_queue[0]    
     SignalBus.elevator_ready.emit(request['sprite_name'])
-    
-    # print("SignalBus.elevator_arrived, handle_same_floor_request") 
-
 
 func _on_sprite_entering():
     state = ElevatorState.IN_TRANSIT
@@ -179,17 +177,9 @@ func check_current_floor() -> void:
 
 func handle_arrival() -> void:    
     current_floor = destination_floor
-
-    
-    var completed_request = elevator_queue[0]
     var elevator = floor_to_elevator.get(current_floor, null)
-
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPENING)
-        SignalBus.elevator_arrived.emit(completed_request['sprite_name'], current_floor)
-        # 
-        # print("SignalBus.elevator_arrived, handle_arrival")         
-
 
 func _on_sprite_exiting(sprite_name: String) -> void: 
     print("removing request from queue")   
@@ -372,25 +362,27 @@ func apply_scale_factor():
 
 func position_cabin():
     var viewport_size = get_viewport().size
-    var x_position = viewport_size.x / 2  
-    
-    var floor_nodes = get_tree().get_nodes_in_group("floors")
-    var floor_node = null
-    
-    for floors in floor_nodes:
-        if floors.floor_number == current_floor:
-            floor_node = floors
-            break
+    var x_position = viewport_size.x / 2
 
-    if not floor_node:
-        push_warning("Floor node for floor %d not found" % current_floor)
+    if not navigation_controller:
+        push_warning("Navigation_Controller not found in the scene!")
         return
-        
-    var collision_edges = floor_node.get_collision_edges()
+    
+    var floors_dict: Dictionary = navigation_controller.floors
+
+    if not floors_dict.has(current_floor):
+        push_warning("Floor data for floor %d not found" % current_floor)
+        return
+
+    var floor_data      = floors_dict[current_floor]
+    var collision_edges = floor_data["edges"]
+    
     var bottom_edge_y = collision_edges["bottom"]
     var cabin_height = get_cabin_height()
+
     var y_position = bottom_edge_y - (cabin_height / 2)
     global_position = Vector2(x_position, y_position)
+
 
 func get_cabin_height():
     var sprite = get_node("Sprite2D")  # Adjust node path if your sprite differs
@@ -399,12 +391,41 @@ func get_cabin_height():
     else:
         return 0
 
-func get_elevator_position(collision_edges: Dictionary) -> Vector2:        
+func get_elevator_position(collision_edges: Dictionary) -> Vector2:      
+    
     var center_x: float = (collision_edges["left"] + collision_edges["right"]) / 2
     var sprite_height: float = get_cabin_height()
     var adjusted_y: float = collision_edges["bottom"] - sprite_height / 2    
     return Vector2(center_x, adjusted_y)
 
+func cache_elevators():
+    var elevators_dict: Dictionary = navigation_controller.elevators
+    for floor_number in elevators_dict.keys():
+        var elevator_data = elevators_dict[floor_number]
+        floor_to_elevator[floor_number] = elevator_data["ref"]
+
+func cache_floor_positions():
+        
+    var floors_dict: Dictionary = navigation_controller.floors
+    for floor_number in floors_dict.keys():
+        var floor_data = floors_dict[floor_number]
+        var collision_edges = floor_data["edges"]
+        var target_pos = get_elevator_position(collision_edges)
+        floor_to_target_position[floor_number] = target_pos
+        var floor_bottom = collision_edges["bottom"]
+        var floor_top    = collision_edges["top"]
+        var height       = floor_bottom - floor_top        
+        var lower_edge = floor_top
+        var upper_edge = floor_top + (height * 1.25)
+
+        floor_boundaries[floor_number] = {
+            "upper_edge": upper_edge,
+            "lower_edge": lower_edge
+        }
+
+func get_elevator_for_current_floor() -> Node:
+    return floor_to_elevator[current_floor]
+    
 func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer = Timer.new()
     cabin_timer.one_shot = true
@@ -412,42 +433,5 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
 
-
-func cache_elevators():
-    var elevators = get_tree().get_nodes_in_group("elevators")
-    for elevator in elevators:
-        if elevator.floor_instance:
-            floor_to_elevator[elevator.floor_instance.floor_number] = elevator
-
-func cache_floor_positions():
-    var floors = get_tree().get_nodes_in_group("floors")
-    for building_floor in floors:
-        if building_floor.has_method("get_collision_edges"):
-            var collision_edges = building_floor.get_collision_edges()
-
-            # Optional: store the elevator's center position (already done)
-            var target_pos = get_elevator_position(collision_edges)
-            floor_to_target_position[building_floor.floor_number] = target_pos
-
-            # Compute 25% and 99% Y-coordinates for this floor's bounding area
-            var floor_bottom = collision_edges["bottom"]
-            var floor_top    = collision_edges["top"]
-            # Example:
-            var height = floor_bottom - floor_top
-            var lower_edge  = floor_top
-            var upper_edge  = floor_top    + (height * 1.25)  # 25% from top. We are using the next floor as reference in the check function. That's why we adjust by 125%, to account for the actual current floor. 
-
-            floor_boundaries[building_floor.floor_number] = {
-                "upper_edge": upper_edge,
-                "lower_edge": lower_edge
-            }
-
-           
-
-func get_elevator_for_floor(floor_number: int) -> Area2D:    
-    return floor_to_elevator.get(floor_number, null)
-
-func get_elevator_for_current_floor() -> Area2D:    
-    return get_elevator_for_floor(current_floor)
 
 #endregion

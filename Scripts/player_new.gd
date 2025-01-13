@@ -134,6 +134,7 @@ func exit_elevator():
 #endregion
         
         
+#region Sprite Animation
 
 func _animate_sprite() -> void:
     var direction = (sprite_data_new.target_position - sprite_data_new.current_position).normalized()
@@ -186,8 +187,9 @@ func _animate_sprite() -> void:
             # Fallback if none of the above states apply
             push_warning("in _animate_sprite: Sprite is in no recognized state!")
             $AnimatedSprite2D.play("idle")
+#endregion
 
-#region Spr
+#region Sprite Movement
 func move_sprite(delta: float) -> void:
     
     var active_state = sprite_data_new.get_active_state()
@@ -275,13 +277,6 @@ func connect_to_signals():
     SignalBus.elevator_ready.connect(_on_elevator_ready)
     SignalBus.elevator_ready.connect(_on_elevator_at_destination)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  
-    
-    #SignalBus.elevator_arrived.connect(_on_elevator_arrived)   
-    #SignalBus.elevator_position_updated.connect(_on_elevator_ride)
-    #SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
-    #SignalBus.floor_clicked.connect(_on_floor_clicked)
-    #SignalBus.door_clicked.connect(_on_door_clicked)player_sprite_ready
-    #$AnimatedSprite2D.animation_finished.connect(_on_sprite_entered_elevator)   
 #endregion
 
 

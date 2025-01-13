@@ -65,7 +65,24 @@ func _ready():
     navigation_click.connect(_on_navigation_click)
     adjusted_navigation_click.connect(_on_adjusted_navigation_click)
     player_sprite_ready.connect(_on_player_sprite_ready)
+    # Connect the new signals to dummy functions
+    elevator_called.connect(_on_elevator_called)
+    elevator_request_confirmed.connect(_on_elevator_request_confirmed)
+    elevator_ready.connect(_on_elevator_ready)
+    exit_animation_finished.connect(_on_exit_animation_finished)
 
+
+func _on_elevator_called(_sprite_name: String, _target_floor: int) -> void:
+    pass
+
+func _on_elevator_request_confirmed(_sprite_name: String, _floor_number: int) -> void:
+    pass
+
+func _on_elevator_ready(_sprite_name: String) -> void:
+    pass
+
+func _on_exit_animation_finished(_sprite_name: String) -> void:
+    pass
 
 
 func _on_player_sprite_ready():

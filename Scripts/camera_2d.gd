@@ -13,6 +13,6 @@ func _process(_delta: float) -> void:
     position.x = screen_center_x
     
     # Get the player node dynamically and follow its y-position
-    var player = get_parent().get_node("%Player")
+    var player = get_parent().get_node("%Player_new")
     if player:
         position.y = player.position.y
