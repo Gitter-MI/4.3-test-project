@@ -33,7 +33,7 @@ var target_room: int = -1
 var needs_elevator: bool = false
 var current_elevator_position: Vector2 = Vector2.ZERO
 
-var elevator_y_offset
+
 
 
 

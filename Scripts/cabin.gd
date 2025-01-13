@@ -5,6 +5,7 @@ extends Node2D
 @onready var testing_requests_node = %TestingRequests
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 
+
 enum ElevatorState {
     WAITING,       # 0
     IN_TRANSIT     # 1
@@ -126,8 +127,6 @@ func move_elevator(delta: float) -> void:
     if not cabin_timer.is_stopped():
         # push_warning("Cabin timer is running while cabin is moving. Stopping it now.")
         cabin_timer.stop() # attempt to prevent the timer from removing requests while the current request is being processed, which could lead to an out-of-bounds error in on_arrival
-
-
 
     var elevator = floor_to_elevator.get(current_floor, null)    
     if elevator.door_state != elevator.DoorState.CLOSED:
@@ -363,23 +362,11 @@ func apply_scale_factor():
 func position_cabin():
     var viewport_size = get_viewport().size
     var x_position = viewport_size.x / 2
-
-    if not navigation_controller:
-        push_warning("Navigation_Controller not found in the scene!")
-        return
-    
     var floors_dict: Dictionary = navigation_controller.floors
-
-    if not floors_dict.has(current_floor):
-        push_warning("Floor data for floor %d not found" % current_floor)
-        return
-
     var floor_data      = floors_dict[current_floor]
-    var collision_edges = floor_data["edges"]
-    
+    var collision_edges = floor_data["edges"] 
     var bottom_edge_y = collision_edges["bottom"]
     var cabin_height = get_cabin_height()
-
     var y_position = bottom_edge_y - (cabin_height / 2)
     global_position = Vector2(x_position, y_position)
 
@@ -432,6 +419,5 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.wait_time = wait_time
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
-
-
+    
 #endregion

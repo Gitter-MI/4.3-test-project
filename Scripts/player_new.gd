@@ -4,6 +4,7 @@ extends Area2D
 @onready var state_manager: Node = $State_Component
 @onready var navigation_controller: Node = get_parent().get_node("Navigation_Controller")
 @onready var pathfinder: Pathfinder = $Pathfinder_Component
+@onready var cabin := get_tree().get_root().get_node("Main/Cabin")
 
 const SpriteDataScript = preload("res://Scripts/SpriteData_new.gd")
 
@@ -55,7 +56,10 @@ func _process_elevator_actions() -> void:
                 enter_elevator()
             else: 
                 on_sprite_entered_elevator()
-
+        sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:      
+            _animate_sprite()
+        sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:      
+            _animate_sprite()
         sprite_data_new.ElevatorState.EXITING_ELEVATOR:
             exit_elevator()        
         _:
@@ -84,15 +88,16 @@ func _on_elevator_ready(incoming_sprite_name: String):
         sprite_data_new.elevator_ready = true
 
 func enter_elevator():
-    # print("Sprite is entering the elevator.")
-    sprite_data_new.entering_elevator = true    
+    sprite_data_new.entering_elevator = true
     var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
-    var elevator_edges = elevator_data["edges"]
-    var elevator_bottom_y = elevator_edges["bottom"]
-    var elevator_center_x = elevator_data["position"].x 
-    global_position.x = elevator_center_x
-    global_position.y = elevator_bottom_y - (sprite_data_new.sprite_height * 0.5)
-    sprite_data_new.elevator_y_offset = global_position.y - elevator_data["position"].y
+    var cabin_height = cabin.get_cabin_height()
+    var cabin_bottom_y = elevator_data["position"].y + (cabin_height * 0.5)
+    var new_position = Vector2(
+        elevator_data["position"].x,
+        cabin_bottom_y - (sprite_data_new.sprite_height * 0.5)
+    )
+    sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
+    global_position = sprite_data_new.current_position
     z_index = -9
     SignalBus.entering_elevator.emit()
     _animate_sprite()
@@ -106,11 +111,22 @@ func on_sprite_entered_elevator():
 
 func _on_elevator_ride(elevator_pos: Vector2) -> void:
     if sprite_data_new.entered_elevator:
-        # Keep the sprite aligned with the elevator’s position + y-offset
-        global_position.x = elevator_pos.x
-        global_position.y = elevator_pos.y + sprite_data_new.elevator_y_offset        
-        sprite_data_new.current_position = global_position
+        var cabin_height = cabin.get_cabin_height()
+        var cabin_bottom_y = elevator_pos.y + (cabin_height * 0.5)
+        var new_position = Vector2(
+            elevator_pos.x,
+            cabin_bottom_y - (sprite_data_new.sprite_height * 0.5)
+        )
+        sprite_data_new.set_current_position(
+            new_position,
+            sprite_data_new.current_floor_number,
+            sprite_data_new.current_room
+        )
+        global_position = sprite_data_new.current_position
         _animate_sprite()
+
+
+
 
 func _on_elevator_at_destination(incoming_sprite_name: String):    
     if incoming_sprite_name == sprite_data_new.sprite_name and sprite_data_new.entered_elevator == true:
