@@ -6,6 +6,9 @@ enum RoomState { CHECKING_ROOM_STATE, ENTERING_ROOM, IN_ROOM, EXITING_ROOM, NONE
 enum ElevatorState { CALLING_ELEVATOR, WAITING_FOR_ELEVATOR, ENTERING_ELEVATOR, IN_ELEVATOR_ROOM, IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR, NONE }
 enum ActiveState { NONE, MOVEMENT, ROOM, ELEVATOR }
 
+# change to bool flag
+enum MovementPermission { UNKNOWN, ALLOWED, BLOCKED }
+var movement_permission: MovementPermission = MovementPermission.ALLOWED
 
 var movement_state: MovementState = MovementState.IDLE
 var room_state: RoomState = RoomState.NONE
@@ -35,6 +38,9 @@ var nav_target_floor: int = -1
 var nav_target_room: int = -1
 
 
+
+# new
+var elevator_request_id: int = -1
 
 var elevator_requested: bool = false
 var elevator_request_confirmed: bool = false

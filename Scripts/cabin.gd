@@ -1,3 +1,12 @@
+# if queue not empty and next request is on another floor, close door immediately and start moving ASAP
+# if door opens and a sprite is waiting already then sprite enters immediately, placing their own (existing) request at the top of the queue
+# is several sprites are waiting the one first in queue goes first
+# if the elevator is ready and there is a request for this floor but noone is entering immediately, start timer 2 s
+# if the timer times out, remove the first request and proceed with the next request. 
+## check _on_elevator_ready in player script. That's where we learn if a sprite is not available to take their turn
+
+# what happens if a sprite wants to change their destination floor while waiting
+
 # cabin.gd
 extends Node2D
 
@@ -16,9 +25,11 @@ var floor_boundaries = {}
 
 
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 5
+var current_floor: int = 4
 var destination_floor: int = 1
-var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1"}, ...]
+var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1", 'request_id': 1}, ...]
+
+var next_request_id: int = 0
 
 var floor_to_elevator = {}
 var floor_to_target_position = {}
@@ -103,7 +114,7 @@ func elevator_logic() -> void:
 func handle_same_floor_request() -> void:
     # print("handle_same_floor_request")
     var request = elevator_queue[0]    
-    SignalBus.elevator_ready.emit(request['sprite_name'])
+    SignalBus.elevator_ready.emit(request['sprite_name'], next_request_id)
 
 func _on_sprite_entering():
     state = ElevatorState.IN_TRANSIT
@@ -143,7 +154,7 @@ func move_elevator(delta: float) -> void:
         global_position.y = new_y
     
     check_current_floor()
-    SignalBus.elevator_position_updated.emit(global_position)
+    SignalBus.elevator_position_updated.emit(global_position, next_request_id)
 
 
 
@@ -181,7 +192,7 @@ func handle_arrival() -> void:
         elevator.set_door_state(elevator.DoorState.OPENING)
 
 func _on_sprite_exiting(sprite_name: String) -> void: 
-    print("removing request from queue")   
+    # print("removing request from queue")
     remove_from_elevator_queue(sprite_name)
     state = ElevatorState.WAITING
     
@@ -201,7 +212,7 @@ func _on_elevator_door_state_changed(new_state):
                 var first_request = elevator_queue[0]
                 # Emit the signal using the sprite name from the first request
                 
-                SignalBus.elevator_ready.emit(first_request["sprite_name"])
+                SignalBus.elevator_ready.emit(first_request["sprite_name"], next_request_id)
                 
 
         elevator.DoorState.CLOSED:
@@ -243,7 +254,7 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
     if not request_updated:
         add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
         # print("Added new request for sprite:", sprite_name, "to floor:", target_floor)
-        SignalBus.elevator_request_confirmed.emit(sprite_name, target_floor)
+        # SignalBus.elevator_request_confirmed.emit(sprite_name, target_floor, next_request_id)
 
     ## <--- After the player has added a request, add your 3 dummy requests.
     #if testing_requests_node:
@@ -320,15 +331,25 @@ func _print_elevator_direction() -> void:
 #endregion
 
 #region elevator queue management
-func add_to_elevator_queue(request: Dictionary) -> void:    
+func add_to_elevator_queue(request: Dictionary) -> void:
+    # Increment the ID counter
+    next_request_id += 1
+    # Assign the new ID to the request
+    request.request_id = next_request_id
+
+    # Add the request to the elevator queue
     elevator_queue.append(request)
-    # confirmed: queue is properly updating after finishing the first request
+
+    # Now emit a signal so the requesting sprite knows its request ID
+    # Adjust if you keep your signals in a singleton called SignalBus
+    # and have a signal called elevator_request_confirmed
+    SignalBus.elevator_request_confirmed.emit(
+        request.sprite_name,
+        request.target_floor,
+        request.request_id
+    )
     
     
-
-
-
-
 
 func remove_from_elevator_queue(sprite_name: String) -> void:
     # confirmed: queue is properly managed after finishing the first request
@@ -337,11 +358,10 @@ func remove_from_elevator_queue(sprite_name: String) -> void:
     
         if queue_req.has("sprite_name") and queue_req["sprite_name"] == sprite_name:
             elevator_queue.remove_at(i)
-            print("Removed request for:", sprite_name, ", updated queue:", elevator_queue)            
+            # print("Removed request for:", sprite_name, ", updated queue:", elevator_queue)            
             return
-    
+                
     print("No elevator request found for:", sprite_name)
-
 
 
 func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:

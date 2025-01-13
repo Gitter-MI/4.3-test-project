@@ -37,6 +37,9 @@ func _process(delta: float) -> void:
     if active_state == sprite_data_new.ActiveState.ELEVATOR:
         _process_elevator_actions()
 
+        
+
+
 
 
 #region Elevator Movement
@@ -77,14 +80,18 @@ func call_elevator():
     #print("Pick-Up floor: ", sprite_data_new.current_floor_number)
     sprite_data_new.elevator_requested = true
 
-func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int) -> void:
-    # print("signal received: _on_elevator_request_confirmed")    
+func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int, request_id: int) -> void:
+    
     if incoming_sprite_name == sprite_data_new.sprite_name:        
         if incoming_floor == sprite_data_new.current_floor_number:            
+            sprite_data_new.elevator_request_id = request_id
+            # print("Elevator request confirmed. Request ID =", request_id)            
             sprite_data_new.elevator_request_confirmed = true
+            
 
-func _on_elevator_ready(incoming_sprite_name: String):
-    if incoming_sprite_name == sprite_data_new.sprite_name and sprite_data_new.entered_elevator == false:
+func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
+    if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == false:
+        # AND if sprite at position and waiting, else the sprite has moved away and we can start the queue shuffle or check if another sprite can enter during timer period
         sprite_data_new.elevator_ready = true
 
 func enter_elevator():
@@ -109,7 +116,11 @@ func on_sprite_entered_elevator():
         SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
         _animate_sprite()
 
-func _on_elevator_ride(elevator_pos: Vector2) -> void:
+func _on_elevator_ride(elevator_pos: Vector2, request_id: int) -> void:
+    
+    if sprite_data_new.elevator_request_id != request_id:
+        return 
+
     if sprite_data_new.entered_elevator:
         var cabin_height = cabin.get_cabin_height()
         var cabin_bottom_y = elevator_pos.y + (cabin_height * 0.5)
@@ -128,8 +139,8 @@ func _on_elevator_ride(elevator_pos: Vector2) -> void:
 
 
 
-func _on_elevator_at_destination(incoming_sprite_name: String):    
-    if incoming_sprite_name == sprite_data_new.sprite_name and sprite_data_new.entered_elevator == true:
+func _on_elevator_at_destination(incoming_sprite_name: String, request_id: int):    
+    if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == true:
         # print("destination signal received")
         sprite_data_new.elevator_destination_reached = true
 
@@ -288,11 +299,11 @@ func set_initial_position() -> void:
 #region connect_to_signals
 func connect_to_signals():
     SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
-    SignalBus.floor_area_entered.connect(_on_floor_area_entered)    
-    SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
-    SignalBus.elevator_ready.connect(_on_elevator_ready)
-    SignalBus.elevator_ready.connect(_on_elevator_at_destination)
-    SignalBus.elevator_position_updated.connect(_on_elevator_ride)  
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)        
+    SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed) # 
+    SignalBus.elevator_ready.connect(_on_elevator_ready) # 
+    SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
+    SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
 #endregion
 
 

@@ -5,8 +5,10 @@ extends Node
 
 signal elevator_called(sprite_name: String, target_floor: int)  #the target floor is the current floor of the sprite, the pick-up location
 
-signal elevator_request_confirmed(sprite_name: String, floor_number: int)
-signal elevator_ready(sprite_name: String) # ensures that the correct sprite will enter the elevator next
+signal elevator_request_confirmed(sprite_name: String, target_floor: int, request_id: int)
+signal elevator_position_updated(global_pos: Vector2, request_id: int)   # used to move sprites along with the elevator cabin
+# signal elevator_request_confirmed(sprite_name: String, floor_number: int)
+signal elevator_ready(sprite_name: String, request_id: int) # ensures that the correct sprite will enter the elevator next
 signal entering_elevator()
 signal enter_animation_finished(sprite_name: String, target_floor: int)
 signal exit_animation_finished(sprite_name: String)
@@ -25,7 +27,7 @@ signal elevator_request(sprite_name: String, target_floor: int)
 signal elevator_arrived(sprite_name: String, current_floor: int)
 
 signal exiting_elevator(sprite_name: String)
-signal elevator_position_updated(global_pos: Vector2)   # used to move sprites along with the elevator cabin
+
 signal door_state_changed(new_state)
 
 
@@ -75,10 +77,10 @@ func _ready():
 func _on_elevator_called(_sprite_name: String, _target_floor: int) -> void:
     pass
 
-func _on_elevator_request_confirmed(_sprite_name: String, _floor_number: int) -> void:
+func _on_elevator_request_confirmed(_sprite_name: String, _floor_number: int, _request_id: int) -> void:
     pass
 
-func _on_elevator_ready(_sprite_name: String) -> void:
+func _on_elevator_ready(_sprite_name: String, _request_id: int) -> void:
     pass
 
 func _on_exit_animation_finished(_sprite_name: String) -> void:
@@ -114,7 +116,7 @@ func _on_entering_elevator() -> void:
 func _on_exiting_elevator(_sprite_name: String) -> void:
     pass
 
-func _on_elevator_position_updated(_global_pos: Vector2) -> void:
+func _on_elevator_position_updated(_global_pos: Vector2, _request_id: int) -> void:
     pass
 
 func _on_door_state_changed(_new_state) -> void:
