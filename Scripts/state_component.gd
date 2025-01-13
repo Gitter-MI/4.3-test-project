@@ -73,7 +73,7 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
     # - Once it's sent, we wait for elevator_request_confirmed from the elevator system.
 
     if sprite_data_new.elevator_requested and sprite_data_new.elevator_request_confirmed:
-        print("elevator_request_confirmed, Transition to WAITING state")
+        # print("elevator_request_confirmed, Transition to WAITING state")
         # The system has confirmed it's accepted the request.
         # we don't reset the flags, yet. 
 
@@ -105,7 +105,7 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
         else:
             #  or sprite_data_new.target_room >= 0
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
-            print("Sprite is now in Elevator Transit")
+            # print("Sprite is now in Elevator Transit")
         pass
 
 func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
@@ -123,6 +123,7 @@ func _process_exiting_elevator(sprite_data_new: Resource) -> void:
     if sprite_data_new.exited_elevator:
         
         sprite_data_new.set_movement_state(SpriteDataNew.MovementState.IDLE)
+        
         
         # switch to movement state idle
 #endregion
@@ -163,7 +164,7 @@ func _process_movement_walking(sprite_data_new: Resource) -> void:
         pass
 
 func _update_movement_state(sprite_data_new: Resource) -> void:
-    print("update movement state")
+    # print("update movement state")
     var x_differs = (sprite_data_new.current_position != sprite_data_new.target_position)
     var has_stored = sprite_data_new.has_stored_data
     var room_index = sprite_data_new.target_room
@@ -191,6 +192,7 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
     elif x_differs:        
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+        sprite_data_new.reset_elevator_status() # belongs into sprite 
     else:
         push_warning("_update_movement_state: Bad error in _update_movement_state!")
 #endregion

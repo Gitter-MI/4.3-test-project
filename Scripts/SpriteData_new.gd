@@ -10,6 +10,17 @@ var elevator_destination_reached = false
 var exiting_elevator: bool = false
 var exited_elevator: bool = false 
  
+func reset_elevator_status() -> void:
+    elevator_requested = false
+    elevator_request_confirmed = false
+    elevator_ready = false
+    entering_elevator = false
+    entered_elevator = false
+    elevator_destination_reached = false
+    exiting_elevator = false
+    exited_elevator = false
+
+
 var elevator_y_offset  # probably an int
 
 
