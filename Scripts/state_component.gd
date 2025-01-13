@@ -81,15 +81,32 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR)
 
 
+#func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
+    ## print("func _process_waiting_for_elevator")
+    ## WAITING until the elevator arrives and is ready for this sprite
+    #if sprite_data_new.elevator_ready: # elevator emits signal also before leaving. 
+        ## print("elevator_ready confirmed, Transition to ENTERING_ELEVATOR")
+        ## This indicates the elevator arrived and doors are open for this sprite
+        ## sprite_data_new.elevator_ready = false   ## it is not up to the sprite to decide if the elevator is ready or not. 
+        #
+        #sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
+
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
-    # print("func _process_waiting_for_elevator")
-    # WAITING until the elevator arrives and is ready for this sprite
-    if sprite_data_new.elevator_ready: # elevator emits signal also before leaving. 
-        # print("elevator_ready confirmed, Transition to ENTERING_ELEVATOR")
-        # This indicates the elevator arrived and doors are open for this sprite
-        # sprite_data_new.elevator_ready = false   ## it is not up to the sprite to decide if the elevator is ready or not. 
-        
+    if sprite_data_new.elevator_ready:
+        # Elevator is here → go ENTERING_ELEVATOR
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
+        return
+
+    # NEW: If we detect a nav target on the same floor while WAITING:
+    
+    if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
+        
+        # Cancel elevator usage and switch to movement
+        sprite_data_new.reset_elevator_status()        
+        sprite_data_new.reset_stored_data()
+        sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+        return
+
 
 
 func _process_entering_elevator(sprite_data_new: Resource) -> void:

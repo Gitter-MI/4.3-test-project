@@ -25,7 +25,7 @@ var floor_boundaries = {}
 
 
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 4
+var current_floor: int = 12
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1", 'request_id': 1}, ...]
 
@@ -371,7 +371,7 @@ func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor
-            # print("Current elevator queue after update:", elevator_queue)
+            print("Current elevator queue after update:", elevator_queue)
             return
     
 #endregion

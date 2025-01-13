@@ -25,7 +25,7 @@ func _ready():
     SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
     
 
-func _process(delta: float) -> void:
+func _process(delta: float) -> void:    
     pathfinder.determine_path(sprite_data_new)
     state_manager.process_state(sprite_data_new)
     var active_state = sprite_data_new.get_active_state()
@@ -90,11 +90,28 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
-    if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == false:
-        # AND if sprite at position and waiting, else the sprite has moved away and we can start the queue shuffle or check if another sprite can enter during timer period
-        sprite_data_new.elevator_ready = true
+    # First, make sure this signal is even for us:
+    if incoming_sprite_name != sprite_data_new.sprite_name:
+        return
+    if request_id != sprite_data_new.elevator_request_id:
+        return
+    
+    # Next, confirm we are actually waiting for the elevator:
+    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
+        # The sprite has moved on; ignore this signal so we don't break the flow.
+        return
+    
+    # Also, if you want to confirm the sprite is still in place, 
+    # you can check floor or position to be extra sure:
+    # if sprite_data_new.target_floor_number != sprite_data_new.current_floor_number:
+    #     return
+    
+    # If all checks pass, it's safe to mark elevator_ready = true:
+    sprite_data_new.elevator_ready = true
+
 
 func enter_elevator():
+    print("enter_elevator")
     sprite_data_new.entering_elevator = true
     var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
     var cabin_height = cabin.get_cabin_height()
@@ -110,6 +127,7 @@ func enter_elevator():
     _animate_sprite()
 
 func on_sprite_entered_elevator():
+    print("on_sprite_entered_elevator")
     var current_anim = $AnimatedSprite2D.animation    
     if current_anim == "enter" and sprite_data_new.entering_elevator == true:
         sprite_data_new.entered_elevator = true
