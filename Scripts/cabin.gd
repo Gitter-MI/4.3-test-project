@@ -112,9 +112,9 @@ func elevator_logic() -> void:
 
 
 func handle_same_floor_request() -> void:
-    # print("handle_same_floor_request")
-    var request = elevator_queue[0]    
-    SignalBus.elevator_ready.emit(request['sprite_name'], next_request_id)
+    var request = elevator_queue[0]
+    SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])
+
 
 func _on_sprite_entering():
     state = ElevatorState.IN_TRANSIT
@@ -154,7 +154,7 @@ func move_elevator(delta: float) -> void:
         global_position.y = new_y
     
     check_current_floor()
-    SignalBus.elevator_position_updated.emit(global_position, next_request_id)
+    SignalBus.elevator_position_updated.emit(global_position, elevator_queue[0]["request_id"])
 
 
 
@@ -210,9 +210,10 @@ func _on_elevator_door_state_changed(new_state):
                 start_waiting_timer()
                 # Get the first request in the queue
                 var first_request = elevator_queue[0]
-                # Emit the signal using the sprite name from the first request
+                # Emit the signal with the correct request_id
+                SignalBus.elevator_ready.emit(first_request["sprite_name"], first_request["request_id"])
+
                 
-                SignalBus.elevator_ready.emit(first_request["sprite_name"], next_request_id)
                 
 
         elevator.DoorState.CLOSED:
@@ -257,10 +258,10 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
         # SignalBus.elevator_request_confirmed.emit(sprite_name, target_floor, next_request_id)
 
     ## <--- After the player has added a request, add your 3 dummy requests.
-    #if testing_requests_node:
-        #testing_requests_node.add_dummy_requests(self)
-    #else:
-        #push_warning("TestingRequests node not found - cannot add dummy requests")
+    if testing_requests_node:
+        testing_requests_node.add_dummy_requests(self)
+    else:
+        push_warning("TestingRequests node not found - cannot add dummy requests")
 
 
     update_destination_floor()
@@ -284,9 +285,9 @@ func _on_cabin_timer_timeout() -> void:
     if not elevator_queue.is_empty():
         var _removed_request = elevator_queue[0]
         elevator_queue.remove_at(0)
-        # print("Removed oldest request due to inactivity: ", removed_request)
+        print("Removed oldest request due to inactivity: ", _removed_request)
     else:
-        # print("Elevator queue is empty, nothing to remove.")
+        print("Elevator queue is empty, nothing to remove.")
         pass
 
 
