@@ -103,6 +103,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         # Cancel elevator usage and switch to movement
         sprite_data_new.reset_elevator_status()        
         sprite_data_new.reset_stored_data()
+        sprite_data_new.reset_elevator_request_id()
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         return
 

@@ -260,27 +260,19 @@ func update_destination_floor() -> void:
         destination_floor = elevator_queue[0]['target_floor']
 
 
-func _on_elevator_request(sprite_name: String, target_floor: int) -> void: 
-    # print("_on_elevator_request")       
-    
-    var request_updated = false
+func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
+    # Find if there's an existing request from the same sprite
+    var existing_index := -1
     for i in range(elevator_queue.size()):
-        var request = elevator_queue[i]
-        if request['sprite_name'] == sprite_name:
-            if request['target_floor'] == target_floor:
-                # print("Duplicate request ignored for sprite: ", sprite_name, " to floor: ", target_floor)
-                ## does not work if the elevator is on it's way to the pick-up floor
-                return
-            else:
-                elevator_queue[i] = {'target_floor': target_floor, 'sprite_name': sprite_name}
-                # print("Replaced request for sprite:", sprite_name, "with new floor:", target_floor)
-                request_updated = true
-                break
+        if elevator_queue[i].sprite_name == sprite_name:
+            existing_index = i
+            break
 
-    if not request_updated:
-        add_to_elevator_queue({'target_floor': target_floor, 'sprite_name': sprite_name})
-        # print("Added new request for sprite:", sprite_name, "to floor:", target_floor)
-        # SignalBus.elevator_request_confirmed.emit(sprite_name, target_floor, next_request_id)
+    # If a request for this sprite already exists, overwrite it.
+    if existing_index >= 0:
+        overwrite_elevator_request(existing_index, sprite_name, target_floor)
+    else:
+        add_to_elevator_queue({'sprite_name': sprite_name, 'target_floor': target_floor})
 
     ## <--- After the player has added a request, add your 3 dummy requests.
     if testing_requests_node:
@@ -291,8 +283,31 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
 
     update_destination_floor()
 
-    if request_updated and state == ElevatorState.IN_TRANSIT: # If we are already in transit, re-initialize target position so the elevator doesn't keep going to the old floor.
-        initialize_target_position()
+    # from the old implementation: changing target floor in transit
+    #if request_updated and state == ElevatorState.IN_TRANSIT: # If we are already in transit, re-initialize target position so the elevator doesn't keep going to the old floor.
+        #initialize_target_position()
+
+
+func overwrite_elevator_request(index: int, sprite_name: String, target_floor: int) -> void:
+    # Increment the ID counter to give this overwritten request a new ID
+    next_request_id += 1
+
+    # Overwrite the existing request in the queue
+    elevator_queue[index] = {
+        "sprite_name": sprite_name,
+        "target_floor": target_floor,
+        "request_id": next_request_id
+    }
+    print("Elevator queue after overwriting request at index %d: %s"
+          % [index, elevator_queue])
+
+    # Emit a signal with the new request ID
+    SignalBus.elevator_request_confirmed.emit(
+        sprite_name,
+        target_floor,
+        next_request_id
+    )
+
 
 func start_waiting_timer() -> void:
     if cabin_timer == null:

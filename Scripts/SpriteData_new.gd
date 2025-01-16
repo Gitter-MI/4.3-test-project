@@ -53,6 +53,9 @@ var exited_elevator: bool = false
 
 func needs_elevator(destination_floor: int) -> bool:
     return current_floor_number != destination_floor
+    
+func reset_elevator_request_id() -> void:
+    elevator_request_id = -1
  
 func reset_elevator_status() -> void:
     elevator_requested = false
