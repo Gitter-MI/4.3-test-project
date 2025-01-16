@@ -97,8 +97,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
         return
 
-    # NEW: If we detect a nav target on the same floor while WAITING:
-    
+    # Sprite is walking away while waiting for elevator    
     if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
         
         # Cancel elevator usage and switch to movement

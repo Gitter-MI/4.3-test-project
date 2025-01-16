@@ -13,3 +13,8 @@ texture = ExtResource("1_l3g6p")
 [node name="TestingRequests" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("3_t2mhh")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+
+[connection signal="screen_entered" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

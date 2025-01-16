@@ -5,8 +5,6 @@
 # if the timer times out, remove the first request and proceed with the next request. 
 ## check _on_elevator_ready in player script. That's where we learn if a sprite is not available to take their turn
 
-# what happens if a sprite wants to change their destination floor while waiting
-
 # cabin.gd
 extends Node2D
 
@@ -25,7 +23,7 @@ var floor_boundaries = {}
 
 
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 12
+var current_floor: int = 13
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1", 'request_id': 1}, ...]
 
@@ -41,8 +39,16 @@ var target_position: Vector2 = Vector2.ZERO
 var cabin_timer: Timer
 var cabin_timer_timeout: int = 2
 
+
+@onready var visible_notifier: VisibleOnScreenNotifier2D = $VisibleOnScreenNotifier2D
+@onready var cabin_sprite: Sprite2D = $Sprite2D
+const VISIBILITY_MARGIN_MULTIPLIER: float = 1.5
+
 func _ready():
     
+    
+    cabin_sprite.hide() # for testing purposes. The cabin is off-screen when the game starts
+    setup_visibility_notifier()
     
     
     add_to_group("cabin")
@@ -54,6 +60,9 @@ func _ready():
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
     
     SignalBus.exit_animation_finished.connect(_on_sprite_exiting)
+    
+    visible_notifier.screen_entered.connect(_on_screen_entered)
+    visible_notifier.screen_exited.connect(_on_screen_exited)
 
     apply_scale_factor()
     position_cabin()
@@ -64,7 +73,22 @@ func _ready():
     var elevator = get_elevator_for_current_floor()    
     elevator.set_door_state(elevator.DoorState.OPEN)
     setup_cabin_timer(2.0)  ## timer functionality has been temporarily disabled
+
+
+
+func _on_screen_entered() -> void:
+    print("visible")
+    cabin_sprite.show()
     
+
+
+func _on_screen_exited() -> void:
+    print("not visible")
+    cabin_sprite.hide()
+
+
+
+ 
 
 func _process(delta: float) -> void:
     
@@ -245,6 +269,7 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
         if request['sprite_name'] == sprite_name:
             if request['target_floor'] == target_floor:
                 # print("Duplicate request ignored for sprite: ", sprite_name, " to floor: ", target_floor)
+                ## does not work if the elevator is on it's way to the pick-up floor
                 return
             else:
                 elevator_queue[i] = {'target_floor': target_floor, 'sprite_name': sprite_name}
@@ -340,6 +365,7 @@ func add_to_elevator_queue(request: Dictionary) -> void:
 
     # Add the request to the elevator queue
     elevator_queue.append(request)
+    print("elevator queue after adding a new request: ", elevator_queue)
 
     # Now emit a signal so the requesting sprite knows its request ID
     # Adjust if you keep your signals in a singleton called SignalBus
@@ -440,5 +466,16 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.wait_time = wait_time
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
+
+
+func setup_visibility_notifier() -> void:
+    var cabin_height: float = get_cabin_height()
+    var margin: float = cabin_height * VISIBILITY_MARGIN_MULTIPLIER
     
+    # Create a rect that's taller than the cabin
+    var rect = visible_notifier.rect
+    rect.position.y = -margin  # Extend upward
+    rect.size.y = cabin_height + (margin * 2)  # Add margin to both top and bottom
+    visible_notifier.rect = rect
+
 #endregion

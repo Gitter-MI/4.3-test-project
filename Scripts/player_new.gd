@@ -69,15 +69,13 @@ func _process_elevator_actions() -> void:
                         
             pass
 
-func call_elevator():    
+func call_elevator():  
+    print("calling elevator")  
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number
     )
     _animate_sprite()
-    #print("Details of the elevator request: ")
-    #print("Sprite_Name: ",sprite_data_new.sprite_name)
-    #print("Pick-Up floor: ", sprite_data_new.current_floor_number)
     sprite_data_new.elevator_requested = true
 
 func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int, request_id: int) -> void:
@@ -100,13 +98,6 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
     if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
         # The sprite has moved on; ignore this signal so we don't break the flow.
         return
-    
-    # Also, if you want to confirm the sprite is still in place, 
-    # you can check floor or position to be extra sure:
-    # if sprite_data_new.target_floor_number != sprite_data_new.current_floor_number:
-    #     return
-    
-    # If all checks pass, it's safe to mark elevator_ready = true:
     sprite_data_new.elevator_ready = true
 
 
