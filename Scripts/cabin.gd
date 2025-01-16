@@ -23,7 +23,7 @@ var floor_boundaries = {}
 
 
 var state: ElevatorState = ElevatorState.WAITING
-var current_floor: int = 13
+var current_floor: int = 2
 var destination_floor: int = 1
 var elevator_queue: Array = []  # Example: [{'target_floor': 1, 'sprite_name': "Player_1", 'request_id': 1}, ...]
 
@@ -33,7 +33,7 @@ var floor_to_elevator = {}
 var floor_to_target_position = {}
 
 const SCALE_FACTOR: float = 2.3
-const SPEED: float = 400.0  # Pixels per second
+const SPEED: float = 500.0  # Pixels per second
 
 var target_position: Vector2 = Vector2.ZERO
 var cabin_timer: Timer
@@ -47,13 +47,12 @@ const VISIBILITY_MARGIN_MULTIPLIER: float = 1.5
 func _ready():
     
     
-    cabin_sprite.hide() # for testing purposes. The cabin is off-screen when the game starts
-    setup_visibility_notifier()
-    
-    
     add_to_group("cabin")
     SignalBus.elevator_called.connect(_on_elevator_request)
     SignalBus.elevator_request.connect(_on_elevator_request)
+    
+    SignalBus.elevator_request_changed.connect(_on_elevator_request_changed)
+    
     SignalBus.entering_elevator.connect(_on_sprite_entering)
     SignalBus.enter_animation_finished.connect(_on_sprite_entered)
     SignalBus.exiting_elevator.connect(_on_sprite_exiting)
@@ -61,14 +60,16 @@ func _ready():
     
     SignalBus.exit_animation_finished.connect(_on_sprite_exiting)
     
-    visible_notifier.screen_entered.connect(_on_screen_entered)
-    visible_notifier.screen_exited.connect(_on_screen_exited)
+
 
     apply_scale_factor()
     position_cabin()
     z_index = -10    
     cache_elevators()
-    cache_floor_positions()    
+    cache_floor_positions()
+    setup_visibility_notifier()
+    visible_notifier.screen_entered.connect(_on_screen_entered)  # move to signal bus?
+    visible_notifier.screen_exited.connect(_on_screen_exited)
 
     var elevator = get_elevator_for_current_floor()    
     elevator.set_door_state(elevator.DoorState.OPEN)
@@ -76,15 +77,7 @@ func _ready():
 
 
 
-func _on_screen_entered() -> void:
-    print("visible")
-    cabin_sprite.show()
-    
 
-
-func _on_screen_exited() -> void:
-    print("not visible")
-    cabin_sprite.hide()
 
 
 
@@ -232,8 +225,9 @@ func _on_elevator_door_state_changed(new_state):
             # Start the timer only if there is at least one request waiting
             if not elevator_queue.is_empty():
                 start_waiting_timer()
+                # print("starting timer")
                 # Get the first request in the queue
-                var first_request = elevator_queue[0]
+                var first_request = elevator_queue[0]                
                 # Emit the signal with the correct request_id
                 SignalBus.elevator_ready.emit(first_request["sprite_name"], first_request["request_id"])
 
@@ -288,25 +282,50 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
         #initialize_target_position()
 
 
-func overwrite_elevator_request(index: int, sprite_name: String, target_floor: int) -> void:
-    # Increment the ID counter to give this overwritten request a new ID
-    next_request_id += 1
 
-    # Overwrite the existing request in the queue
-    elevator_queue[index] = {
-        "sprite_name": sprite_name,
-        "target_floor": target_floor,
-        "request_id": next_request_id
-    }
-    print("Elevator queue after overwriting request at index %d: %s"
-          % [index, elevator_queue])
 
-    # Emit a signal with the new request ID
-    SignalBus.elevator_request_confirmed.emit(
-        sprite_name,
-        target_floor,
-        next_request_id
+func _on_elevator_request_changed(request_id: int) -> void:
+    if elevator_queue.is_empty():
+        return  # no current request to process
+
+    # The top (current) request
+    var top_request = elevator_queue[0]
+    
+    # The pickup floor from the current request
+    var pickup_floor = top_request["target_floor"]
+
+    # Search the queue for another request with the same floor (ignoring index 0)
+    var matching_index := -1
+    for i in range(1, elevator_queue.size()):
+        var req = elevator_queue[i]
+        if req["target_floor"] == pickup_floor:
+            matching_index = i
+            break
+
+    # If we didn't find another request on the same floor, do nothing
+    if matching_index == -1:
+        return
+
+    # Overwrite the top request with the matching one
+    var matching_request = elevator_queue[matching_index]
+    elevator_queue[0] = matching_request
+
+    # At this point, the same request can appear twice in the queue
+    # (since we haven't removed the matching request from its original place).
+    # This is intentional in your scenario.
+
+    # Notify the sprite for the new top request
+    SignalBus.elevator_ready.emit(
+        matching_request["sprite_name"],
+        matching_request["request_id"]
     )
+
+    # Optionally, you could print or log for debugging
+    print("Queue after overwriting top request with matching floor request:", elevator_queue)
+
+    
+
+
 
 
 func start_waiting_timer() -> void:
@@ -390,6 +409,27 @@ func add_to_elevator_queue(request: Dictionary) -> void:
         request.target_floor,
         request.request_id
     )
+
+
+func overwrite_elevator_request(index: int, sprite_name: String, target_floor: int) -> void:
+    # Increment the ID counter to give this overwritten request a new ID
+    next_request_id += 1
+
+    # Overwrite the existing request in the queue
+    elevator_queue[index] = {
+        "sprite_name": sprite_name,
+        "target_floor": target_floor,
+        "request_id": next_request_id
+    }
+    print("Elevator queue after overwriting request at index %d: %s"
+          % [index, elevator_queue])
+
+    # Emit a signal with the new request ID
+    SignalBus.elevator_request_confirmed.emit(
+        sprite_name,
+        target_floor,
+        next_request_id
+    )
     
     
 
@@ -407,12 +447,13 @@ func remove_from_elevator_queue(sprite_name: String) -> void:
 
 
 func update_elevator_queue(sprite_name: String, new_target_floor: int) -> void:
+    # used to update the target floor of the elevator from the pick-up floor to the destination floor
     # print("update_elevator_queue called")
     # print("Current elevator queue:", elevator_queue)
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["target_floor"] = new_target_floor
-            print("Current elevator queue after update:", elevator_queue)
+            # print("Current elevator queue after update:", elevator_queue)
             return
     
 #endregion
@@ -492,5 +533,14 @@ func setup_visibility_notifier() -> void:
     rect.position.y = -margin  # Extend upward
     rect.size.y = cabin_height + (margin * 2)  # Add margin to both top and bottom
     visible_notifier.rect = rect
+
+func _on_screen_entered() -> void:
+    # print("visible")
+    cabin_sprite.show()
+
+func _on_screen_exited() -> void:
+    # print("not visible")
+    cabin_sprite.hide()
+
 
 #endregion

@@ -9,6 +9,9 @@ signal elevator_request_confirmed(sprite_name: String, target_floor: int, reques
 signal elevator_position_updated(global_pos: Vector2, request_id: int)   # used to move sprites along with the elevator cabin
 # signal elevator_request_confirmed(sprite_name: String, floor_number: int)
 signal elevator_ready(sprite_name: String, request_id: int) # ensures that the correct sprite will enter the elevator next
+
+signal elevator_request_changed(request_id: int)
+
 signal entering_elevator()
 signal enter_animation_finished(sprite_name: String, target_floor: int)
 signal exit_animation_finished(sprite_name: String)

@@ -97,7 +97,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
         return
 
-    # Sprite is walking away while waiting for elevator    
+    # Sprite is walking away, interrupting the waiting state
     if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
         
         # Cancel elevator usage and switch to movement
@@ -106,6 +106,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.reset_elevator_request_id()
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         return
+
 
 
 

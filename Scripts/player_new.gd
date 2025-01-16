@@ -70,7 +70,7 @@ func _process_elevator_actions() -> void:
             pass
 
 func call_elevator():  
-    print("calling elevator")  
+    # print("calling elevator")  
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number
@@ -89,6 +89,13 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
     # First, make sure this signal is even for us:
+    
+
+    if incoming_sprite_name == sprite_data_new.sprite_name and request_id != sprite_data_new.elevator_request_id:
+        # inform cabin that the request is potentially skippable
+        SignalBus.elevator_request_changed.emit(request_id)
+        # pass
+    
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return
     if request_id != sprite_data_new.elevator_request_id:
@@ -102,7 +109,7 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
 
 
 func enter_elevator():
-    print("enter_elevator")
+    # print("enter_elevator")
     sprite_data_new.entering_elevator = true
     var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
     var cabin_height = cabin.get_cabin_height()
@@ -118,7 +125,7 @@ func enter_elevator():
     _animate_sprite()
 
 func on_sprite_entered_elevator():
-    print("on_sprite_entered_elevator")
+    # print("on_sprite_entered_elevator")
     var current_anim = $AnimatedSprite2D.animation    
     if current_anim == "enter" and sprite_data_new.entering_elevator == true:
         sprite_data_new.entered_elevator = true
