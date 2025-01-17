@@ -12,7 +12,7 @@ signal elevator_ready(sprite_name: String, request_id: int) # ensures that the c
 
 signal elevator_request_changed(request_id: int)
 
-signal entering_elevator()
+signal entering_elevator(sprite_name: String, request_id: int)
 signal enter_animation_finished(sprite_name: String, target_floor: int)
 signal exit_animation_finished(sprite_name: String)
 
@@ -113,7 +113,7 @@ func _on_elevator_request(_sprite_name: String, _target_floor: int) -> void:
 func _on_elevator_arrived(_sprite_name: String, _current_floor: int) -> void:
     pass
 
-func _on_entering_elevator() -> void:
+func _on_entering_elevator(_sprite_name: String, _request_id: int) -> void:
     pass
 
 func _on_exiting_elevator(_sprite_name: String) -> void:

@@ -121,7 +121,7 @@ func enter_elevator():
     sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
     global_position = sprite_data_new.current_position
     z_index = -9
-    SignalBus.entering_elevator.emit()
+    SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
     _animate_sprite()
 
 func on_sprite_entered_elevator():

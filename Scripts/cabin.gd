@@ -133,9 +133,25 @@ func handle_same_floor_request() -> void:
     SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])
 
 
-func _on_sprite_entering():
-    state = ElevatorState.IN_TRANSIT
-    
+#func _on_sprite_entering(sprite_name: String, request_id: int):
+    ## this needs to confirm that the expected sprite is entering with the expected request id
+    #
+    #
+    #state = ElevatorState.IN_TRANSIT
+
+func _on_sprite_entering(sprite_name: String, request_id: int):
+    if elevator_queue.is_empty():
+        print("No active requests for sprite entry.")
+        return
+
+    var top_request = elevator_queue[0]
+    if top_request["sprite_name"] == sprite_name and top_request["request_id"] == request_id:
+        state = ElevatorState.IN_TRANSIT
+        print("Sprite entered successfully: ", sprite_name, ", request_id: ", request_id)
+    else:
+        print("Invalid entry attempt by:", sprite_name, "with request ID:", request_id)
+
+
 
 
 func _on_sprite_entered(sprite_name: String, target_floor: int) -> void:
@@ -285,6 +301,7 @@ func _on_elevator_request(sprite_name: String, target_floor: int) -> void:
 
 
 func _on_elevator_request_changed(request_id: int) -> void:
+    ## double check if the request passed in is the request id we expect or if we don't need it
     if elevator_queue.is_empty():
         return  # no current request to process
 
