@@ -100,10 +100,13 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
     # Sprite is walking away, interrupting the waiting state
     if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
         
+        
+        
+        ## move this to the player script without the state setter: function move_sprite inside the if clause
         # Cancel elevator usage and switch to movement
         sprite_data_new.reset_elevator_status()        
         sprite_data_new.reset_stored_data()
-        sprite_data_new.reset_elevator_request_id()
+        sprite_data_new.reset_elevator_request_id()        
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         return
 

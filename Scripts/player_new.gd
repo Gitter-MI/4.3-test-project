@@ -3,8 +3,10 @@ extends Area2D
 
 @onready var state_manager: Node = $State_Component
 @onready var navigation_controller: Node = get_parent().get_node("Navigation_Controller")
-@onready var pathfinder: Pathfinder = $Pathfinder_Component
+
+@onready var pathfinder:= get_tree().get_root().get_node("Main/Player_new/Pathfinder_Component")
 @onready var cabin := get_tree().get_root().get_node("Main/Cabin")
+
 
 const SpriteDataScript = preload("res://Scripts/SpriteData_new.gd")
 
@@ -17,6 +19,7 @@ var previous_elevator_position: Vector2 = Vector2.ZERO
 
 
 func _ready():
+    
     sprite_data_new = SpriteDataScript.new()
     instantiate_sprite()
     connect_to_signals()
@@ -69,19 +72,36 @@ func _process_elevator_actions() -> void:
                         
             pass
 
-func call_elevator():  
-    # print("calling elevator")  
+
+func call_elevator() -> void:
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
-        sprite_data_new.current_floor_number
+        sprite_data_new.current_floor_number, # pick_up_floor
+        sprite_data_new.stored_target_floor,  # destination_floor
+        sprite_data_new.elevator_request_id
     )
     _animate_sprite()
     sprite_data_new.elevator_requested = true
 
-func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int, request_id: int) -> void:
+
+
+#func call_elevator():  
+    ## print("calling elevator")  
+    #SignalBus.elevator_called.emit(
+        #sprite_data_new.sprite_name,
+        #sprite_data_new.current_floor_number,
+        #sprite_data_new.elevator_request_id
+    #)
+    #_animate_sprite()
+    #sprite_data_new.elevator_requested = true
+
+func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int, destination_floor: int, request_id: int) -> void:
+    
+    print("destination_floor of the confirmed request: ", destination_floor)
+    print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
     
     if incoming_sprite_name == sprite_data_new.sprite_name:        
-        if incoming_floor == sprite_data_new.current_floor_number:            
+        if incoming_floor == sprite_data_new.current_floor_number and destination_floor == sprite_data_new.stored_target_floor:            
             sprite_data_new.elevator_request_id = request_id
             # print("Elevator request confirmed. Request ID =", request_id)            
             sprite_data_new.elevator_request_confirmed = true
@@ -93,6 +113,7 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
 
     if incoming_sprite_name == sprite_data_new.sprite_name and request_id != sprite_data_new.elevator_request_id:
         # inform cabin that the request is potentially skippable
+        # print("emitting request changed signal to the cabin")
         SignalBus.elevator_request_changed.emit(request_id)
         # pass
     
@@ -121,7 +142,7 @@ func enter_elevator():
     sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
     global_position = sprite_data_new.current_position
     z_index = -9
-    SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
+    SignalBus.entering_elevator.emit()
     _animate_sprite()
 
 func on_sprite_entered_elevator():
