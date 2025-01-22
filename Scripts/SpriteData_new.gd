@@ -14,17 +14,17 @@ var movement_state: MovementState = MovementState.IDLE
 var room_state: RoomState = RoomState.NONE
 var elevator_state: ElevatorState = ElevatorState.NONE
 
-var sprite_name: String = "Player_2"
+var sprite_name: String = ""
 var sprite_height: int = -1
 var sprite_width: int = -1
 var speed: float = 400.0
 
 var current_position: Vector2 = Vector2.ZERO
-var current_floor_number: int = 3                   # initial spawn floor
+var current_floor_number: int = -1                   # initial spawn floor
 var current_room: int = -1                          # spawns 'on the floor'
 
 var target_position: Vector2 = Vector2.ZERO
-var target_floor_number: int = 3                    # initial spawn floor
+var target_floor_number: int = -1                    # initial spawn floor
 var target_room: int = -1
 
 var has_stored_data: bool = false
@@ -40,7 +40,7 @@ var nav_target_room: int = -1
 
 
 # new
-var elevator_request_id: int = 1
+var elevator_request_id: int = -1
 
 var elevator_requested: bool = false
 var elevator_request_confirmed: bool = false
