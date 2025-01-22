@@ -55,6 +55,7 @@ func _process_elevator_actions() -> void:
                 call_elevator()
         
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
+            # call_elevator()
             pass
 
         sprite_data_new.ElevatorState.ENTERING_ELEVATOR:            
@@ -97,8 +98,8 @@ func call_elevator() -> void:
 
 func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int, destination_floor: int, request_id: int) -> void:
     
-    print("destination_floor of the confirmed request: ", destination_floor)
-    print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
+    # print("destination_floor of the confirmed request: ", destination_floor)
+    # print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
     
     if incoming_sprite_name == sprite_data_new.sprite_name:        
         if incoming_floor == sprite_data_new.current_floor_number and destination_floor == sprite_data_new.stored_target_floor:            
@@ -108,23 +109,13 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
-    # First, make sure this signal is even for us:
-    
-
-    if incoming_sprite_name == sprite_data_new.sprite_name and request_id != sprite_data_new.elevator_request_id:
-        # inform cabin that the request is potentially skippable
-        # print("emitting request changed signal to the cabin")
-        SignalBus.elevator_request_changed.emit(request_id)
-        # pass
     
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return
     if request_id != sprite_data_new.elevator_request_id:
-        return
+        return    
     
-    # Next, confirm we are actually waiting for the elevator:
-    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
-        # The sprite has moved on; ignore this signal so we don't break the flow.
+    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:        
         return
     sprite_data_new.elevator_ready = true
 

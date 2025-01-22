@@ -40,7 +40,7 @@ var nav_target_room: int = -1
 
 
 # new
-var elevator_request_id: int = -1
+var elevator_request_id: int = 1
 
 var elevator_requested: bool = false
 var elevator_request_confirmed: bool = false
