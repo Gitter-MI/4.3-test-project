@@ -191,6 +191,7 @@ func update_destination_floor() -> void:
     target_position = floor_to_target_position[destination_floor]
 
 
+#region Request Management
 func find_request_index_by_sprite(sprite_name: String) -> int:
     for i in range(elevator_queue.size()):
         if elevator_queue[i]["sprite_name"] == sprite_name:
@@ -225,7 +226,7 @@ func _on_elevator_request(
             "sprite_name": sprite_name,
             "pick_up_floor": sprite_pick_up_floor,            
             "destination_floor": sprite_destination_floor,
-            "sprite_request_id": sprite_request_id
+            # "sprite_request_id": sprite_request_id
         })
     else:
         # print("request_index >= 0 => Found existing request")
@@ -293,8 +294,7 @@ func shuffle_elevator_queue_with_new_request(
         # Data from the sprite
         "sprite_name": sprite_name,
         "pick_up_floor": pick_up_floor,        
-        "destination_floor": destination_floor,
-        "sprite_request_id": sprite_request_id
+        "destination_floor": destination_floor,        
     }
 
     # 3) Find the insertion position behind all requests on the same floor.
@@ -315,8 +315,9 @@ func shuffle_elevator_queue_with_new_request(
         new_request.sprite_name,
         new_request.pick_up_floor,
         new_request.destination_floor,
-        new_request.request_id                                    
+        next_request_id                              
     )
+#endregion
 
 
 
@@ -344,7 +345,7 @@ func _on_cabin_timer_timeout() -> void:
 
 
 
-#region Elevator direction
+
 #region Elevator direction
 func set_elevator_direction() -> void:
     var new_direction: int = 0
