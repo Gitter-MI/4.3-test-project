@@ -1,4 +1,3 @@
-# SpriteData_new.gd
 extends Resource
 
 enum MovementState { IDLE, WALKING, NONE }

@@ -26,6 +26,43 @@ func _on_player_sprite_ready():
     # print_all_registered()
 
 
+func _on_navigation_command(sprite_name: String, destination_floor_number: Vector2, destination_door_index: int, commander: String) -> void:
+    
+
+    # Originally intended for the AI controller to issue navigation commands to the AI sprites, we can also use this to issue commands to the player sprite from a game controller. 
+    # For example: when event X: override and ignore player input. Make player sprite do Y instead. 
+    # The player input can still be managed via the navigation input signal chain. It could also be integrated into the flow described above. 
+    
+    ## additional ideas:
+    # include the emittent to the signal message: game controller, AI, player ("adjusted_navigation_ai_command", "adjusted_navigation_game_command", "adjusted_navigation_player_command")
+    # include target event to the message: interact with object
+    # log an event for observability and consumption
+    
+    ## key takeaway:
+    ## if everything becomes a navigation command then we don't have to change the player script besides renaming the signal connection and the receiving function
+    ## we pass the source with the signal and can then differentiate in the process function/state machine
+    ## when the nav click has been adjusted we forward it with the commander enum to this function and then process it fast. 
+    
+        
+    # get_door_center_x using the door index
+    # get the corresponding y coordinate for this sprite for the requested floor
+    # calculate the corresponding destination position
+    # emit the signal
+    
+    var destination_position # needs to be calculated here    
+     
+    SignalBus.emit_signal(
+        "adjusted_navigation_command",   
+        commander,  
+        sprite_name,    
+        destination_floor_number,
+        destination_door_index,
+        destination_position
+    )
+
+
+
+
 func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:    
     var click_data: Dictionary = _determine_click_type(door_index, floor_number, global_position)
     var edges: Dictionary = click_data["edges"]
@@ -34,7 +71,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     # print("_on_navigation_click: global_position: ", global_position)
     
     SignalBus.emit_signal(
-        "adjusted_navigation_click",
+        "adjusted_navigation_click",        
         floor_number,
         door_index,
         adjusted_click_position

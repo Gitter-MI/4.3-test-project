@@ -336,12 +336,23 @@ func set_initial_data():
 
 #region connect_to_signals
 func connect_to_signals():
+    
     SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
+    SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
+    
+    
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)        
     SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed) # 
     SignalBus.elevator_ready.connect(_on_elevator_ready) # 
     SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
+    
+    
+func _on_adjusted_navigation_command(Arguments): 
+    print("nav command received with Arguments: ", Arguments)
+    
+    
+    
 #endregion
 
 

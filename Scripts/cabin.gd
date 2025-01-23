@@ -55,6 +55,7 @@ func _process(delta: float) -> void:
         ElevatorState.IN_TRANSIT:            
             move_elevator(delta)
             
+#region Elevator functionality
 func process_next_request():
     # If queue is empty, do nothing
     if elevator_queue.is_empty():
@@ -189,7 +190,7 @@ func update_destination_floor() -> void:
         destination_floor = current_request["pick_up_floor"]
         
     target_position = floor_to_target_position[destination_floor]
-
+#endregion
 
 #region Request Management
 func find_request_index_by_sprite(sprite_name: String) -> int:
@@ -319,8 +320,7 @@ func shuffle_elevator_queue_with_new_request(
     )
 #endregion
 
-
-
+#region Cabin Timer
   
 func start_waiting_timer() -> void:
     if cabin_timer == null:
@@ -342,9 +342,7 @@ func _on_cabin_timer_timeout() -> void:
     else:
         # print("Elevator queue is empty, nothing to remove.")
         pass
-
-
-
+#endregion
 
 #region Elevator direction
 func set_elevator_direction() -> void:
