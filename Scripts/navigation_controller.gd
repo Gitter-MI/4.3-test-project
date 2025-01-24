@@ -26,7 +26,7 @@ func _on_player_sprite_ready():
     # print_all_registered()
 
 
-func _on_navigation_command(sprite_name: String, destination_floor_number: Vector2, destination_door_index: int, commander: String) -> void:
+func _on_navigation_command(sprite_name: String, destination_floor_number: int, destination_door_index: int, commander: String, adjusted_position: Vector2) -> void:
     
 
     # Originally intended for the AI controller to issue navigation commands to the AI sprites, we can also use this to issue commands to the player sprite from a game controller. 
@@ -49,16 +49,9 @@ func _on_navigation_command(sprite_name: String, destination_floor_number: Vecto
     # calculate the corresponding destination position
     # emit the signal
     
-    var destination_position # needs to be calculated here    
-     
-    SignalBus.emit_signal(
-        "adjusted_navigation_command",   
-        commander,  
-        sprite_name,    
-        destination_floor_number,
-        destination_door_index,
-        destination_position
-    )
+    # var destination_position # needs to be calculated here    
+    
+    SignalBus.adjusted_navigation_command.emit(commander, sprite_name, destination_floor_number, destination_door_index, adjusted_position )
 
 
 
@@ -68,14 +61,19 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     var edges: Dictionary = click_data["edges"]
     var initial_click_pos: Vector2 = click_data["initial_click_pos"]
     var adjusted_click_position: Vector2 = _adjust_click_position(edges, initial_click_pos)
+    print("adjusted_click_position: ", adjusted_click_position)
+    var commander: String = "player_input"
     # print("_on_navigation_click: global_position: ", global_position)
     
-    SignalBus.emit_signal(
-        "adjusted_navigation_click",        
-        floor_number,
-        door_index,
-        adjusted_click_position
-    )
+    _on_navigation_command(commander, floor_number, door_index, commander, adjusted_click_position)
+    
+    #SignalBus.emit_signal(
+        #"adjusted_navigation_click",
+        #commander,         
+        #floor_number,
+        #door_index,
+        #adjusted_click_position
+    #)
    # print("!!!! adjusted click data in _on_navigation_click: ", adjusted_click_position)
 
 

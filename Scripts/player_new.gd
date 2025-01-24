@@ -287,7 +287,19 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
         )
         # print("I, %s, have entered floor #%d" % [name, floor_number])
 
-func _on_adjusted_navigation_click(_floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:
+#func _on_adjusted_navigation_click(_floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:
+    ## print("Navigation click received in player script")    
+    #var adjusted_door_index = _door_index 
+    ## if target is elevator on another floor, ensure we are not entering the elevator there
+    #if adjusted_door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
+        #adjusted_door_index = -1
+    #sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, adjusted_door_index)
+#endregion
+
+
+   
+
+func _on_adjusted_navigation_command(_commander: String, sprite_name: String, _floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:       
     # print("Navigation click received in player script")    
     var adjusted_door_index = _door_index 
     # if target is elevator on another floor, ensure we are not entering the elevator there
@@ -295,6 +307,9 @@ func _on_adjusted_navigation_click(_floor_number: int, _door_index: int, _click_
         adjusted_door_index = -1
     sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, adjusted_door_index)
 #endregion
+
+
+
 
 
 #region set_initial_position
@@ -337,7 +352,7 @@ func set_initial_data():
 #region connect_to_signals
 func connect_to_signals():
     
-    SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
+    # SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
     SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
     
     
@@ -348,8 +363,7 @@ func connect_to_signals():
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
     
     
-func _on_adjusted_navigation_command(Arguments): 
-    print("nav command received with Arguments: ", Arguments)
+
     
     
     
