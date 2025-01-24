@@ -48,6 +48,7 @@ signal adjusted_navigation_command(commander: String, sprite_name: String, floor
 
 
 signal player_sprite_ready()
+signal all_sprites_ready()
 signal floor_area_entered(area: Area2D, floor_number: int)
 
 

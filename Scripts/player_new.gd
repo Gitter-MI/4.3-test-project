@@ -1,11 +1,16 @@
 # player_new.gd
 extends Area2D
 
-@onready var state_manager: Node = $State_Component
-@onready var navigation_controller: Node = get_parent().get_node("Navigation_Controller")
+# @onready var state_manager: Node = $State_Component
+@onready var navigation_controller := get_tree().get_root().get_node("Main/Navigation_Controller")
 
-@onready var pathfinder:= get_tree().get_root().get_node("Main/Player_new/Pathfinder_Component")
+# @onready var pathfinder:= get_tree().get_root().get_node("Main/Player_new/Pathfinder_Component")
 @onready var cabin := get_tree().get_root().get_node("Main/Cabin")
+
+
+@export var state_manager: Node
+@export var pathfinder: Node
+
 
 
 const SpriteDataScript = preload("res://Scripts/SpriteData_new.gd")
@@ -25,8 +30,10 @@ func _ready():
     connect_to_signals()
     set_initial_data()
     set_initial_position()
-    # print("Player sprite ready")
-    SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
+    print("Player sprite ready") # is not being printed
+    
+    ## signal should be emitted by the spawner instead once when all sprites are ready
+    # SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
     
 
 func _process(delta: float) -> void:    
@@ -342,7 +349,7 @@ func set_initial_data():
     sprite_data_new.current_floor_number = 3 
     sprite_data_new.current_room = -1  
     sprite_data_new.target_floor_number = 3
-    sprite_data_new.sprite_name = "Player_1"
+    sprite_data_new.sprite_name = "Player"
     sprite_data_new.elevator_request_id = 1
 
 
@@ -378,7 +385,8 @@ func connect_to_signals():
 #####################################################################################################
 
 func instantiate_sprite():
-    add_to_group("player_sprites_new")
+    add_to_group("player_sprite")   # for other nodes explicitly referencing this player sprite
+    add_to_group("sprites")
     # print("player is in group player_sprites")
     # sprite_data_new = SpriteDataNew.new()    
     apply_scale_factor_to_sprite()

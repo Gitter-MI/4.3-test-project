@@ -13,16 +13,16 @@ func _ready():
     register_all_floors()
     register_all_doors()    
     register_all_elevators()
-    # print_all_registered()
+    print_all_registered()
 
     SignalBus.navigation_click.connect(_on_navigation_click)
-    SignalBus.player_sprite_ready.connect(_on_player_sprite_ready)
+    SignalBus.all_sprites_ready.connect(_on_sprites_ready)
 
 
 
-func _on_player_sprite_ready():
-    # print("signal received")  # is being printed once
-    register_all_player_sprites()
+func _on_sprites_ready():
+    print("sprites ready signal received")  # is being printed once
+    register_sprites()
     # print_all_registered()
 
 
@@ -51,6 +51,9 @@ func _on_navigation_command(sprite_name: String, destination_floor_number: int, 
     
     # var destination_position # needs to be calculated here    
     
+    
+    '''Most tasks are now done in the function that receives the signal'''
+    
     SignalBus.adjusted_navigation_command.emit(commander, sprite_name, destination_floor_number, destination_door_index, adjusted_position )
 
 
@@ -67,14 +70,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     
     _on_navigation_command(commander, floor_number, door_index, commander, adjusted_click_position)
     
-    #SignalBus.emit_signal(
-        #"adjusted_navigation_click",
-        #commander,         
-        #floor_number,
-        #door_index,
-        #adjusted_click_position
-    #)
-   # print("!!!! adjusted click data in _on_navigation_click: ", adjusted_click_position)
+
 
 
 func _determine_click_type(door_index: int, floor_number: int, global_position: Vector2) -> Dictionary:
@@ -139,9 +135,9 @@ func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2
        
 func print_all_registered():
     #print("Print only the keys or the full dictionaries")
-    print("Floors: ", floors)
+    # print("Floors: ", floors)
     #print("Doors: ", doors)
-    # print("Player: ", player.keys())
+    print("Player: ", player) #.keys()
     # print("Elevators: ", elevators)
 
 #region Register Areas
@@ -235,27 +231,28 @@ func register_elevator(floor_number: int, edges: Dictionary, elevator_ref: Node)
     }
 
 
-#--- Player Sprites ---
-func register_all_player_sprites():
+#--- Sprites ---
+func register_sprites():
     # print("registering player sprites in nav controller") # is printed once
-    var sprite_nodes = get_tree().get_nodes_in_group("player_sprites_new")
-    # print("sprite_nodes: ", sprite_nodes)  # sprite_nodes is empty
+    var sprite_nodes = get_tree().get_nodes_in_group("sprites")
+    print("sprite_nodes: ", sprite_nodes)  # sprite_nodes is empty
     for node in sprite_nodes:    
         if node is Area2D:    # Player_new is an Area2D, all other nodes are not Area2D
-            # print("node in register_all_player_sprites: ", node)
-            # print("registering player sprite in register_all_player_sprites")
-            register_player_sprite(node)
+            print("node in register_sprites: ", node)
+            print("registering player sprite in register_sprites")
+            register_all_sprites(node)
 
-func register_player_sprite(player_node: Area2D):
+func register_all_sprites(player_node: Area2D):
     
     # print("in register player sprite") # is being printed twice
     # Fetch the correct property from player_node
-    var data = player_node.get("sprite_data_new")
+    var sprite_data_new = player_node.get("sprite_data_new")
     # print("var data: ", data)
-    if data is Resource:
+    if sprite_data_new is Resource:
         player[player_node.name] = {
-            "width": data.sprite_width,
-            "height": data.sprite_height,
+            "name": sprite_data_new.sprite_name,
+            "width": sprite_data_new.sprite_width,
+            "height": sprite_data_new.sprite_height,
             "ref": player_node
         }
         # print("player dict in nav controller: ", player)  # prints the expected values

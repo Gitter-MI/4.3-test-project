@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c1voqfl0thkhx" path="res://Scenes/Cabin.tscn" id="2_kci24"]
 [ext_resource type="Script" path="res://Scripts/camera_2d.gd" id="4_a875k"]
 [ext_resource type="PackedScene" uid="uid://boabwgamfwv0b" path="res://Scenes/player_new.tscn" id="5_ft0ge"]
-[ext_resource type="Script" path="res://Scripts/player_new.gd" id="7_s7vbf"]
+[ext_resource type="Script" path="res://Scripts/spawner.gd" id="7_i7040"]
 [ext_resource type="Script" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
 
 [node name="Main" type="Node2D"]
@@ -18,9 +18,9 @@ script = ExtResource("8_7c7ne")
 [node name="Cabin" parent="." instance=ExtResource("2_kci24")]
 unique_name_in_owner = true
 
-[node name="Player_new" parent="." instance=ExtResource("5_ft0ge")]
-unique_name_in_owner = true
-script = ExtResource("7_s7vbf")
+[node name="Spawner" type="Node2D" parent="."]
+script = ExtResource("7_i7040")
+player_scene = ExtResource("5_ft0ge")
 
 [node name="Camera" type="Node2D" parent="."]
 metadata/_edit_group_ = true
