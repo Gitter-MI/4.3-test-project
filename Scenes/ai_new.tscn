@@ -1,63 +1,63 @@
-[gd_scene load_steps=20 format=3 uid="uid://boabwgamfwv0b"]
+[gd_scene load_steps=20 format=3 uid="uid://d34esq11ri6sa"]
 
-[ext_resource type="Script" path="res://Scripts/player_new.gd" id="1_fa1y6"]
-[ext_resource type="Script" path="res://Scripts/pathfinder_component.gd" id="2_3ljf0"]
-[ext_resource type="Texture2D" uid="uid://bfikhkmebh1ss" path="res://Sprites/Player_1.png" id="2_5d8fy"]
-[ext_resource type="Script" path="res://Scripts/state_component.gd" id="3_6rwmx"]
+[ext_resource type="Texture2D" uid="uid://bfikhkmebh1ss" path="res://Sprites/Player_1.png" id="1_0jo43"]
+[ext_resource type="Script" path="res://Scripts/ai_new.gd" id="1_qdau5"]
+[ext_resource type="Script" path="res://Scripts/pathfinder_component.gd" id="1_qsrug"]
+[ext_resource type="Script" path="res://Scripts/state_component.gd" id="2_uqh0m"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v4w6j"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(230, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_482mg"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(184, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fjhg7"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(207, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gowlk"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(184, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d20v5"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(207, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bq5a3"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(92, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b4gpr"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(115, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_we1eg"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(138, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_meo52"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(161, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k8gha"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(0, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8a2b7"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(23, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5tqls"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(46, 0, 22, 44)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qt28u"]
-atlas = ExtResource("2_5d8fy")
+atlas = ExtResource("1_0jo43")
 region = Rect2(69, 0, 22, 44)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_h05dm"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_o7nt5"]
 animations = [{
 "frames": [{
 "duration": 1.0,
@@ -124,23 +124,23 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_noyxn"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sd83v"]
 
-[node name="Player_new" type="Area2D" node_paths=PackedStringArray("state_manager", "pathfinder")]
-script = ExtResource("1_fa1y6")
+[node name="AI_new" type="Area2D" node_paths=PackedStringArray("state_manager", "pathfinder")]
+script = ExtResource("1_qdau5")
 state_manager = NodePath("State_Component")
 pathfinder = NodePath("Pathfinder_Component")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-sprite_frames = SubResource("SpriteFrames_h05dm")
+sprite_frames = SubResource("SpriteFrames_o7nt5")
 animation = &"enter"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
-shape = SubResource("RectangleShape2D_noyxn")
+shape = SubResource("RectangleShape2D_sd83v")
 
 [node name="Pathfinder_Component" type="Node" parent="."]
-script = ExtResource("2_3ljf0")
+script = ExtResource("1_qsrug")
 
 [node name="State_Component" type="Node" parent="."]
-script = ExtResource("3_6rwmx")
+script = ExtResource("2_uqh0m")

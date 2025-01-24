@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://dauc0o8e2gap3"]
+[gd_scene load_steps=8 format=3 uid="uid://dauc0o8e2gap3"]
 
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Scenes/Building.tscn" id="1_avx81"]
 [ext_resource type="PackedScene" uid="uid://c1voqfl0thkhx" path="res://Scenes/Cabin.tscn" id="2_kci24"]
 [ext_resource type="Script" path="res://Scripts/camera_2d.gd" id="4_a875k"]
+[ext_resource type="PackedScene" uid="uid://d34esq11ri6sa" path="res://Scenes/ai_new.tscn" id="5_5vdco"]
 [ext_resource type="PackedScene" uid="uid://boabwgamfwv0b" path="res://Scenes/player_new.tscn" id="5_ft0ge"]
 [ext_resource type="Script" path="res://Scripts/spawner.gd" id="7_i7040"]
 [ext_resource type="Script" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
@@ -20,6 +21,7 @@ unique_name_in_owner = true
 
 [node name="Spawner" type="Node2D" parent="."]
 script = ExtResource("7_i7040")
+ai_scene = ExtResource("5_5vdco")
 player_scene = ExtResource("5_ft0ge")
 
 [node name="Camera" type="Node2D" parent="."]

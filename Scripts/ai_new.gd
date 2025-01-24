@@ -30,7 +30,7 @@ func _ready():
     connect_to_signals()
     set_initial_data()
     set_initial_position()
-    #  print("Player sprite ready") # is not being printed
+    print("AI sprite ready") # is not being printed
     
     ## signal should be emitted by the spawner instead once when all sprites are ready
     # SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
@@ -346,11 +346,11 @@ func set_initial_position() -> void:
     # print("in set_initial_position: ", global_position)
 
 func set_initial_data():
-    sprite_data_new.current_floor_number = 3 
+    sprite_data_new.current_floor_number = 2 
     sprite_data_new.current_room = -1  
-    sprite_data_new.target_floor_number = 3
-    sprite_data_new.sprite_name = "Player"
-    sprite_data_new.elevator_request_id = 1
+    sprite_data_new.target_floor_number = 2
+    sprite_data_new.sprite_name = "AI 1"
+    sprite_data_new.elevator_request_id = 2
 
 
 #endregion

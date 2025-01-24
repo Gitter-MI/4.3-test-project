@@ -13,7 +13,7 @@ func _ready():
     register_all_floors()
     register_all_doors()    
     register_all_elevators()
-    print_all_registered()
+    # print_all_registered()
 
     SignalBus.navigation_click.connect(_on_navigation_click)
     SignalBus.all_sprites_ready.connect(_on_sprites_ready)
@@ -235,11 +235,11 @@ func register_elevator(floor_number: int, edges: Dictionary, elevator_ref: Node)
 func register_sprites():
     # print("registering player sprites in nav controller") # is printed once
     var sprite_nodes = get_tree().get_nodes_in_group("sprites")
-    print("sprite_nodes: ", sprite_nodes)  # sprite_nodes is empty
+    # print("sprite_nodes: ", sprite_nodes)  # sprite_nodes is empty
     for node in sprite_nodes:    
         if node is Area2D:    # Player_new is an Area2D, all other nodes are not Area2D
-            print("node in register_sprites: ", node)
-            print("registering player sprite in register_sprites")
+            # print("node in register_sprites: ", node)
+            # print("registering player sprite in register_sprites")
             register_all_sprites(node)
 
 func register_all_sprites(player_node: Area2D):
