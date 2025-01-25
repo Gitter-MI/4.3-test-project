@@ -20,6 +20,8 @@ func _process(_delta: float) -> void:
     
     queue_manager.pre_process_new_elevator_requests()
     
+    # elevator_logic()
+    
     # check if there are new requests for elevator rides
     # if yes -> process them 
     # result should be the most up to date elevator request queue 

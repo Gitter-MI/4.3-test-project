@@ -11,23 +11,15 @@ signal elevator_called(
     sprite_elevator_request_id: int
 )
 
-signal elevator_request_confirmed(
-    sprite_name: String,
-    pick_up_floor: int,
-    destination_floor: int,
-    request_id: int
-)
 
 
 
-#signal elevator_called(sprite_name: String, target_floor: int, sprite_elevator_request_id: int)  #the target floor is the current floor of the sprite, the pick-up location
-#
-#signal elevator_request_confirmed(sprite_name: String, target_floor: int, request_id: int)
+
+signal elevator_request_confirmed(sprite_name: String, request_id: int)
+
 signal elevator_position_updated(global_pos: Vector2, request_id: int)   # used to move sprites along with the elevator cabin
-# signal elevator_request_confirmed(sprite_name: String, floor_number: int)
 signal elevator_ready(sprite_name: String, request_id: int) # ensures that the correct sprite will enter the elevator next
 
-# signal elevator_request_changed(request_id: int)
 
 signal entering_elevator(sprite_name: String, request_id: int)
 signal enter_animation_finished(sprite_name: String, target_floor: int)
@@ -131,7 +123,7 @@ func _on_elevator_request_changed(_request_id: int) -> void:
 func _on_elevator_called(_sprite_name: String, _pick_up_floor: int, _destination_floor: int, _request_id: int) -> void:
     pass
 
-func _on_elevator_request_confirmed(_sprite_name: String, _pick_up_floor: int, _destination_floor: int, _request_id: int) -> void:
+func _on_elevator_request_confirmed(_sprite_name: String, _request_id: int) -> void:
     pass
 
 func _on_elevator_ready(_sprite_name: String, _request_id: int) -> void:

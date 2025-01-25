@@ -1,8 +1,5 @@
 extends Node2D
 
-func _ready():
-    print("button cabin ready")
-
 # You can define these in the same script or a global constants script
 
 const MOVEMENT_STATE_NAMES = [

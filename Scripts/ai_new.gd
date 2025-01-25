@@ -101,16 +101,15 @@ func call_elevator() -> void:
     #_animate_sprite()
     #sprite_data_new.elevator_requested = true
 
-func _on_elevator_request_confirmed(incoming_sprite_name: String, incoming_floor: int, destination_floor: int, request_id: int) -> void:
+func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: int) -> void:
     
     # print("destination_floor of the confirmed request: ", destination_floor)
     # print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
     
-    if incoming_sprite_name == sprite_data_new.sprite_name:        
-        if incoming_floor == sprite_data_new.current_floor_number and destination_floor == sprite_data_new.stored_target_floor:            
-            sprite_data_new.elevator_request_id = request_id
-            # print("Elevator request confirmed. Request ID =", request_id)            
-            sprite_data_new.elevator_request_confirmed = true
+    if incoming_sprite_name == sprite_data_new.sprite_name:                  
+        sprite_data_new.elevator_request_id = request_id
+        # print("Elevator request confirmed. Request ID =", request_id)            
+        sprite_data_new.elevator_request_confirmed = true
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
@@ -358,7 +357,7 @@ func set_initial_data():
 func connect_to_signals():
     
     # SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
-    SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
+    # SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
     
     
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)        

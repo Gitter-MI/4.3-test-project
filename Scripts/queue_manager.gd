@@ -82,6 +82,7 @@ func pre_process_new_elevator_requests() -> void:
                 update_elevator_queue()
             else:
                 print("New: shuffle case - others also waiting on floor")
+                shuffle_elevator_queue_with_new_request()
 
     new_requests = false
 
@@ -95,6 +96,67 @@ func handle_new_request(request_data: Dictionary) -> void:
     })
 
 
+
+
+
+
+func shuffle_elevator_queue_with_new_request() -> void:
+    # 1) Confirm there's a new request to process
+    if elevator_request_queue.is_empty():
+        return
+
+    # 2) Reference the first pending request directly
+    var request_data = elevator_request_queue[0]
+    var sprite_name = request_data["sprite_name"]
+    var pick_up_floor = request_data["pick_up_floor"]
+    var destination_floor = request_data["destination_floor"]
+    var sprite_request_id = request_data["request_id"]  # This is the external (incoming) ID
+
+    print("Shuffling elevator queue for sprite:", sprite_name, ", pick_up_floor:", pick_up_floor)
+    
+    # 3) Remove the old request from this sprite, if it exists in elevator_queue
+    var old_index = find_request_index_by_sprite(sprite_name)
+    if old_index != -1:
+        print("  -> Removing existing request at index:", old_index, "for sprite:", sprite_name)
+        elevator_queue.remove_at(old_index)
+    else:
+        print("  -> No existing request found to remove for sprite:", sprite_name)
+
+    # 4) Build a new request, similar to 'add_to_elevator_queue' logic
+    next_request_id += 1
+    var new_request = {
+        "request_id":         next_request_id,      # internal elevator ID
+        "sprite_request_id":  sprite_request_id,    # external sprite request ID
+        "sprite_name":        sprite_name,
+        "pick_up_floor":      pick_up_floor,
+        "destination_floor":  destination_floor
+    }
+
+    # 5) Find insertion position behind all requests on the same pick_up_floor
+    var insertion_index = -1
+    for i in range(elevator_queue.size()):
+        if elevator_queue[i].has("pick_up_floor") and elevator_queue[i]["pick_up_floor"] == pick_up_floor:
+            insertion_index = i
+
+    if insertion_index == -1:
+        push_warning("shuffle_elevator_queue_with_new_request called, but no existing requests on floor %d" % pick_up_floor)
+        return
+
+    print("  -> Inserting new request behind index:", insertion_index, ", for floor:", pick_up_floor)
+
+    elevator_queue.insert(insertion_index + 1, new_request)
+
+    # 6) Confirm the request back to the sprite
+    SignalBus.elevator_request_confirmed.emit(
+        new_request["sprite_name"], 
+        new_request["request_id"]
+    )
+
+    # 7) Remove this item from elevator_request_queue now that we're done shuffling
+    elevator_request_queue.remove_at(0)
+
+
+
 func add_to_elevator_queue(request: Dictionary) -> void:    
     next_request_id += 1
     request.request_id = next_request_id
@@ -102,30 +164,31 @@ func add_to_elevator_queue(request: Dictionary) -> void:
     elevator_queue.append(request)
     # print("New: Elevator queue after adding a new request:", elevator_queue)
     
-    SignalBus.elevator_request_confirmed.emit(
-        request.sprite_name,
-        request.pick_up_floor,
-        request.destination_floor,
-        request.request_id
-    )    
+    SignalBus.elevator_request_confirmed.emit(request["sprite_name"], request["request_id"])
+  
     elevator_request_queue.remove_at(0)
     # print("New elevator request queue after pre-processing: ", elevator_request_queue)
 
 
 
 func update_elevator_queue() -> void:
-    
+
     var request_data = elevator_request_queue[0]
     var sprite_name = request_data["sprite_name"]
     var new_destination_floor = request_data["destination_floor"]
-    
-    # var current_destination_floor = elevator_queue[0]["destination_floor"]
-    
+
+    var current_destination_floor = elevator_queue[0]["destination_floor"]
+    if current_destination_floor == new_destination_floor:
+        return
+
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
-            item["destination_floor"] = new_destination_floor    
-    
+            item["destination_floor"] = new_destination_floor
+            SignalBus.elevator_request_confirmed.emit(sprite_name, item["request_id"])            
+            return
+
     elevator_request_queue.remove_at(0)
+
 
 
 func remove_from_elevator_queue(sprite_name: String, request_id: int) -> void:
