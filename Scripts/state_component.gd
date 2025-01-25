@@ -44,12 +44,12 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
             # print("_process_elevator_state->ElevatorState.CALLING_ELEVATOR")
             _process_calling_elevator(sprite_data_new)
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
-            # print("_process_elevator_state->ElevatorState.WAITING_FOR_ELEVATOR")
+            # ("_process_elevator_state->ElevatorState.WAITING_FOR_ELEVATOR")
             _process_waiting_for_elevator(sprite_data_new)
         sprite_data_new.ElevatorState.ENTERING_ELEVATOR:
             # print("_process_elevator_state->ElevatorState.ENTERING_ELEVATOR")
             _process_entering_elevator(sprite_data_new)
-        # Add more if needed, e.g. IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR
+        
         sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:
             _process_in_elevator_transit(sprite_data_new)
         sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:
@@ -114,7 +114,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
 
 
 func _process_entering_elevator(sprite_data_new: Resource) -> void:
-    # print("func _process_entering_elevator")
+    # print("func _process_entering_elevator: ", sprite_data_new.sprite_name)
     # The sprite is currently entering the elevator
     # We might check if 'entering_elevator' is done or not.
 
@@ -126,13 +126,13 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
         else:
             #  or sprite_data_new.target_room >= 0
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
-            # print("Sprite is now in Elevator Transit")
+            print("Sprite is now in Elevator Transit")
         pass
 
 func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
     # print("_process_in_elevator_transit: in elevator transit")
     if sprite_data_new.elevator_destination_reached:  
-        # print("sprite is now exiting the elevator")      
+        print("sprite is now exiting the elevator")      
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
 
 

@@ -1,5 +1,21 @@
 extends Node
 
+func _ready():
+    print("Cabin data ready")
+
+# state variables
+
+var doors_opening: bool = false
+var doors_open: bool = true
+var doors_closing: bool = false
+var doors_closed: bool = false
+var request_started: bool = false
+var request_finished: bool = false
+var transit_occupied: bool = false
+var transit_empty: bool = false
+
+var elevator_occupied: bool = false
+
 
 
 enum ElevatorState {
@@ -13,12 +29,9 @@ var current_floor: int = 0  # for spawning only.
 var destination_floor: int = 1  # for spawning only. If not used, remove
 
 
-var elevator_occupied: bool = false
-var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
-var next_request_id: int = 10
 
-# queue into the queue manager? 
-var elevator_queue: Array = []  # Example: [{'pick_up_floor', 'destination_floor', 'sprite_name': "Player_1", 'request_id': 1}, ...]
+var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
+
 
 
 var floor_boundaries = {}

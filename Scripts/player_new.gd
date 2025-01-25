@@ -141,7 +141,7 @@ func enter_elevator():
     sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
     global_position = sprite_data_new.current_position
     z_index = -9
-    SignalBus.entering_elevator.emit()
+    SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
     _animate_sprite()
 
 func on_sprite_entered_elevator():
@@ -185,7 +185,7 @@ func exit_elevator():
     var current_anim = $AnimatedSprite2D.animation
     if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
         z_index = 0
-        SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name)
+        SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         sprite_data_new.exited_elevator = true
         sprite_data_new.set_target_position(
             sprite_data_new.stored_target_position,

@@ -29,9 +29,12 @@ signal elevator_ready(sprite_name: String, request_id: int) # ensures that the c
 
 # signal elevator_request_changed(request_id: int)
 
-signal entering_elevator()
+signal entering_elevator(sprite_name: String, request_id: int)
 signal enter_animation_finished(sprite_name: String, target_floor: int)
-signal exit_animation_finished(sprite_name: String)
+signal exit_animation_finished(sprite_name: String, request_id: int)
+
+
+
 
 
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)
@@ -55,10 +58,7 @@ signal floor_area_entered(area: Area2D, floor_number: int)
 
 
 
-signal elevator_request(sprite_name: String, target_floor: int)
-signal elevator_arrived(sprite_name: String, current_floor: int)
 
-signal exiting_elevator(sprite_name: String)
 
 signal door_state_changed(new_state)
 
@@ -92,10 +92,8 @@ func _ready():
     
     
     # Connect signals to dummy functions using Godot 4's syntax
-    elevator_request.connect(_on_elevator_request)
-    elevator_arrived.connect(_on_elevator_arrived)
-    entering_elevator.connect(_on_entering_elevator)
-    exiting_elevator.connect(_on_exiting_elevator)
+    
+    entering_elevator.connect(_on_entering_elevator)    
     elevator_position_updated.connect(_on_elevator_position_updated)
     door_state_changed.connect(_on_door_state_changed)
     floor_clicked.connect(_on_floor_clicked)
@@ -139,7 +137,7 @@ func _on_elevator_request_confirmed(_sprite_name: String, _pick_up_floor: int, _
 func _on_elevator_ready(_sprite_name: String, _request_id: int) -> void:
     pass
 
-func _on_exit_animation_finished(_sprite_name: String) -> void:
+func _on_exit_animation_finished(_sprite_name: String, _request_id: int) -> void:
     pass
 
 
@@ -166,7 +164,7 @@ func _on_elevator_request(_sprite_name: String, _target_floor: int) -> void:
 func _on_elevator_arrived(_sprite_name: String, _current_floor: int) -> void:
     pass
 
-func _on_entering_elevator() -> void:
+func _on_entering_elevator(_sprite_name: String, _request_id: int) -> void:
     pass
 
 func _on_exiting_elevator(_sprite_name: String) -> void:

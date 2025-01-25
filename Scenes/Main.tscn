@@ -1,5 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://dauc0o8e2gap3"]
+[gd_scene load_steps=10 format=3 uid="uid://dauc0o8e2gap3"]
 
+[ext_resource type="Script" path="res://Scenes/main.gd" id="1_0iuxt"]
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Scenes/Building.tscn" id="1_avx81"]
 [ext_resource type="PackedScene" uid="uid://c1voqfl0thkhx" path="res://Scenes/Cabin.tscn" id="2_kci24"]
 [ext_resource type="Script" path="res://Scripts/camera_2d.gd" id="4_a875k"]
@@ -10,6 +11,7 @@
 [ext_resource type="Script" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
 
 [node name="Main" type="Node2D"]
+script = ExtResource("1_0iuxt")
 
 [node name="Building" parent="." instance=ExtResource("1_avx81")]
 
@@ -33,3 +35,17 @@ metadata/_edit_group_ = true
 
 [node name="Camera2D" type="Camera2D" parent="Camera"]
 script = ExtResource("4_a875k")
+
+[node name="Button_Player" type="Button" parent="."]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Player Sprite"
+
+[node name="Button_Cabin" type="Button" parent="."]
+offset_top = 37.0
+offset_right = 53.0
+offset_bottom = 68.0
+text = "Cabin"
+
+[connection signal="pressed" from="Button_Player" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="Button_Cabin" to="." method="_on_button_cabin_pressed"]

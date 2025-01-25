@@ -31,7 +31,7 @@ var cabin_timer_timeout: int = 2
 
 
 func _ready():
-    add_to_group("cabin")
+    # add_to_group("cabin")
     apply_scale_factor()
     position_cabin()
     connect_to_signals()
@@ -94,7 +94,7 @@ func handle_same_floor_request() -> void:
     SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])
 
 
-func _on_sprite_entering():
+func _on_sprite_entering(_sprite_name: String, _request_id: int) -> void:
     state = ElevatorState.IN_TRANSIT
     
 
@@ -143,7 +143,7 @@ func handle_arrival() -> void:
     if elevator:
         elevator.set_door_state(elevator.DoorState.OPENING)
 
-func _on_sprite_exiting(sprite_name: String) -> void:
+func _on_sprite_exiting(sprite_name: String, _request_id: int) -> void:
     remove_from_elevator_queue(sprite_name)
     elevator_occupied = false
     state = ElevatorState.WAITING
@@ -399,7 +399,7 @@ func add_to_elevator_queue(request: Dictionary) -> void:
 
     # 2) Add the request to the queue
     elevator_queue.append(request)
-    print("Elevator queue after adding a new request:", elevator_queue)
+    # print("Elevator queue after adding a new request:", elevator_queue)
 
     # 3) Confirm the request back to the sprite
     #    (You can decide which floors you emit. Typically pick-up + final.)
@@ -498,15 +498,16 @@ func get_elevator_for_current_floor() -> Node:
 
 
 func connect_to_signals():    
-    SignalBus.elevator_called.connect(_on_elevator_request)
-    SignalBus.elevator_request.connect(_on_elevator_request)
-    
-    SignalBus.entering_elevator.connect(_on_sprite_entering)
-    SignalBus.enter_animation_finished.connect(_on_sprite_entered)
-    SignalBus.exiting_elevator.connect(_on_sprite_exiting)
-    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
-    
-    SignalBus.exit_animation_finished.connect(_on_sprite_exiting)
+    pass
+    #SignalBus.elevator_called.connect(_on_elevator_request)
+    #SignalBus.elevator_request.connect(_on_elevator_request)
+    #
+    #SignalBus.entering_elevator.connect(_on_sprite_entering)
+    #SignalBus.enter_animation_finished.connect(_on_sprite_entered)
+    #SignalBus.exiting_elevator.connect(_on_sprite_exiting)
+    #SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
+    #
+    #SignalBus.exit_animation_finished.connect(_on_sprite_exiting)
 
 
    

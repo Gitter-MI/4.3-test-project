@@ -64,7 +64,7 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     var edges: Dictionary = click_data["edges"]
     var initial_click_pos: Vector2 = click_data["initial_click_pos"]
     var adjusted_click_position: Vector2 = _adjust_click_position(edges, initial_click_pos)
-    print("adjusted_click_position: ", adjusted_click_position)
+    # print("adjusted_click_position: ", adjusted_click_position)
     var commander: String = "player_input"
     # print("_on_navigation_click: global_position: ", global_position)
     

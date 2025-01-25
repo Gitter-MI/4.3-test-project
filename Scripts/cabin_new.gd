@@ -4,6 +4,7 @@ extends Node2D
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 @onready var cabin_sprite: Sprite2D = $Sprite2D
 @onready var cabin_data: Node = $Cabin_Data
+@onready var queue_manager = $Queue_Manager # interface: add_to_elevator_queue, remove_from_elevator_queue, update_elevator_queue
 
 
 
@@ -11,10 +12,24 @@ func _ready():
     
     set_up_elevator_cabin()    
     z_index = -10
-    setup_cabin_timer(2.0)
+    setup_cabin_timer(2.0)    
+    add_to_group("cabin")
     
     
-
+func _process(_delta: float) -> void:
+    
+    queue_manager.pre_process_new_elevator_requests()
+    
+    # check if there are new requests for elevator rides
+    # if yes -> process them 
+    # result should be the most up to date elevator request queue 
+    
+    # then: process the elevator queue
+    # if there is nothing: return
+    # else take a look at the first request in the queue and see where we are with the request processing 
+    pass
+    
+    
 
 # ---------------------------------------------------
 # Region: Cabin Set-Up
@@ -96,7 +111,7 @@ func get_elevator_for_current_floor() -> Node:
 
 func connect_to_signals():
     print("connecting to signals / pass for now.")
-    #SignalBus.elevator_called.connect(_on_elevator_request)
+    # SignalBus.elevator_called.connect(_on_elevator_request)  -> Has been moved to the queue manager script
     # ...
 
 func setup_cabin_timer(wait_time: float) -> void:
