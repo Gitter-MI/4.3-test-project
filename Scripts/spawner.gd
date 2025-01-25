@@ -16,7 +16,7 @@ func _ready():
     
     
     SignalBus.all_sprites_ready.emit()  
-    print("all_sprites_ready signal emitted")
+    # print("all_sprites_ready signal emitted")
 
 func spawn_player():
     var player_instance = player_scene.instantiate()

@@ -21,7 +21,7 @@ func _ready():
 
 
 func _on_sprites_ready():
-    print("sprites ready signal received")  # is being printed once
+    # print("sprites ready signal received")  # is being printed once
     register_sprites()
     # print_all_registered()
 

@@ -27,7 +27,7 @@ signal elevator_position_updated(global_pos: Vector2, request_id: int)   # used 
 # signal elevator_request_confirmed(sprite_name: String, floor_number: int)
 signal elevator_ready(sprite_name: String, request_id: int) # ensures that the correct sprite will enter the elevator next
 
-signal elevator_request_changed(request_id: int)
+# signal elevator_request_changed(request_id: int)
 
 signal entering_elevator()
 signal enter_animation_finished(sprite_name: String, target_floor: int)
@@ -84,8 +84,11 @@ signal door_clicked(
 
 #region Warning Suppression. Remove later
 func _ready():
+    navigation_command.connect(_on_navigation_command)
+    adjusted_navigation_command.connect(_on_adjusted_navigation_command)
+    all_sprites_ready.connect(_on_all_sprites_ready)
     
-    elevator_request_changed.connect(_on_elevator_request_changed)
+    
     
     
     # Connect signals to dummy functions using Godot 4's syntax
@@ -108,6 +111,18 @@ func _ready():
     elevator_request_confirmed.connect(_on_elevator_request_confirmed)
     elevator_ready.connect(_on_elevator_ready)
     exit_animation_finished.connect(_on_exit_animation_finished)
+
+
+func _on_navigation_command(_sprite_name: String, _destination_floor_number: int, _destination_door_index: int, _commander: String, _adjusted_position: Vector2) -> void:
+    pass
+
+func _on_adjusted_navigation_command(_commander: String, _sprite_name: String, _floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:  
+    pass
+
+
+func _on_all_sprites_ready() -> void:
+    pass
+
 
 func _on_elevator_request_changed(_request_id: int) -> void:
     pass

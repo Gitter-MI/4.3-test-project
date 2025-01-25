@@ -10,7 +10,7 @@ func _ready():
     
     player_sprite = get_tree().get_first_node_in_group("player_sprite") as Area2D
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
     # Keep the camera's x-position locked to the horizontal center
     position.x = screen_center_x
     # If we found a player node, follow its y-position

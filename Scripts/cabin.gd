@@ -1,11 +1,9 @@
 # cabin.gd
 extends Node2D
 
-@onready var testing_requests_node = %TestingRequests
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
-@onready var visible_notifier: VisibleOnScreenNotifier2D = $VisibleOnScreenNotifier2D
 @onready var cabin_sprite: Sprite2D = $Sprite2D
-const VISIBILITY_MARGIN_MULTIPLIER: float = 1.5
+
 
 enum ElevatorState {
     WAITING,       # 0
@@ -40,7 +38,7 @@ func _ready():
     z_index = -10    
     cache_elevators()               # why not have the navigation controller offer an interface for this data?
     cache_floor_positions()         # why not have the navigation controller offer an interface for this data?
-    setup_visibility_notifier()
+    
     var elevator = get_elevator_for_current_floor()    
     elevator.set_door_state(elevator.DoorState.OPEN)
     setup_cabin_timer(2.0)
@@ -278,7 +276,7 @@ func shuffle_elevator_queue_with_new_request(
     sprite_name: String, 
     pick_up_floor: int, 
     _destination_floor: int, 
-    sprite_request_id: int
+    _sprite_request_id: int
 ) -> void:
     print("shuffle queue")
     # 1) Remove the old request from this sprite.
@@ -509,9 +507,6 @@ func connect_to_signals():
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)    
     
     SignalBus.exit_animation_finished.connect(_on_sprite_exiting)
-    visible_notifier.screen_entered.connect(_on_screen_entered)  # move to signal bus?
-    visible_notifier.screen_exited.connect(_on_screen_exited) 
-
 
 
    
@@ -521,25 +516,5 @@ func setup_cabin_timer(wait_time: float) -> void:
     cabin_timer.wait_time = wait_time
     cabin_timer.timeout.connect(_on_cabin_timer_timeout)
     add_child(cabin_timer)
-
-
-func setup_visibility_notifier() -> void:
-    var cabin_height: float = get_cabin_height()
-    var margin: float = cabin_height * VISIBILITY_MARGIN_MULTIPLIER
-    
-    # Create a rect that's taller than the cabin
-    var rect = visible_notifier.rect
-    rect.position.y = -margin  # Extend upward
-    rect.size.y = cabin_height + (margin * 2)  # Add margin to both top and bottom
-    visible_notifier.rect = rect
-
-func _on_screen_entered() -> void:
-    # print("visible")
-    cabin_sprite.show()
-
-func _on_screen_exited() -> void:
-    # print("not visible")
-    cabin_sprite.hide()
-
 
 #endregion

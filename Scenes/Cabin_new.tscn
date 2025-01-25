@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://cs1nq0fh8p8n8"]
+
+[ext_resource type="Script" path="res://Scripts/cabin_new.gd" id="1_xi3jd"]
+[ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="2_3c41o"]
+[ext_resource type="Script" path="res://Scripts/cabin_data.gd" id="3_htjsw"]
+[ext_resource type="Script" path="res://Scripts/queue_manager.gd" id="4_j8kbg"]
+
+[node name="Cabin_new" type="Node2D"]
+script = ExtResource("1_xi3jd")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_3c41o")
+
+[node name="Cabin_Data" type="Node" parent="."]
+script = ExtResource("3_htjsw")
+
+[node name="Queue_Manager" type="Node" parent="."]
+script = ExtResource("4_j8kbg")

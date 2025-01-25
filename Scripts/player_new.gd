@@ -306,7 +306,7 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
 
    
 
-func _on_adjusted_navigation_command(_commander: String, sprite_name: String, _floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:       
+func _on_adjusted_navigation_command(_commander: String, _sprite_name: String, _floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:       
     # print("Navigation click received in player script")    
     var adjusted_door_index = _door_index 
     # if target is elevator on another floor, ensure we are not entering the elevator there
