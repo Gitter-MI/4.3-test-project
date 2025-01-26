@@ -7,9 +7,7 @@ extends Node2D
 @onready var queue_manager = $Queue_Manager # interface: add_to_elevator_queue, remove_from_elevator_queue, update_elevator_queue
 
 
-
-func _ready():
-    
+func _ready():    
     set_up_elevator_cabin()    
     z_index = -10
     setup_cabin_timer(2.0)    

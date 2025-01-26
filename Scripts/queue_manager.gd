@@ -81,7 +81,7 @@ func pre_process_new_elevator_requests() -> void:
                 # print("New: Update Elevator Queue")
                 update_elevator_queue()
             else:
-                print("New: shuffle case - others also waiting on floor")
+                # print("New: shuffle case - others also waiting on floor")
                 shuffle_elevator_queue_with_new_request()
 
     new_requests = false
@@ -184,10 +184,11 @@ func update_elevator_queue() -> void:
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["destination_floor"] = new_destination_floor
-            SignalBus.elevator_request_confirmed.emit(sprite_name, item["request_id"])            
-            return
+            SignalBus.elevator_request_confirmed.emit(sprite_name, item["request_id"])                        
 
     elevator_request_queue.remove_at(0)
+    # print("elevator_request_queue: ", elevator_request_queue)
+    # print("elevator_queue: ", elevator_queue)
 
 
 

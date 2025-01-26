@@ -30,6 +30,8 @@ func determine_path(sprite: SpriteDataNew) -> void:
         var elevator_info = navigation_controller.elevators.get(sprite.current_floor_number, null)        
         var elevator_position = elevator_info["position"]
         var new_target_position = Vector2(elevator_position.x, sprite.current_position.y)
+        sprite.elevator_requested = false
+        sprite.elevator_request_confirmed = false
         sprite.set_target_position(new_target_position, sprite.current_floor_number, sprite.current_room)        
         sprite.set_stored_position(sprite.nav_target_position, sprite.nav_target_floor, sprite.nav_target_room)
         # print("Original navigation data stored in stored data.")

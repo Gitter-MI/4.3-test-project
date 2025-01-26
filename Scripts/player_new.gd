@@ -83,6 +83,7 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
+    # print("Calling Elevator: ", sprite_data_new.sprite_name)
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number, # pick_up_floor
@@ -94,15 +95,7 @@ func call_elevator() -> void:
 
 
 
-#func call_elevator():  
-    ## print("calling elevator")  
-    #SignalBus.elevator_called.emit(
-        #sprite_data_new.sprite_name,
-        #sprite_data_new.current_floor_number,
-        #sprite_data_new.elevator_request_id
-    #)
-    #_animate_sprite()
-    #sprite_data_new.elevator_requested = true
+
 
 func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: int) -> void:
     

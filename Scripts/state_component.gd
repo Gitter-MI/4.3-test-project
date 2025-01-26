@@ -92,6 +92,12 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
         #sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
 
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
+    
+    if not sprite_data_new.elevator_requested and not sprite_data_new.elevator_request_confirmed:
+        sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
+        return        
+    
+    
     if sprite_data_new.elevator_ready:
         # Elevator is here → go ENTERING_ELEVATOR
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
