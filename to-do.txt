@@ -1,3 +1,8 @@
+
+
+Player trying to enter the elevator room when the elevator is not there can lead to crash
+
+
 Player input only for Player 1 sprite
 
 Set random targets for AI guy

@@ -94,6 +94,7 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
     
     if not sprite_data_new.elevator_requested and not sprite_data_new.elevator_request_confirmed:
+        print("sprite reset from WAITING to CALLING ELEVATOR")
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
         return        
     
@@ -207,7 +208,7 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
         if room_index < 0 and room_index != -2:
             sprite_data_new.set_movement_state(sprite_data_new.MovementState.IDLE)
         elif room_index >= 0:
-            sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)
+            sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)            
         elif room_index == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
             # print("!!!! sprite is now calling elevator")

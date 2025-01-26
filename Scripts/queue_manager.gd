@@ -64,7 +64,8 @@ func pre_process_new_elevator_requests() -> void:
         return
 
     while not elevator_request_queue.is_empty():
-        # print("New Elevator Request Queue: ", elevator_request_queue)
+        
+        print("New Elevator Request Queue: ", elevator_request_queue)
         
         var request_data = elevator_request_queue[0]
         var sprite_name  = request_data["sprite_name"]
@@ -178,8 +179,6 @@ func update_elevator_queue() -> void:
     var new_destination_floor = request_data["destination_floor"]
 
     var current_destination_floor = elevator_queue[0]["destination_floor"]
-    if current_destination_floor == new_destination_floor:
-        return
 
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:

@@ -60,7 +60,7 @@ func _on_navigation_command(sprite_name: String, destination_floor_number: int, 
 
 
 func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:    
-    # print("click recorded")
+    print("click recorded")
     var click_data: Dictionary = _determine_click_type(door_index, floor_number, global_position)
     var edges: Dictionary = click_data["edges"]
     var initial_click_pos: Vector2 = click_data["initial_click_pos"]

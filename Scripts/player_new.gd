@@ -36,16 +36,20 @@ func _ready():
     # SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
     
 
-func _process(delta: float) -> void:    
+func _process(delta: float) -> void:   
+    
     pathfinder.determine_path(sprite_data_new)
+    # print("process state") 
     state_manager.process_state(sprite_data_new)
     var active_state = sprite_data_new.get_active_state()
     
-    if active_state == sprite_data_new.ActiveState.MOVEMENT:        
+    if active_state == sprite_data_new.ActiveState.MOVEMENT:   
+        # print("process movement")     
         move_sprite(delta)
         _animate_sprite()
 
     if active_state == sprite_data_new.ActiveState.ELEVATOR:
+        # print("process elevator actions")
         _process_elevator_actions()
 
         
@@ -83,7 +87,7 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
-    # print("Calling Elevator: ", sprite_data_new.sprite_name)
+    print("Calling Elevator: ", sprite_data_new.sprite_name)
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number, # pick_up_floor
@@ -298,13 +302,15 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
 
    
 
-func _on_adjusted_navigation_command(_commander: String, _sprite_name: String, _floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:       
-    # print("Navigation click received in player script")    
-    var adjusted_door_index = _door_index 
+func _on_adjusted_navigation_command(_commander: String, _sprite_name: String, _floor_number: int, door_index: int, _click_global_position: Vector2) -> void:       
+    print("Navigation click received in player script")    
+    print("Door index from Nav Controller: ", door_index)
+    # var adjusted_door_index = _door_index 
     # if target is elevator on another floor, ensure we are not entering the elevator there
-    if adjusted_door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
-        adjusted_door_index = -1
-    sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, adjusted_door_index)
+    if door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
+        door_index = -1
+        print("Adjusted door index by player script: ", door_index)
+    sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, door_index)
 #endregion
 
 
