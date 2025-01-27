@@ -5,7 +5,7 @@ extends Area2D
 @onready var navigation_controller := get_tree().get_root().get_node("Main/Navigation_Controller")
 
 # @onready var pathfinder:= get_tree().get_root().get_node("Main/Player_new/Pathfinder_Component")
-@onready var cabin := get_tree().get_root().get_node("Main/Cabin")
+@onready var cabin := get_tree().get_root().get_node("Main/Cabin_new")
 
 
 @export var state_manager: Node

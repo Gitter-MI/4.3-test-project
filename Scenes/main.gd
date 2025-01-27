@@ -1,6 +1,7 @@
 extends Node2D
 
-# You can define these in the same script or a global constants script
+# two buttons for debugging info in-game
+# can be removed completely
 
 const MOVEMENT_STATE_NAMES = [
     "IDLE",      # MovementState.IDLE = 0

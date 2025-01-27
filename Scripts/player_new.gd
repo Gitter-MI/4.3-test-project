@@ -5,7 +5,7 @@ extends Area2D
 @onready var navigation_controller := get_tree().get_root().get_node("Main/Navigation_Controller")
 
 # @onready var pathfinder:= get_tree().get_root().get_node("Main/Player_new/Pathfinder_Component")
-@onready var cabin := get_tree().get_root().get_node("Main/Cabin")
+@onready var cabin := get_tree().get_root().get_node("Main/Cabin_new")
 
 
 @export var state_manager: Node
@@ -137,6 +137,7 @@ func enter_elevator():
     sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
     global_position = sprite_data_new.current_position
     z_index = -9
+    # print("Sprite emits entering elevator signal")
     SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
     _animate_sprite()
 

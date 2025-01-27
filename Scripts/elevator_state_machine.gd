@@ -15,17 +15,17 @@ func _ready() -> void:
     pass
     
     
-func _process(float) -> void:
+func _process(_float) -> void:
         match cabin_data.elevator_state:
         
             cabin_data.ElevatorState.IDLE:            
                 process_idle()       
             cabin_data.ElevatorState.WAITING:
                 process_waiting()       
-            #cabin_data.ElevatorState.DEPARTING:            
-                #elevator_state_manager.process_departing()       
-            #cabin_data.ElevatorState.TRANSIT:      
-                #elevator_state_manager.process_transit()       
+            cabin_data.ElevatorState.DEPARTING:            
+                process_departing()       
+            cabin_data.ElevatorState.TRANSIT:      
+                process_transit()       
             #cabin_data.ElevatorState.ARRIVING:      
                 #elevator_state_manager.process_arriving()       
             _:
@@ -45,13 +45,21 @@ func process_waiting() -> void:
     if not cabin_data.elevator_busy:
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
     
+    if cabin_data.elevator_busy and not cabin_data.pick_up_on_current_floor:
+        cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
     
+    if cabin_data.elevator_busy and cabin_data.elevator_ready and cabin_data.elevator_occupied:
+        cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
     
 
             
     
 func process_departing() -> void:
-    print("Elevator is DEPARTING")
+    # print("Elevator is DEPARTING")
+    # print("cabin_data.elevator_occupied: ", cabin_data.elevator_occupied)
+    # print("cabin_data.doors_closed: ", cabin_data.doors_closed)
+    if cabin_data.elevator_occupied and cabin_data.doors_closed:
+        cabin_data.set_elevator_state(CabinData.ElevatorState.TRANSIT)
 
 func process_transit() -> void:
     print("Elevator is in TRANSIT")

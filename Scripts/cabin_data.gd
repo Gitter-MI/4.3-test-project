@@ -2,24 +2,28 @@
 extends Node
 
 enum ElevatorState { IDLE, WAITING, DEPARTING, TRANSIT, ARRIVING}
+var elevator_state: ElevatorState = ElevatorState.IDLE  # initial state
 
 func set_elevator_state(new_state: ElevatorState) -> void:    
     elevator_state = new_state
 
-
-
-var elevator_state: ElevatorState = ElevatorState.IDLE  # initial state
-
-
 var elevator_busy: bool = false
-var pick_up_on_current_floor: bool = false
+var pick_up_on_current_floor: bool = false    
+var elevator_ready: bool = false
+var elevator_occupied: bool = false
+var timer_started: bool = false
+
+
+
+
+
 
 var doors_opening: bool = false
 var doors_open: bool = true
 var doors_closing: bool = false
 var doors_closed: bool = false
-var elevator_occupied: bool = false
-var timer_started: bool = false
+
+
 
 
 
@@ -35,6 +39,7 @@ var target_position: Vector2 = Vector2.ZERO
 
 const SCALE_FACTOR: float = 2.3 
 const SPEED: float = 500.0  # Pixels per second
+
 
 var cabin_timer: Timer
 var cabin_timer_timeout: int = 2
