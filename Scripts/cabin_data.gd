@@ -7,12 +7,12 @@ func set_elevator_state(new_state: ElevatorState) -> void:
     elevator_state = new_state
 
 
-var elevator_state: ElevatorState = ElevatorState.WAITING  # initial state
 
-# state variables
+var elevator_state: ElevatorState = ElevatorState.IDLE  # initial state
 
-'''variables like arriving, departing, doors opening etc... are uni-dimensional in the sense that they can only be covered by one state'''
 
+var elevator_busy: bool = false
+var pick_up_on_current_floor: bool = false
 
 var doors_opening: bool = false
 var doors_open: bool = true
@@ -23,12 +23,7 @@ var timer_started: bool = false
 
 
 
-
-
-
-
-
-var current_floor: int = 0  # for spawning only.
+var current_floor: int = 3  # for spawning only.
 var destination_floor: int = 1  # for spawning only. If not used, remove
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle

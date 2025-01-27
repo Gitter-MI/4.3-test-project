@@ -13,26 +13,42 @@ const CabinData = preload("res://Scripts/cabin_data.gd")
 
 func _ready() -> void:
     pass
+    
+    
+func _process(float) -> void:
+        match cabin_data.elevator_state:
+        
+            cabin_data.ElevatorState.IDLE:            
+                process_idle()       
+            cabin_data.ElevatorState.WAITING:
+                process_waiting()       
+            #cabin_data.ElevatorState.DEPARTING:            
+                #elevator_state_manager.process_departing()       
+            #cabin_data.ElevatorState.TRANSIT:      
+                #elevator_state_manager.process_transit()       
+            #cabin_data.ElevatorState.ARRIVING:      
+                #elevator_state_manager.process_arriving()       
+            _:
+                push_warning("unknow state in process_cabin_states")                            
+                pass
 
 func process_idle() -> void:
     
-    if not queue_manager.elevator_queue:   
+    if not cabin_data.elevator_busy:
         return
-    
-    if queue_manager.elevator_queue:
+    else:    
         cabin_data.set_elevator_state(CabinData.ElevatorState.WAITING)
     
     
 func process_waiting() -> void:       
     
-    print("queue_manager.elevator_queue: ", queue_manager.elevator_queue)  
-    
-    if not queue_manager.elevator_queue:                      
+    if not cabin_data.elevator_busy:
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
     
-    else:
-        print("checking if pick up floor is the same as the cabin's current floor")
-        print("Elevator is WAITING")
+    
+    
+
+            
     
 func process_departing() -> void:
     print("Elevator is DEPARTING")

@@ -11,32 +11,61 @@ func _ready():
     set_up_elevator_cabin()    
     z_index = -10
     setup_cabin_timer(2.0)    
-    add_to_group("cabin")
+    add_to_group("cabin")    
     
     
 func _process(_delta: float) -> void:
     
-    queue_manager.pre_process_new_elevator_requests()
+    queue_manager.pre_process_new_elevator_requests()    
     elevator_logic()
         
 
-func elevator_logic():
-    
-    match cabin_data.elevator_state:
+func elevator_logic() -> void:
+    var current_state = cabin_data.elevator_state
+
+    match current_state:
+        cabin_data.ElevatorState.IDLE:
+            process_idle()
         
-        cabin_data.ElevatorState.IDLE:            
-            elevator_state_manager.process_idle()       
         cabin_data.ElevatorState.WAITING:
-            elevator_state_manager.process_waiting()       
-        cabin_data.ElevatorState.DEPARTING:            
-            elevator_state_manager.process_departing()       
-        cabin_data.ElevatorState.TRANSIT:      
-            elevator_state_manager.process_transit()       
-        cabin_data.ElevatorState.ARRIVING:      
-            elevator_state_manager.process_arriving()       
-        _:
-                        
-            pass
+            process_waiting()
+
+        #cabin_data.ElevatorState.DEPARTING:
+            #elevator_state_manager.process_departing()
+#
+        #cabin_data.ElevatorState.TRANSIT:
+            #elevator_state_manager.process_transit()
+#
+        #cabin_data.ElevatorState.ARRIVING:
+            #elevator_state_manager.process_arriving()
+    
+
+func process_idle():
+    # print("process idle")
+    if queue_manager.elevator_queue:
+        cabin_data.elevator_busy = true
+        # print("TRUE: queue_manager.elevator_queue: ", queue_manager.elevator_queue)
+    else:
+        cabin_data.elevator_busy = false
+        # print("FALSE: queue_manager.elevator_queue: ", queue_manager.elevator_queue)
+
+
+
+func process_waiting():
+    # print("process waiting called")
+    is_at_first_request_pickup_floor()
+    # print("cabin_data.pick_up_on_current_floor: ", cabin_data.pick_up_on_current_floor)
+
+
+func is_at_first_request_pickup_floor() -> void:
+    # print("cabin_data.current_floor: ", cabin_data.current_floor)
+    var first_request = queue_manager.elevator_queue[0]
+    if first_request["pick_up_floor"] == cabin_data.current_floor:
+        cabin_data.pick_up_on_current_floor = true
+    else: 
+        cabin_data.pick_up_on_current_floor = false
+
+
 
 
 func move_elevator(delta: float) -> void:
