@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="2_3c41o"]
 [ext_resource type="Script" path="res://Scripts/cabin_data.gd" id="3_htjsw"]
 [ext_resource type="Script" path="res://Scripts/queue_manager.gd" id="4_j8kbg"]
-[ext_resource type="Script" path="res://Scenes/elevator_state_machine.gd" id="5_eywy4"]
+[ext_resource type="Script" path="res://Scripts/elevator_state_machine.gd" id="5_eywy4"]
 
 [node name="Cabin_new" type="Node2D"]
 script = ExtResource("1_xi3jd")
@@ -18,5 +18,7 @@ script = ExtResource("3_htjsw")
 [node name="Queue_Manager" type="Node" parent="."]
 script = ExtResource("4_j8kbg")
 
-[node name="Elevator_StateMachine" type="Node" parent="."]
+[node name="Elevator_StateMachine" type="Node" parent="." node_paths=PackedStringArray("queue_manager", "cabin_data")]
 script = ExtResource("5_eywy4")
+queue_manager = NodePath("../Queue_Manager")
+cabin_data = NodePath("../Cabin_Data")

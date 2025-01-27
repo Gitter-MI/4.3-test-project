@@ -30,19 +30,26 @@ func _ready():
     connect_to_signals()
     set_initial_data()
     set_initial_position()
-    # print("AI sprite ready")
+    #  print("Player sprite ready") # is not being printed
+    
+    ## signal should be emitted by the spawner instead once when all sprites are ready
+    # SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
     
 
-func _process(delta: float) -> void:    
+func _process(delta: float) -> void:   
+    
     pathfinder.determine_path(sprite_data_new)
+    # print("process state") 
     state_manager.process_state(sprite_data_new)
     var active_state = sprite_data_new.get_active_state()
     
-    if active_state == sprite_data_new.ActiveState.MOVEMENT:        
+    if active_state == sprite_data_new.ActiveState.MOVEMENT:   
+        # print("process movement")     
         move_sprite(delta)
         _animate_sprite()
 
     if active_state == sprite_data_new.ActiveState.ELEVATOR:
+        # print("process elevator actions")
         _process_elevator_actions()
 
         
@@ -72,7 +79,7 @@ func _process_elevator_actions() -> void:
             _animate_sprite()
         sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:      
             _animate_sprite()
-        sprite_data_new.ElevatorState.EXITING_ELEVATOR:            
+        sprite_data_new.ElevatorState.EXITING_ELEVATOR:
             exit_elevator()        
         _:
                         
@@ -80,6 +87,7 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
+    # print("Calling Elevator: ", sprite_data_new.sprite_name)
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number, # pick_up_floor
@@ -91,15 +99,7 @@ func call_elevator() -> void:
 
 
 
-#func call_elevator():  
-    ## print("calling elevator")  
-    #SignalBus.elevator_called.emit(
-        #sprite_data_new.sprite_name,
-        #sprite_data_new.current_floor_number,
-        #sprite_data_new.elevator_request_id
-    #)
-    #_animate_sprite()
-    #sprite_data_new.elevator_requested = true
+
 
 func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: int) -> void:
     
@@ -108,7 +108,7 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
     
     if incoming_sprite_name == sprite_data_new.sprite_name:                  
         sprite_data_new.elevator_request_id = request_id
-        # print("Elevator request confirmed. Request ID =", request_id)            
+        print("Elevator request confirmed. Request ID =", request_id)            
         sprite_data_new.elevator_request_confirmed = true
             
 
@@ -181,7 +181,6 @@ func exit_elevator():
     var current_anim = $AnimatedSprite2D.animation
     if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
         z_index = 0
-        # print("!!!!!!!!!!!! AI SPRITE IS EMITTING EXIT ANIMATION FINSIHED")
         SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         sprite_data_new.exited_elevator = true
         sprite_data_new.set_target_position(
@@ -291,25 +290,22 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
         )
         # print("I, %s, have entered floor #%d" % [name, floor_number])
 
-#func _on_adjusted_navigation_click(_floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:
-    ## print("Navigation click received in player script")    
-    #var adjusted_door_index = _door_index 
-    ## if target is elevator on another floor, ensure we are not entering the elevator there
-    #if adjusted_door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
-        #adjusted_door_index = -1
-    #sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, adjusted_door_index)
 #endregion
 
 
    
 
-func _on_adjusted_navigation_command(_commander: String, _sprite_name: String, _floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:       
-    # print("Navigation click received in player script")    
-    var adjusted_door_index = _door_index 
-    # if target is elevator on another floor, ensure we are not entering the elevator there
-    if adjusted_door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
-        adjusted_door_index = -1
-    sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, adjusted_door_index)
+func _on_adjusted_navigation_command(_commander: String, sprite_name: String, floor_number: int, door_index: int, click_global_position: Vector2) -> void:       
+    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")             
+    
+    if not sprite_name == sprite_data_new.sprite_name:
+        return
+    
+    # if target is elevator room on another floor, ensure we are setting destination to that position not the room
+    if door_index == -2 and floor_number != sprite_data_new.current_floor_number:
+        door_index = -1
+        # print("Adjusted door index by player script: ", door_index)
+    sprite_data_new.set_sprite_nav_data(click_global_position, floor_number, door_index)
 #endregion
 
 
@@ -346,8 +342,8 @@ func set_initial_data():
     sprite_data_new.current_floor_number = 2 
     sprite_data_new.current_room = -1  
     sprite_data_new.target_floor_number = 2
-    sprite_data_new.sprite_name = "AI 1"
-    sprite_data_new.elevator_request_id = 2
+    sprite_data_new.sprite_name = "AI_SPRITE"
+    sprite_data_new.elevator_request_id = 1
 
 
 #endregion
@@ -357,7 +353,7 @@ func set_initial_data():
 func connect_to_signals():
     
     # SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
-    # SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
+    SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
     
     
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)        
@@ -382,7 +378,7 @@ func connect_to_signals():
 #####################################################################################################
 
 func instantiate_sprite():
-    add_to_group("player_sprite")   # for other nodes explicitly referencing this player sprite
+    add_to_group("ai_sprites")   # for other nodes explicitly referencing this player sprite
     add_to_group("sprites")
     # print("player is in group player_sprites")
     # sprite_data_new = SpriteDataNew.new()    

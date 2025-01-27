@@ -1,26 +1,32 @@
+# cabin_data.gd
 extends Node
 
+enum ElevatorState { IDLE, WAITING, DEPARTING, TRANSIT, ARRIVING}
+
+func set_elevator_state(new_state: ElevatorState) -> void:    
+    elevator_state = new_state
+
+
+var elevator_state: ElevatorState = ElevatorState.WAITING  # initial state
+
 # state variables
+
+'''variables like arriving, departing, doors opening etc... are uni-dimensional in the sense that they can only be covered by one state'''
+
 
 var doors_opening: bool = false
 var doors_open: bool = true
 var doors_closing: bool = false
 var doors_closed: bool = false
-var request_started: bool = false
-var request_finished: bool = false
-var transit_occupied: bool = false
-var transit_empty: bool = false
-
 var elevator_occupied: bool = false
+var timer_started: bool = false
 
 
 
-enum ElevatorState {
-    WAITING,       # 0
-    IN_TRANSIT     # 1
-}
 
-var state: ElevatorState = ElevatorState.WAITING  # initial state
+
+
+
 
 var current_floor: int = 0  # for spawning only.
 var destination_floor: int = 1  # for spawning only. If not used, remove

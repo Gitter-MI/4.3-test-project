@@ -87,7 +87,7 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
-    print("Calling Elevator: ", sprite_data_new.sprite_name)
+    # print("Calling Elevator: ", sprite_data_new.sprite_name)
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number, # pick_up_floor
@@ -106,7 +106,7 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
     # print("destination_floor of the confirmed request: ", destination_floor)
     # print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
     
-    if incoming_sprite_name == sprite_data_new.sprite_name:                  
+    if incoming_sprite_name == sprite_data_new.sprite_name:            
         sprite_data_new.elevator_request_id = request_id
         # print("Elevator request confirmed. Request ID =", request_id)            
         sprite_data_new.elevator_request_confirmed = true
@@ -290,27 +290,22 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
         )
         # print("I, %s, have entered floor #%d" % [name, floor_number])
 
-#func _on_adjusted_navigation_click(_floor_number: int, _door_index: int, _click_global_position: Vector2) -> void:
-    ## print("Navigation click received in player script")    
-    #var adjusted_door_index = _door_index 
-    ## if target is elevator on another floor, ensure we are not entering the elevator there
-    #if adjusted_door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
-        #adjusted_door_index = -1
-    #sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, adjusted_door_index)
 #endregion
 
 
    
 
-func _on_adjusted_navigation_command(_commander: String, _sprite_name: String, _floor_number: int, door_index: int, _click_global_position: Vector2) -> void:       
-    print("Navigation click received in player script")    
-    print("Door index from Nav Controller: ", door_index)
-    # var adjusted_door_index = _door_index 
-    # if target is elevator on another floor, ensure we are not entering the elevator there
-    if door_index == -2 and _floor_number != sprite_data_new.current_floor_number:
+func _on_adjusted_navigation_command(_commander: String, sprite_name: String, floor_number: int, door_index: int, click_global_position: Vector2) -> void:       
+    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")        
+    
+    if not sprite_name == sprite_data_new.sprite_name:
+        return
+    
+    # if target is elevator room on another floor, ensure we are setting destination to that position not the room
+    if door_index == -2 and floor_number != sprite_data_new.current_floor_number:
         door_index = -1
-        print("Adjusted door index by player script: ", door_index)
-    sprite_data_new.set_sprite_nav_data(_click_global_position, _floor_number, door_index)
+        # print("Adjusted door index by player script: ", door_index)
+    sprite_data_new.set_sprite_nav_data(click_global_position, floor_number, door_index)
 #endregion
 
 

@@ -65,13 +65,11 @@ func pre_process_new_elevator_requests() -> void:
 
     while not elevator_request_queue.is_empty():
         
-        print("New Elevator Request Queue: ", elevator_request_queue)
-        
+        # print("New Elevator Request Queue: ", elevator_request_queue)        
         var request_data = elevator_request_queue[0]
-        var sprite_name  = request_data["sprite_name"]
-        
+        var sprite_name  = request_data["sprite_name"]        
         var existing_index = find_request_index_by_sprite(sprite_name)
-
+        
         if existing_index == -1:
             # print("New: Handling a new request")
             handle_new_request(request_data)
@@ -163,7 +161,7 @@ func add_to_elevator_queue(request: Dictionary) -> void:
     request.request_id = next_request_id
     
     elevator_queue.append(request)
-    # print("New: Elevator queue after adding a new request:", elevator_queue)
+    print("New: Elevator queue after adding a new request:", elevator_queue)
     
     SignalBus.elevator_request_confirmed.emit(request["sprite_name"], request["request_id"])
   
@@ -177,9 +175,7 @@ func update_elevator_queue() -> void:
     var request_data = elevator_request_queue[0]
     var sprite_name = request_data["sprite_name"]
     var new_destination_floor = request_data["destination_floor"]
-
-    var current_destination_floor = elevator_queue[0]["destination_floor"]
-
+    
     for item in elevator_queue:
         if item.has("sprite_name") and item["sprite_name"] == sprite_name:
             item["destination_floor"] = new_destination_floor

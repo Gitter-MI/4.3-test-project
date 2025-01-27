@@ -1,6 +1,8 @@
+Set names for sprites programmatically
+===> The player_new script is completely re-usable. If only I would set the initial data outside the script...
 
 
-Player trying to enter the elevator room when the elevator is not there can lead to crash
+
 
 
 Player input only for Player 1 sprite

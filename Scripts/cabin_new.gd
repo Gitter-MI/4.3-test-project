@@ -4,8 +4,8 @@ extends Node2D
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 @onready var cabin_sprite: Sprite2D = $Sprite2D
 @onready var cabin_data: Node = $Cabin_Data
-@onready var queue_manager = $Queue_Manager # interface: add_to_elevator_queue, remove_from_elevator_queue, update_elevator_queue
-
+@onready var queue_manager: Node = $Queue_Manager # interface: add_to_elevator_queue, remove_from_elevator_queue, update_elevator_queue
+@onready var elevator_state_manager: Node = $Elevator_StateMachine
 
 func _ready():    
     set_up_elevator_cabin()    
@@ -17,19 +17,106 @@ func _ready():
 func _process(_delta: float) -> void:
     
     queue_manager.pre_process_new_elevator_requests()
+    elevator_logic()
+        
+
+func elevator_logic():
     
-    # elevator_logic()
+    match cabin_data.elevator_state:
+        
+        cabin_data.ElevatorState.IDLE:            
+            elevator_state_manager.process_idle()       
+        cabin_data.ElevatorState.WAITING:
+            elevator_state_manager.process_waiting()       
+        cabin_data.ElevatorState.DEPARTING:            
+            elevator_state_manager.process_departing()       
+        cabin_data.ElevatorState.TRANSIT:      
+            elevator_state_manager.process_transit()       
+        cabin_data.ElevatorState.ARRIVING:      
+            elevator_state_manager.process_arriving()       
+        _:
+                        
+            pass
+
+
+func move_elevator(delta: float) -> void:
+    if cabin_data.target_position == Vector2.ZERO:        
+        return  # Elevator doesn't have a target different from it's current position, so just return
+
+    # Only stop if it's actually running:
+    if not cabin_data.cabin_timer.is_stopped():
+        # push_warning("Cabin timer is running while cabin is moving. Stopping it now.")
+        cabin_data.cabin_timer.stop() # attempt to prevent the timer from removing requests while the current request is being processed, which could lead to an out-of-bounds error in on_arrival
+
+    var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)    
+    if elevator.door_state != elevator.DoorState.CLOSED:
+        return
     
-    # check if there are new requests for elevator rides
-    # if yes -> process them 
-    # result should be the most up to date elevator request queue 
+    var direction = sign(cabin_data.target_position.y - global_position.y)
+    var movement = cabin_data.SPEED * delta * direction
+    var new_y = global_position.y + movement
     
-    # then: process the elevator queue
-    # if there is nothing: return
-    # else take a look at the first request in the queue and see where we are with the request processing 
-    pass
+    if (direction > 0 and new_y >= cabin_data.target_position.y) or (direction < 0 and new_y <= cabin_data.target_position.y):
+        global_position.y = cabin_data.target_position.y
+        handle_arrival()
+    else:
+        global_position.y = new_y
     
+    SignalBus.elevator_position_updated.emit(global_position, queue_manager.elevator_queue[0]["request_id"])
+
+
+
+func handle_arrival() -> void:    
+    cabin_data.current_floor = cabin_data.destination_floor
+    var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)
+    if elevator:
+        elevator.set_door_state(elevator.DoorState.OPENING)
+
+
+#region Elevator direction
+func set_elevator_direction() -> void:
+    var new_direction: int = 0
     
+    if queue_manager.elevator_queue.size() > 0:
+        var next_floor: int
+        if cabin_data.elevator_occupied:
+            next_floor = queue_manager.elevator_queue[0]["destination_floor"]
+        else:
+            next_floor = queue_manager.elevator_queue[0]["pick_up_floor"]        
+        if next_floor > cabin_data.current_floor:
+            new_direction = 1   # going up
+        elif next_floor < cabin_data.current_floor:
+            new_direction = -1  # going down
+        else:
+            new_direction = 0   # same floor
+    else:
+        new_direction = 0      # no requests => no movement
+    
+    cabin_data.elevator_direction = new_direction
+    # If we are about to set direction=0 while elevator is IN_TRANSIT,
+    # that means the new request is effectively the same floor => treat as immediate arrival.
+    if new_direction == 0 and cabin_data.elevator_state == cabin_data.ElevatorState.IN_TRANSIT:
+        cabin_data.elevator_state = cabin_data.ElevatorState.WAITING        
+        handle_arrival()
+        return    
+    cabin_data.elevator_direction = new_direction
+
+func reset_elevator_direction() -> void:
+    if cabin_data.elevator_direction != 0:
+        cabin_data.elevator_direction = 0
+        # _print_elevator_direction()
+
+func _print_elevator_direction() -> void:
+    match cabin_data.elevator_direction:
+        1:
+            print("Elevator direction changed to: UP")
+        -1:
+            print("Elevator direction changed to: DOWN")
+        0:
+            print("Elevator direction changed to: IDLE")
+#endregion
+
+
 
 # ---------------------------------------------------
 # Region: Cabin Set-Up
