@@ -108,11 +108,14 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
     
     if incoming_sprite_name == sprite_data_new.sprite_name:            
         sprite_data_new.elevator_request_id = request_id
-        # print("Elevator request confirmed. Request ID =", request_id)            
+        print("Elevator request confirmed. Request ID =", request_id)            
         sprite_data_new.elevator_request_confirmed = true
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
+    
+    print("ready signal request id: ", request_id)
+    print("sprite data request id: ", sprite_data_new.elevator_request_id)
     
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return

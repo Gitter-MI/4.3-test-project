@@ -104,9 +104,8 @@ func process_arrival() -> void:
             cabin_data.doors_opening = true
             cabin_data.doors_closed = false
 
-    if cabin_data.doors_open and cabin_data.elevator_occupied:
-        var first_request = queue_manager.elevator_queue[0]
-        SignalBus.elevator_ready.emit(first_request["sprite_name"], first_request["request_id"])    
+    if cabin_data.doors_open and cabin_data.elevator_occupied:  
+        emit_ready_signal()
 
 
 

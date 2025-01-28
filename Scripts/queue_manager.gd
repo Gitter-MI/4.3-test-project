@@ -176,10 +176,11 @@ func update_elevator_queue() -> void:
     var sprite_name = request_data["sprite_name"]
     var new_destination_floor = request_data["destination_floor"]
     
-    for item in elevator_queue:
-        if item.has("sprite_name") and item["sprite_name"] == sprite_name:
-            item["destination_floor"] = new_destination_floor
-            SignalBus.elevator_request_confirmed.emit(sprite_name, item["request_id"])                        
+    for request in elevator_queue:
+        if request.has("sprite_name") and request["sprite_name"] == sprite_name:
+            request["destination_floor"] = new_destination_floor
+            print("update request confirmed request id: ", request["request_id"])
+            SignalBus.elevator_request_confirmed.emit(request["sprite_name"], request["request_id"])                        
 
     elevator_request_queue.remove_at(0)
     # print("elevator_request_queue: ", elevator_request_queue)
