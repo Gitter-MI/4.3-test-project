@@ -26,13 +26,13 @@ func _process(_float) -> void:
                 process_departing()       
             cabin_data.ElevatorState.TRANSIT:      
                 process_transit()       
-            #cabin_data.ElevatorState.ARRIVING:      
-                #elevator_state_manager.process_arriving()       
+            cabin_data.ElevatorState.ARRIVING:      
+                process_arriving()       
             _:
                 push_warning("unknow state in process_cabin_states")                            
                 pass
 
-func process_idle() -> void:
+func process_idle() -> void:    
     
     if not cabin_data.elevator_busy:
         return
@@ -40,8 +40,7 @@ func process_idle() -> void:
         cabin_data.set_elevator_state(CabinData.ElevatorState.WAITING)
     
     
-func process_waiting() -> void:       
-    
+func process_waiting() -> void:
     if not cabin_data.elevator_busy:
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
     
@@ -58,14 +57,19 @@ func process_departing() -> void:
     # print("Elevator is DEPARTING")
     # print("cabin_data.elevator_occupied: ", cabin_data.elevator_occupied)
     # print("cabin_data.doors_closed: ", cabin_data.doors_closed)
-    if cabin_data.elevator_occupied and cabin_data.doors_closed:
+    if cabin_data.doors_closed:
         cabin_data.set_elevator_state(CabinData.ElevatorState.TRANSIT)
 
 func process_transit() -> void:
-    print("Elevator is in TRANSIT")
+    
+    if cabin_data.elevator_direction == 0:
+        cabin_data.set_elevator_state(CabinData.ElevatorState.ARRIVING)
 
 func process_arriving() -> void:
-    print("Elevator is ARRIVING")
+    
+    if cabin_data.doors_open == true and not cabin_data.elevator_occupied:
+        cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
+        print("cabin is now idling again")
 
 
 

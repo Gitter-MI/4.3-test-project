@@ -2,7 +2,7 @@ Set names for sprites programmatically
 ===> The player_new script is completely re-usable. If only I would set the initial data outside the script...
 
 
-
+cabin removes sprites without using the remove function
 
 
 Player input only for Player 1 sprite
