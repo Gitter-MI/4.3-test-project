@@ -20,6 +20,8 @@ signal elevator_request_confirmed(sprite_name: String, request_id: int)
 signal elevator_position_updated(global_pos: Vector2, request_id: int)   # used to move sprites along with the elevator cabin
 signal elevator_ready(sprite_name: String, request_id: int) # ensures that the correct sprite will enter the elevator next
 
+signal request_elevator_ready_status(sprite_name: String, request_id: int)
+
 
 signal entering_elevator(sprite_name: String, request_id: int)
 signal enter_animation_finished(sprite_name: String, target_floor: int)
@@ -100,6 +102,8 @@ func _ready():
     elevator_called.connect(_on_elevator_called)
     elevator_request_confirmed.connect(_on_elevator_request_confirmed)
     elevator_ready.connect(_on_elevator_ready)
+    
+    
     exit_animation_finished.connect(_on_exit_animation_finished)
 
 

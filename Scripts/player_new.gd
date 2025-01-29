@@ -66,7 +66,8 @@ func _process_elevator_actions() -> void:
             if not sprite_data_new.elevator_requested:
                 call_elevator()
         
-        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
+        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:   
+            # if sprite_data_new.elevator_ready =          
             # call_elevator()
             pass
 
@@ -108,22 +109,36 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
     
     if incoming_sprite_name == sprite_data_new.sprite_name:            
         sprite_data_new.elevator_request_id = request_id
-        print("Elevator request confirmed. Request ID =", request_id)            
+        # print("Elevator request confirmed. Request ID =", request_id)            
         sprite_data_new.elevator_request_confirmed = true
+        print("request confirmed, requesting ready status")
+        
+        # check if a state update is needed
+        state_manager._process_elevator_state(sprite_data_new)
+        
+        request_elevator_ready_status()
+
+func request_elevator_ready_status():
+    SignalBus.request_elevator_ready_status.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
             
 
-func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
+func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
     
-    print("ready signal request id: ", request_id)
-    print("sprite data request id: ", sprite_data_new.elevator_request_id)
+    # 
     
+    # print("ready signal request id: ", request_id)
+    # print("sprite data request id: ", sprite_data_new.elevator_request_id)    
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return
+        
     if request_id != sprite_data_new.elevator_request_id:
-        return    
+        return           
     
-    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:        
+        
+    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
+        print("sprite state is not waiting for elevator")
         return
+    # print("sprite_data_new.elevator_ready = true")        
     sprite_data_new.elevator_ready = true
 
 

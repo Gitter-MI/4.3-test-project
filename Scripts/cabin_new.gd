@@ -64,12 +64,13 @@ func process_waiting():
         emit_ready_signal()
     
     if cabin_data.pick_up_on_current_floor and cabin_data.elevator_ready and not cabin_data.elevator_occupied:
-        # print("waiting for sprite to enter or timer timeout")
+        # print("waiting for sprite to enter or timer timeout")   
+        # emit_ready_signal()    
         return
      
     else:
         return
-        
+
     
 
 func _on_sprite_entered_elevator(_sprite_name, _elevator_request_id):
@@ -163,8 +164,8 @@ func update_destination_floor() -> void:
 
 func emit_ready_signal():
         var request = queue_manager.elevator_queue[0]
-        SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])
-        print("Emitting signal to: ",  request["sprite_name"]," with request id: ", request["request_id"])
+        # print("Emitting signal to: ",  request["sprite_name"]," with request id: ", request["request_id"])
+        SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])        
         cabin_data.elevator_ready = true   
 
 func is_at_first_request_pickup_floor() -> void:
@@ -318,11 +319,20 @@ func get_elevator_for_current_floor() -> Node:
     return cabin_data.floor_to_elevator[cabin_data.current_floor]
 
 func connect_to_signals():
-    # print("connecting to signals / pass for now.")
+    # print("connecting to signals / pass for now.")    
     SignalBus.entering_elevator.connect(_on_sprite_entered_elevator)    
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
     SignalBus.exit_animation_finished.connect(_on_sprite_exiting) 
+    
+    SignalBus.request_elevator_ready_status.connect(on_ready_status_requested)
     # ...
+    
+    
+func on_ready_status_requested(sprite_name: String, request_id: int) -> void:
+    print("on_ready_status_requested")
+    var request = queue_manager.elevator_queue[0]
+    if cabin_data.elevator_ready and request["sprite_name"] == sprite_name and request["request_id"] == request_id:
+        emit_ready_signal()
 
 func setup_cabin_timer(wait_time: float) -> void:
     var new_timer = Timer.new()
@@ -334,7 +344,7 @@ func setup_cabin_timer(wait_time: float) -> void:
     
     # Make sure cabin_data.cabin_timer references THIS timer
     cabin_data.cabin_timer = new_timer
-    print("In timer setup: cabin_data.cabin_timer: ", cabin_data.cabin_timer)
+    # print("In timer setup: cabin_data.cabin_timer: ", cabin_data.cabin_timer)
 
 
 
@@ -348,25 +358,25 @@ func start_waiting_timer() -> void:
         setup_cabin_timer(cabin_data.cabin_timer_timeout)
     else:        
         cabin_data.cabin_timer.stop()
-        print("stopping timer to start again")
+       #  print("stopping timer to start again")
 
     # If there's at least one request, start the timer
     if not queue_manager.elevator_queue.is_empty():
         cabin_data.cabin_timer.start()
-        print("cabin timer started")  
-        print("In timer started: cabin_data.cabin_timer: ", cabin_data.cabin_timer)  
+        # print("cabin timer started")  
+        # print("In timer started: cabin_data.cabin_timer: ", cabin_data.cabin_timer)  
 
 
 
 
 func stop_waiting_timer() -> void:
-    print("stop_waiting_timer")
-    print("In timer stop: cabin_data.cabin_timer: ", cabin_data.cabin_timer)  
+    # print("stop_waiting_timer")
+    # print("In timer stop: cabin_data.cabin_timer: ", cabin_data.cabin_timer)  
     if cabin_data.cabin_timer == null:
         push_warning("cabin timer not set-up in stop_waiting_timer")        
             
     cabin_data.cabin_timer.stop()
-    print("cabin timer stopped")
+    # print("cabin timer stopped")
     
 
 func _on_cabin_timer_timeout() -> void:
@@ -376,7 +386,7 @@ func _on_cabin_timer_timeout() -> void:
         var request_id   = removed_request.get("request_id", -1)  
         
         reset_elevator(sprite_name, request_id)      
-        print("Removed oldest request:", removed_request)
+        # print("Removed oldest request:", removed_request)
         check_elevator_queue()
     else:
         print("Elevator queue is empty, nothing to remove.")

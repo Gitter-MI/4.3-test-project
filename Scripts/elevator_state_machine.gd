@@ -32,8 +32,7 @@ func _process(_float) -> void:
                 push_warning("unknow state in process_cabin_states")                            
                 pass
 
-func process_idle() -> void:    
-    
+func process_idle() -> void:        
     if not cabin_data.elevator_busy:
         return
     else:    

@@ -14,7 +14,7 @@ var elevator_occupied: bool = false
 var timer_started: bool = false
 
 
-
+var re_emit_ready_signal: bool = false
 
 
 
@@ -27,7 +27,7 @@ var doors_closed: bool = false
 
 
 
-var current_floor: int = 10  # for spawning only.
+var current_floor: int = 6  # for spawning only.
 var destination_floor: int = 1  # for spawning only. If not used, remove
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
