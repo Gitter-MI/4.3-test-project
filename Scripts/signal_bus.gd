@@ -21,6 +21,10 @@ signal elevator_position_updated(global_pos: Vector2, request_id: int)   # used 
 signal elevator_ready(sprite_name: String, request_id: int) # ensures that the correct sprite will enter the elevator next
 
 signal request_elevator_ready_status(sprite_name: String, request_id: int)
+signal request_skippable(sprite_name: String, request_id: int)
+signal queue_reordered()
+
+
 
 
 signal entering_elevator(sprite_name: String, request_id: int)
@@ -83,7 +87,7 @@ func _ready():
     all_sprites_ready.connect(_on_all_sprites_ready)
     
     
-    
+     
     
     # Connect signals to dummy functions using Godot 4's syntax
     

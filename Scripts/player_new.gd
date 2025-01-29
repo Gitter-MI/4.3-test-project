@@ -123,20 +123,21 @@ func request_elevator_ready_status():
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
-    
-    # 
-    
-    # print("ready signal request id: ", request_id)
-    # print("sprite data request id: ", sprite_data_new.elevator_request_id)    
+    print("-----------PLAYER-----------")
+    print("ready signal received!")
+    print("ready signal request id: ", request_id)
+    print("sprite data request id: ", sprite_data_new.elevator_request_id)       
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return
         
     if request_id != sprite_data_new.elevator_request_id:
+        SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         return           
     
         
     if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
         print("sprite state is not waiting for elevator")
+        SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         return
     # print("sprite_data_new.elevator_ready = true")        
     sprite_data_new.elevator_ready = true
@@ -380,6 +381,7 @@ func connect_to_signals():
     SignalBus.elevator_ready.connect(_on_elevator_ready) # 
     SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
+    SignalBus.queue_reordered.connect(request_elevator_ready_status)
     
     
 

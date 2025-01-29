@@ -57,7 +57,7 @@ func _on_navigation_command(sprite_name: String, destination_floor_number: int, 
     SignalBus.adjusted_navigation_command.emit(commander, sprite_name, destination_floor_number, destination_door_index, adjusted_position )
 
 
-
+var count: int = 0
 
 func _on_navigation_click(global_position: Vector2, floor_number: int, door_index: int) -> void:    
     # print("click recorded")
@@ -70,6 +70,11 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     # print("_on_navigation_click: global_position: ", global_position)
     
     _on_navigation_command("Player", floor_number, door_index, commander, adjusted_click_position)
+    
+    
+    if count == 0:
+        _on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
+        count = count + 1
     
 
 

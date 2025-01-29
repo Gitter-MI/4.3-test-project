@@ -16,58 +16,6 @@ Debug Elevator
 
 
 
+#################
 
-
-'''
-keep calling ready when the sprite is not there
-
-cabin:
-    func process_waiting():
-    
-    if cabin_data.elevator_busy: 
-        is_at_first_request_pickup_floor()
-    # print("cabin_data.pick_up_on_current_floor: ", cabin_data.pick_up_on_current_floor)
-    
-    if cabin_data.pick_up_on_current_floor and not cabin_data.elevator_ready:
-        emit_ready_signal()
-    
-    if cabin_data.pick_up_on_current_floor and cabin_data.elevator_ready and not cabin_data.elevator_occupied:
-        # print("waiting for sprite to enter or timer timeout")   
-        emit_ready_signal()    
-        return
-     
-    else:
-        return
-
-
-in the sprites ready function:
-
-func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
-    
-    # print("ready signal request id: ", request_id)
-    # print("sprite data request id: ", sprite_data_new.elevator_request_id)    
-    if incoming_sprite_name != sprite_data_new.sprite_name:
-        return
-        
-        
-    if any of the following two is true: signal the queue manager: I am not here
-        if request_id != sprite_data_new.elevator_request_id:        
-            return           
-        
-            
-        if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
-            return
-    # print("sprite_data_new.elevator_ready = true")        
-    sprite_data_new.elevator_ready = true
-    
-    
-    
-    
-In queue manager:
-    if the sprite is not here, then check if there is another pick up request from the same floor.
-    If yes, move that to [0] and the other request takes the place (shuffle)
-    the emit_ready_signal() will then send ready to the other sprite
-    
-    if there is no other sprite waiting: 
-        do nothing
-    '''
+the shuffle function doesn't know which sprites are actually still waiting

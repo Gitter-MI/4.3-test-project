@@ -1,4 +1,4 @@
-# player_new.gd
+# ai_player_new.gd
 extends Area2D
 
 # @onready var state_manager: Node = $State_Component
@@ -66,7 +66,8 @@ func _process_elevator_actions() -> void:
             if not sprite_data_new.elevator_requested:
                 call_elevator()
         
-        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
+        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:   
+            # if sprite_data_new.elevator_ready =          
             # call_elevator()
             pass
 
@@ -106,21 +107,41 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
     # print("destination_floor of the confirmed request: ", destination_floor)
     # print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
     
-    if incoming_sprite_name == sprite_data_new.sprite_name:                  
+    if incoming_sprite_name == sprite_data_new.sprite_name:            
         sprite_data_new.elevator_request_id = request_id
         print("Elevator request confirmed. Request ID =", request_id)            
         sprite_data_new.elevator_request_confirmed = true
+        print("request confirmed, requesting ready status with this data:")
+        print("")
+        
+        
+        # check if a state update is needed
+        state_manager._process_elevator_state(sprite_data_new)
+        
+        request_elevator_ready_status()
+
+func request_elevator_ready_status():
+    print("AI SPRITE IS REQUESTING READY")
+    SignalBus.request_elevator_ready_status.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
             
 
-func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
+func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
     
+    print("-----------AI SPRITE-----------")
+    print("ready signal received!")
+    print("ready signal request id: ", request_id)
+    print("sprite data request id: ", sprite_data_new.elevator_request_id)    
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return
+        
     if request_id != sprite_data_new.elevator_request_id:
-        return    
+        return           
     
-    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:        
+        
+    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
+        print("sprite state is not waiting for elevator")
         return
+    # print("sprite_data_new.elevator_ready = true")        
     sprite_data_new.elevator_ready = true
 
 
@@ -137,6 +158,7 @@ func enter_elevator():
     sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
     global_position = sprite_data_new.current_position
     z_index = -9
+    # print("Sprite emits entering elevator signal")
     SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
     _animate_sprite()
 
@@ -296,7 +318,7 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
    
 
 func _on_adjusted_navigation_command(_commander: String, sprite_name: String, floor_number: int, door_index: int, click_global_position: Vector2) -> void:       
-    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")             
+    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")        
     
     if not sprite_name == sprite_data_new.sprite_name:
         return
@@ -339,9 +361,9 @@ func set_initial_position() -> void:
     # print("in set_initial_position: ", global_position)
 
 func set_initial_data():
-    sprite_data_new.current_floor_number = 2 
+    sprite_data_new.current_floor_number = 3 
     sprite_data_new.current_room = -1  
-    sprite_data_new.target_floor_number = 2
+    sprite_data_new.target_floor_number = 3
     sprite_data_new.sprite_name = "AI_SPRITE"
     sprite_data_new.elevator_request_id = 1
 
@@ -361,6 +383,7 @@ func connect_to_signals():
     SignalBus.elevator_ready.connect(_on_elevator_ready) # 
     SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
+    SignalBus.queue_reordered.connect(request_elevator_ready_status)
     
     
 
@@ -378,7 +401,7 @@ func connect_to_signals():
 #####################################################################################################
 
 func instantiate_sprite():
-    add_to_group("ai_sprites")   # for other nodes explicitly referencing this player sprite
+    add_to_group("player_sprite")   # for other nodes explicitly referencing this player sprite
     add_to_group("sprites")
     # print("player is in group player_sprites")
     # sprite_data_new = SpriteDataNew.new()    
