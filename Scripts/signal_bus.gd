@@ -27,7 +27,7 @@ signal queue_reordered()
 
 
 
-signal entering_elevator(sprite_name: String, request_id: int)
+signal entering_elevator(sprite_name: String, request_id: int, destination_room: int)
 signal enter_animation_finished(sprite_name: String, target_floor: int)
 signal exit_animation_finished(sprite_name: String, request_id: int)
 
@@ -90,6 +90,9 @@ func _ready():
      
     
     # Connect signals to dummy functions using Godot 4's syntax
+    request_elevator_ready_status.connect(_on_request_elevator_ready_status)
+    request_skippable.connect(_on_request_skippable)
+    queue_reordered.connect(_on_queue_reordered)
     
     entering_elevator.connect(_on_entering_elevator)    
     elevator_position_updated.connect(_on_elevator_position_updated)
@@ -109,6 +112,18 @@ func _ready():
     
     
     exit_animation_finished.connect(_on_exit_animation_finished)
+
+
+func _on_request_elevator_ready_status(_sprite_name: String, _request_id: int):
+    pass
+
+
+func _on_request_skippable(_sprite_name: String, _request_id: int):
+    pass
+    
+    
+func _on_queue_reordered():
+    pass
 
 
 func _on_navigation_command(_sprite_name: String, _destination_floor_number: int, _destination_door_index: int, _commander: String, _adjusted_position: Vector2) -> void:
@@ -164,7 +179,7 @@ func _on_elevator_request(_sprite_name: String, _target_floor: int) -> void:
 func _on_elevator_arrived(_sprite_name: String, _current_floor: int) -> void:
     pass
 
-func _on_entering_elevator(_sprite_name: String, _request_id: int) -> void:
+func _on_entering_elevator(_sprite_name: String, _request_id: int, _destination_room: int) -> void:
     pass
 
 func _on_exiting_elevator(_sprite_name: String) -> void:

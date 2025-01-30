@@ -134,13 +134,13 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
         else:
             #  or sprite_data_new.target_room >= 0
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
-            print("Sprite is now in Elevator Transit")
+            # print("Sprite is now in Elevator Transit")
         pass
 
 func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
     # print("_process_in_elevator_transit: in elevator transit")
     if sprite_data_new.elevator_destination_reached:  
-        print("sprite is now exiting the elevator")      
+        # print("sprite is now exiting the elevator")      
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
 
 

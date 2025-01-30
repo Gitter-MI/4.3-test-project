@@ -1,3 +1,17 @@
+Other sprites are acting as if they were exiting the elevator even though they didn't even ride it.
+
+- ensure a ready signal is only being send when needed (for immediate entry)
+    - otherwise use a ready state (WAITING)
+
+
+- (!) ensure that the elevator signals are always(!) properly vetted by the receiving sprites. 
+    - Is this a signal for me?
+
+
+- lastly register elevator signals for each sprite individually or provide callbacks to ensure that the elevator is talking only to the sprites it needs to. 
+
+
+
 Set names for sprites programmatically
 ===> The player_new script is completely re-usable. If only I would set the initial data outside the script...
 
@@ -18,4 +32,11 @@ Debug Elevator
 
 #################
 
-the shuffle function doesn't know which sprites are actually still waiting
+implement the room state thing
+do crazy clicks
+find any other bug that could be in the way
+add more sprites to find out if shuffle really works as expected
+
+
+otherwise: 
+    Congrats. You are closer than ever. 

@@ -111,7 +111,7 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
         sprite_data_new.elevator_request_id = request_id
         # print("Elevator request confirmed. Request ID =", request_id)            
         sprite_data_new.elevator_request_confirmed = true
-        print("request confirmed, requesting ready status")
+        # print("request confirmed, requesting ready status")
         
         # check if a state update is needed
         state_manager._process_elevator_state(sprite_data_new)
@@ -123,10 +123,10 @@ func request_elevator_ready_status():
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
-    print("-----------PLAYER-----------")
-    print("ready signal received!")
-    print("ready signal request id: ", request_id)
-    print("sprite data request id: ", sprite_data_new.elevator_request_id)       
+    #print("-----------PLAYER-----------")
+    #print("ready signal received!")
+    #print("ready signal request id: ", request_id)
+    #print("sprite data request id: ", sprite_data_new.elevator_request_id)       
     if incoming_sprite_name != sprite_data_new.sprite_name:
         return
         
@@ -136,7 +136,7 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
     
         
     if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
-        print("sprite state is not waiting for elevator")
+        # print("sprite state is not waiting for elevator")
         SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         return
     # print("sprite_data_new.elevator_ready = true")        
@@ -157,7 +157,7 @@ func enter_elevator():
     global_position = sprite_data_new.current_position
     z_index = -9
     # print("Sprite emits entering elevator signal")
-    SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
+    SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id, sprite_data_new.target_room)
     _animate_sprite()
 
 func on_sprite_entered_elevator():
@@ -192,8 +192,16 @@ func _on_elevator_ride(elevator_pos: Vector2, request_id: int) -> void:
 
 
 func _on_elevator_at_destination(incoming_sprite_name: String, request_id: int):    
+    #print("from signal")
+    #print("incoming_sprite_name: ", incoming_sprite_name)
+    #print("request_id: ", request_id)
+    #
+    #print("from sprite")
+    #print("sprite_data_new.sprite_name: ", sprite_data_new.sprite_name)
+    #print("sprite_data_new.elevator_request_id: ", sprite_data_new.elevator_request_id)
+    #print("sprite_data_new.entered_elevator: ", sprite_data_new.entered_elevator)
     if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == true:
-        # print("destination signal received")
+        # print("destination signal received in player")
         sprite_data_new.elevator_destination_reached = true
 
 func exit_elevator():

@@ -6,7 +6,7 @@ var new_requests: bool = false
 
 var next_request_id: int = 10
 
-'''The queue management functions should ideall all take the same inputs? For example sprite name and request id. '''
+
 # elevator queue: jobs the elevator needs to process
 # elevator request queue: requests from sprites to use the elevator. Stored here for pre-processing before adding them to the actual elevator queue
 var elevator_queue: Array = []  # Example: [{'pick_up_floor', 'destination_floor', 'sprite_name': "Player_1", 'request_id': 1}, ...]
@@ -24,18 +24,17 @@ func _ready():
     _previous_elevator_queue = elevator_queue.duplicate(true)
 
 
-func _process(delta: float) -> void:
+#func _process(delta: float) -> void:
     # Check if the queue has changed
-    if _previous_elevator_queue != elevator_queue:
-        print("/(&/(&/(=&/(&/()&/()&/()&/(&/()&/()&/()&/()&/()&/()&/()&/()&/()&()/&/()&/()&/()&/()&/()&/()&())))))")
-        print("Elevator queue changed:", elevator_queue)
-        # Update our stored copy
-        _previous_elevator_queue = elevator_queue.duplicate(true)
+    #if _previous_elevator_queue != elevator_queue:       
+        ## print("Elevator queue changed:", elevator_queue)
+        ## Update our stored copy
+        #_previous_elevator_queue = elevator_queue.duplicate(true)
 
 
 
-func _on_request_skippable(sprite_name: String, request_id: int):
-    print("request skippable")
+func _on_request_skippable(sprite_name: String, _request_id: int):
+    # print("request skippable")
 
     # 1) Find the request in elevator_queue by sprite_name only
     var skip_index := -1
@@ -46,7 +45,7 @@ func _on_request_skippable(sprite_name: String, request_id: int):
             break
 
     if skip_index == -1:
-        print(" -> Could not find a matching request in elevator_queue for sprite '%s'." % sprite_name)
+        # print(" -> Could not find a matching request in elevator_queue for sprite '%s'." % sprite_name)
         return
 
     # Grab the pick_up_floor of the request that wants to skip
@@ -60,12 +59,12 @@ func _on_request_skippable(sprite_name: String, request_id: int):
 
     # If this sprite is the only request on that floor, do nothing
     if same_floor_indices.size() <= 1:
-        print(" -> No other requests on this floor. Doing nothing.")
+        # print(" -> No other requests on this floor. Doing nothing.")
         return
 
     # 3) Remove the skippable request from the queue
     var skip_request = elevator_queue[skip_index]
-    print("skip_request: ", elevator_queue[skip_index])
+    # print("skip_request: ", elevator_queue[skip_index])
     elevator_queue.remove_at(skip_index)
 
     # Find the largest index among same-floor requests (excluding the one we just removed)
@@ -80,7 +79,7 @@ func _on_request_skippable(sprite_name: String, request_id: int):
 
     # Insert the skippable request after the last same-floor request
     elevator_queue.insert(last_same_floor_index + 1, skip_request)
-    print(" -> Moved request for sprite '%s' behind others on floor %d." % [sprite_name, skip_floor])
+    # print(" -> Moved request for sprite '%s' behind others on floor %d." % [sprite_name, skip_floor])
 
     # 4) (Optional) Re-confirm the new front of the queue for that floor if needed
     #    If you still want to emit a 'confirmed' signal for the new front:
@@ -90,32 +89,32 @@ func _on_request_skippable(sprite_name: String, request_id: int):
             first_request_for_floor = req
             break
 
-    print("elevator queue after skipabble: ", elevator_queue)
+    # print("elevator queue after skipabble: ", elevator_queue)
 
     if first_request_for_floor and first_request_for_floor != skip_request:
         SignalBus.elevator_request_confirmed.emit(
             first_request_for_floor["sprite_name"],
             first_request_for_floor["request_id"]
         )
-        print(" -> Emitted elevator_request_confirmed for sprite '%s' now at the front."
-              % first_request_for_floor["sprite_name"])
+        # print(" -> Emitted elevator_request_confirmed for sprite '%s' now at the front."
+        #      % first_request_for_floor["sprite_name"])
     else:
-        print(" -> No other sprite is ahead; no confirmation emitted.")
+        pass
+        # print(" -> No other sprite is ahead; no confirmation emitted.")
 
-    print("****************** queue at the end of the skippable function")
-    get_first_elevator_request()
+    # print("****************** queue at the end of the skippable function")
+    # get_first_elevator_request()
     SignalBus.queue_reordered.emit()
     
 
 
 func get_first_elevator_request() -> Dictionary:    
     
-    var first_request = elevator_queue[0]
-    
-    print("elevator_queue in get_first_request: ", elevator_queue)
-    
-    print("first request in queue - request_id: ", first_request["request_id"]) # here the first request is still the old, skippable request
-    print("first request in queue - sprite_name: ", first_request["sprite_name"])
+    var first_request = elevator_queue[0]    
+    #print("elevator_queue in get_first_request: ", elevator_queue)
+    #
+    #print("first request in queue - request_id: ", first_request["request_id"]) # here the first request is still the old, skippable request
+    #print("first request in queue - sprite_name: ", first_request["sprite_name"])
     return first_request
 
 
@@ -263,7 +262,7 @@ func add_to_elevator_queue(request: Dictionary) -> void:
     request.request_id = next_request_id
     
     elevator_queue.append(request)
-    print("New: Elevator queue after adding a new request:", elevator_queue)
+    # print("New: Elevator queue after adding a new request:", elevator_queue)
     
     SignalBus.elevator_request_confirmed.emit(request["sprite_name"], request["request_id"])
   
@@ -303,12 +302,13 @@ func remove_from_elevator_queue(sprite_name: String, request_id: int) -> void:
             if queue_req.has("request_id") and queue_req["request_id"] == request_id:
                 # Remove the request
                 elevator_queue.remove_at(i)
-                print("Removed request for:", sprite_name, "with request_id:", request_id)
+                #print("Removed request for: ", sprite_name, "with request_id: ", request_id)
                 # print("Updated elevator_queue:", elevator_queue)
                 return
             else:
+                pass
                 # Found the right sprite but request_id doesn't match
-                print("Found sprite:", sprite_name, "but request_id mismatch. Expected:", request_id, "got:", queue_req.get("request_id", "None"))
+                # print("Found sprite:", sprite_name, "but request_id mismatch. Expected:", request_id, "got:", queue_req.get("request_id", "None"))
                 # Continue searching in case there's another entry for the same sprite with the correct request_id
     
     # If we finish the loop, no match found

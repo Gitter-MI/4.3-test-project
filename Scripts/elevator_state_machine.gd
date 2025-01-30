@@ -68,7 +68,7 @@ func process_arriving() -> void:
     
     if cabin_data.doors_open == true and not cabin_data.elevator_occupied:
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
-        print("cabin is now idling again")
+        # print("cabin is now idling again")
 
 
 
