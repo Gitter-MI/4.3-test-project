@@ -39,6 +39,7 @@ func elevator_logic(_delta) -> void:
             process_arrival()
     
 
+#region process functions
 func process_idle():
     # print("process idle")
     check_elevator_queue()
@@ -61,34 +62,18 @@ func process_waiting():
     # print("cabin_data.pick_up_on_current_floor: ", cabin_data.pick_up_on_current_floor)
     
     if cabin_data.pick_up_on_current_floor and not cabin_data.elevator_ready:
-        print("process_waiting - if cabin_data.pick_up_on_current_floor and not cabin_data.elevator_ready")
+        # print("process_waiting - if cabin_data.pick_up_on_current_floor and not cabin_data.elevator_ready")
         emit_ready_signal()
     
     if cabin_data.pick_up_on_current_floor and cabin_data.elevator_ready and not cabin_data.elevator_occupied:
         # print("waiting for sprite to enter or timer timeout")   
         if cabin_data.elevator_queue_reordered: 
-            print("process_waiting - if cabin_data.elevator_queue_reordered")
+            # print("process_waiting - if cabin_data.elevator_queue_reordered")
             emit_ready_signal()    
         return
      
     else:
         return
-
-    
-
-func _on_sprite_entered_elevator(_sprite_name, _elevator_request_id, target_room):
-    
-    if target_room == -2:
-        print("Sprite wants to enter the room")
-        return
-    # print("cabin: _on_sprite_entered_elevator")
-    
-    # check if we need the elevator room or an elevator ride here
-    # if sprite wants to enter room -> allow state change and return
-    # else: 
-    
-    cabin_data.elevator_occupied = true
-    stop_waiting_timer()  
 
 
 func process_departure() -> void:
@@ -121,12 +106,68 @@ func process_arrival() -> void:
 
     if cabin_data.doors_open and cabin_data.elevator_occupied:  
         emit_ready_signal()
+#endregion
+
+#region Signals and Handlers
+func connect_to_signals():
+    # print("connecting to signals / pass for now.")    
+    SignalBus.entering_elevator.connect(_on_sprite_entered_elevator)    
+    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
+    SignalBus.exit_animation_finished.connect(_on_sprite_exiting) 
+    
+    SignalBus.request_elevator_ready_status.connect(_on_ready_status_requested)
+    SignalBus.queue_reordered.connect(_on_queue_reordered)
+    # ...
 
 
+    
+func _on_ready_status_requested(sprite_name: String, request_id: int) -> void:
+    #print("!!!!!------------------------!!!!!")
+    #print("this sprite is requesting ready: ", sprite_name)
+    #print("this is the request id of the requesting sprite: ", request_id)
+    
+    # print("on_ready_status_requested: ", queue_manager.elevator_queue)
+    var request = queue_manager.elevator_queue[0]
+    #print("this is the first sprite name in the queue: ", request["sprite_name"])
+    #print("this is the first request_id in the queue: ", request["request_id"])
+    #print("cabin_data.elevator_ready: ", cabin_data.elevator_ready)
+    
+    if cabin_data.current_floor == request["pick_up_floor"]:
+    
+        if cabin_data.elevator_ready and request["sprite_name"] == sprite_name and request["request_id"] == request_id:
+            print("_on_ready_status_requested")
+            emit_ready_signal()    
+
+
+func emit_ready_signal():
+        # print("elevator queue in emit_ready_signal: ", queue_manager.elevator_queue)            
+        var request = queue_manager.get_first_elevator_request()                
+        # print("Emitting signal to: ",  request["sprite_name"]," with request id: ", request["request_id"])
+        SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])        
+        cabin_data.elevator_ready = true   
+        
+
+func _on_sprite_entered_elevator(_sprite_name, _elevator_request_id, target_room):
+    '''Switch to Room'''
+    if target_room == -2:
+        print("Sprite wants to enter the room")
+        return
+    # print("cabin: _on_sprite_entered_elevator")
+    
+    # check if we need the elevator room or an elevator ride here
+    # if sprite wants to enter room -> allow state change and return
+    # else: 
+    
+    cabin_data.elevator_occupied = true
+    stop_waiting_timer()  
 
 func _on_sprite_exiting(sprite_name: String, request_id: int) -> void:
     reset_elevator(sprite_name, request_id)
-    
+
+
+func _on_queue_reordered():
+    cabin_data.elevator_queue_reordered = true
+  
 func reset_elevator(sprite_name: String, request_id: int) -> void:    
     cabin_data.elevator_occupied = false
     queue_manager.remove_from_elevator_queue(sprite_name, request_id)
@@ -136,9 +177,8 @@ func reset_elevator(sprite_name: String, request_id: int) -> void:
     cabin_data.elevator_ready = false
     cabin_data.elevator_queue_reordered = false
 
-
-
 func _on_elevator_door_state_changed(new_state):
+
     var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)
     if elevator == null:
         return
@@ -160,8 +200,9 @@ func _on_elevator_door_state_changed(new_state):
             set_elevator_direction()
             if cabin_data.destination_floor != cabin_data.current_floor:
                 update_destination_floor()
+#endregion
 
-
+#region Elevator movement
 
 func update_destination_floor() -> void:
     # print("update destination floor")
@@ -174,24 +215,6 @@ func update_destination_floor() -> void:
         cabin_data.destination_floor = current_request["pick_up_floor"]
         
     cabin_data.target_position = cabin_data.floor_to_target_position[cabin_data.destination_floor]
-
-
-
-func emit_ready_signal():
-        # print("elevator queue in emit_ready_signal: ", queue_manager.elevator_queue)            
-        var request = queue_manager.get_first_elevator_request()                
-        print("Emitting signal to: ",  request["sprite_name"]," with request id: ", request["request_id"])
-        SignalBus.elevator_ready.emit(request["sprite_name"], request["request_id"])        
-        cabin_data.elevator_ready = true   
-
-func is_at_first_request_pickup_floor() -> void:
-    # print("cabin_data.current_floor: ", cabin_data.current_floor)
-    var first_request = queue_manager.elevator_queue[0]
-    if first_request["pick_up_floor"] == cabin_data.current_floor:
-        cabin_data.pick_up_on_current_floor = true
-    else: 
-        cabin_data.pick_up_on_current_floor = false
-
 
 
 
@@ -223,9 +246,6 @@ func move_elevator(delta: float) -> void:
 
 
 
-
-
-#region Elevator direction
 func set_elevator_direction() -> void:
     var new_direction: int = 0
     
@@ -252,13 +272,19 @@ func reset_elevator_direction() -> void:
         cabin_data.elevator_direction = 0
         # _print_elevator_direction()
 
+
+func is_at_first_request_pickup_floor() -> void:
+    # print("cabin_data.current_floor: ", cabin_data.current_floor)
+    var first_request = queue_manager.elevator_queue[0]
+    if first_request["pick_up_floor"] == cabin_data.current_floor:
+        cabin_data.pick_up_on_current_floor = true
+    else: 
+        cabin_data.pick_up_on_current_floor = false
+
+
 #endregion
 
-
-
-# ---------------------------------------------------
-# Region: Cabin Set-Up
-# ---------------------------------------------------
+#region Set-Up
 
 func set_up_elevator_cabin(): 
     add_to_group("cabin")
@@ -333,37 +359,9 @@ func cache_floor_positions():
 
 func get_elevator_for_current_floor() -> Node:
     return cabin_data.floor_to_elevator[cabin_data.current_floor]
+#endregion
 
-func connect_to_signals():
-    # print("connecting to signals / pass for now.")    
-    SignalBus.entering_elevator.connect(_on_sprite_entered_elevator)    
-    SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
-    SignalBus.exit_animation_finished.connect(_on_sprite_exiting) 
-    
-    SignalBus.request_elevator_ready_status.connect(_on_ready_status_requested)
-    SignalBus.queue_reordered.connect(_on_queue_reordered)
-    # ...
-
-func _on_queue_reordered():
-    cabin_data.elevator_queue_reordered = true
-    
-func _on_ready_status_requested(sprite_name: String, request_id: int) -> void:
-    #print("!!!!!------------------------!!!!!")
-    #print("this sprite is requesting ready: ", sprite_name)
-    #print("this is the request id of the requesting sprite: ", request_id)
-    
-    # print("on_ready_status_requested: ", queue_manager.elevator_queue)
-    var request = queue_manager.elevator_queue[0]
-    #print("this is the first sprite name in the queue: ", request["sprite_name"])
-    #print("this is the first request_id in the queue: ", request["request_id"])
-    #print("cabin_data.elevator_ready: ", cabin_data.elevator_ready)
-    
-    if cabin_data.current_floor == request["pick_up_floor"]:
-    
-        if cabin_data.elevator_ready and request["sprite_name"] == sprite_name and request["request_id"] == request_id:
-            print("_on_ready_status_requested")
-            emit_ready_signal()
-
+#region CabinTimer
 func setup_cabin_timer(wait_time: float) -> void:
     var new_timer = Timer.new()
     new_timer.one_shot = true
@@ -377,10 +375,6 @@ func setup_cabin_timer(wait_time: float) -> void:
     # print("In timer setup: cabin_data.cabin_timer: ", cabin_data.cabin_timer)
 
 
-
-# ---------------------------------------------------
-# Region: Cabin Timer
-# ---------------------------------------------------
 func start_waiting_timer() -> void:
     # If the cabin_timer doesn't exist yet, create it
     if cabin_data.cabin_timer == null:
@@ -419,6 +413,8 @@ func _on_cabin_timer_timeout() -> void:
         # print("Removed oldest request:", removed_request)
         check_elevator_queue()
     else:
-        print("Elevator queue is empty, nothing to remove.")
+        pass
+        # print("Elevator queue is empty, nothing to remove.")
+#endregion
 
         

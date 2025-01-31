@@ -72,10 +72,12 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     _on_navigation_command("Player", floor_number, door_index, commander, adjusted_click_position)
     
     
+    #if count == 0:
+        #_on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
+        #count = count + 1
     if count == 0:
-        _on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
-        count = count + 1
-    
+        _on_navigation_command("AI_SPRITE", 5, door_index, commander, adjusted_click_position)
+        count = count + 1  
 
 
 

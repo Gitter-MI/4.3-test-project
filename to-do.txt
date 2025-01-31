@@ -1,34 +1,3 @@
-Other sprites are acting as if they were exiting the elevator even though they didn't even ride it.
-
-- ensure a ready signal is only being send when needed (for immediate entry)
-    - otherwise use a ready state (WAITING)
-
-
-- (!) ensure that the elevator signals are always(!) properly vetted by the receiving sprites. 
-    - Is this a signal for me?
-
-
-- lastly register elevator signals for each sprite individually or provide callbacks to ensure that the elevator is talking only to the sprites it needs to. 
-
-
-
-Set names for sprites programmatically
-===> The player_new script is completely re-usable. If only I would set the initial data outside the script...
-
-
-cabin removes sprites without using the remove function
-
-
-Player input only for Player 1 sprite
-
-Set random targets for AI guy
-
-Debug Elevator
--> 2nd Sprite appears to be leaving the Waiting state when it's actually someone elses turn
-
-
-
-
 
 #################
 

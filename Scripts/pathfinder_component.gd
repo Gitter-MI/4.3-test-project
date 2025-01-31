@@ -39,7 +39,9 @@ func determine_path(sprite: SpriteDataNew) -> void:
         
     else:
         # print("I can walk there directly.")        
-        sprite.set_target_position(sprite.nav_target_position, sprite.nav_target_floor, sprite.nav_target_room)                
+        sprite.set_target_position(sprite.nav_target_position, sprite.nav_target_floor, sprite.nav_target_room)
+        sprite.reset_stored_data()
+        sprite.reset_elevator_status()
     
     sprite.reset_nav_data()
     # print("Navigation data has been reset.")

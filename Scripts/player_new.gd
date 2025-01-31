@@ -136,7 +136,7 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
     
         
     if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
-        # print("sprite state is not waiting for elevator")
+        print("sprite state is not waiting for elevator")
         SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         return
     # print("sprite_data_new.elevator_ready = true")        

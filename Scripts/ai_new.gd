@@ -370,9 +370,9 @@ func set_initial_position() -> void:
     # print("in set_initial_position: ", global_position)
 
 func set_initial_data():
-    sprite_data_new.current_floor_number = 3 
+    sprite_data_new.current_floor_number = 4 
     sprite_data_new.current_room = -1  
-    sprite_data_new.target_floor_number = 3
+    sprite_data_new.target_floor_number = 4
     sprite_data_new.sprite_name = "AI_SPRITE"
     sprite_data_new.elevator_request_id = 1
 
