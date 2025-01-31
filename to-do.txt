@@ -1,14 +1,11 @@
-Cannot update target floor while waiting for elevator
-Does not call the elevator again, when already in waiting for elevator state
+Experienced removal of last request in the elevator queue when not wanted.
 
-elevator_requested = true
-sprite_data_new.elevator_request_confirmed = true
 
 #################
 
 implement the room state thing
 do crazy clicks
-find any other bug that could be in the way: 3
+find any other bug that could be in the way: 4
 add more sprites to find out if shuffle really works as expected
 
 
