@@ -84,6 +84,7 @@ func set_stored_position(new_position: Vector2, floor_number: int, room_index: i
     has_stored_data = true
     stored_target_position = new_position
     stored_target_floor = floor_number
+    # print("target floor = ", floor_number)
     stored_target_room = room_index
 
 func set_sprite_nav_data(_click_global_position: Vector2, _floor_number: int, _door_index: int) -> void:

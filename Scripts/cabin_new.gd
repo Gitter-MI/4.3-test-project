@@ -135,7 +135,7 @@ func _on_ready_status_requested(sprite_name: String, request_id: int) -> void:
     if cabin_data.current_floor == request["pick_up_floor"]:
     
         if cabin_data.elevator_ready and request["sprite_name"] == sprite_name and request["request_id"] == request_id:
-            print("_on_ready_status_requested")
+            # print("_on_ready_status_requested")
             emit_ready_signal()    
 
 
@@ -207,7 +207,14 @@ func _on_elevator_door_state_changed(new_state):
 func update_destination_floor() -> void:
     # print("update destination floor")
 
-    var current_request = queue_manager.elevator_queue[0]    
+    if not queue_manager.elevator_queue[0]:
+        push_warning("queue is empty when trying to update the destination floor. func update_destination_floor() in cabin_new")
+        return
+
+
+    var current_request = queue_manager.elevator_queue[0]
+    
+     
     
     if cabin_data.elevator_occupied:
         cabin_data.destination_floor = current_request["destination_floor"]
