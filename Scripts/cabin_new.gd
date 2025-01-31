@@ -90,6 +90,7 @@ func process_departure() -> void:
 
 
 func process_transit(_delta) -> void:
+    
     move_elevator(_delta)
     
 
@@ -148,7 +149,7 @@ func emit_ready_signal():
         
 
 func _on_sprite_entered_elevator(_sprite_name, _elevator_request_id, target_room):
-    '''Switch to Room'''
+    '''Switch to Elevator Room'''
     if target_room == -2:
         print("Sprite wants to enter the room")
         return
@@ -159,7 +160,7 @@ func _on_sprite_entered_elevator(_sprite_name, _elevator_request_id, target_room
     # else: 
     
     cabin_data.elevator_occupied = true
-    print("stopping the timer")
+    # print("stopping the timer")
     stop_waiting_timer()  
 
 func _on_sprite_exiting(sprite_name: String, request_id: int) -> void:
@@ -198,7 +199,7 @@ func _on_elevator_door_state_changed(new_state):
             
             if queue_manager.elevator_queue.size() >= 2:
                 start_waiting_timer()
-                print("Timer started because at least two requests are in the queue")
+                # print("Timer started because at least two requests are in the queue")
                 
 
         elevator.DoorState.CLOSED:
@@ -257,7 +258,8 @@ func move_elevator(delta: float) -> void:
     else: # keep moving towards destination
         global_position.y = new_y
     
-    SignalBus.elevator_position_updated.emit(global_position, queue_manager.elevator_queue[0]["request_id"])
+    if cabin_data.elevator_occupied: 
+        SignalBus.elevator_position_updated.emit(global_position, queue_manager.elevator_queue[0]["request_id"])
 
 
 
@@ -402,14 +404,14 @@ func start_waiting_timer() -> void:
     # If there's at least one request, start the timer
     if not queue_manager.elevator_queue.is_empty():
         cabin_data.cabin_timer.start()
-        print("cabin timer started")  
+        # print("cabin timer started")
         # print("In timer started: cabin_data.cabin_timer: ", cabin_data.cabin_timer)  
 
 
 
 
 func stop_waiting_timer() -> void:
-    print("stop_waiting_timer")
+    # print("stop_waiting_timer")
     # print("In timer stop: cabin_data.cabin_timer: ", cabin_data.cabin_timer)  
     if cabin_data.cabin_timer == null:
         push_warning("cabin timer not set-up in stop_waiting_timer")        
@@ -420,8 +422,9 @@ func stop_waiting_timer() -> void:
 
 func _on_cabin_timer_timeout() -> void:
     
-    if cabin_data.ElevatorState.TRANSIT:
+    if not cabin_data.ElevatorState.WAITING:
         push_warning("Trying to remove a request from the elevator queue while the elevator is in transit")
+        print("Trying to remove a request from the elevator queue while the elevator is in transit")
         return
     
     

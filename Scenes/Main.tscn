@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dauc0o8e2gap3"]
+[gd_scene load_steps=10 format=3 uid="uid://dauc0o8e2gap3"]
 
 [ext_resource type="Script" path="res://Scenes/main.gd" id="1_0iuxt"]
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Scenes/Building.tscn" id="1_avx81"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cs1nq0fh8p8n8" path="res://Scenes/Cabin_new.tscn" id="4_atnqe"]
 [ext_resource type="PackedScene" uid="uid://d34esq11ri6sa" path="res://Scenes/ai_new.tscn" id="5_5vdco"]
 [ext_resource type="PackedScene" uid="uid://boabwgamfwv0b" path="res://Scenes/player_new.tscn" id="5_ft0ge"]
+[ext_resource type="PackedScene" uid="uid://dg7s8upxd5tvp" path="res://Scenes/deco_new.tscn" id="6_1hb7r"]
 [ext_resource type="Script" path="res://Scripts/spawner.gd" id="7_i7040"]
 [ext_resource type="Script" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
 
@@ -22,6 +23,7 @@ script = ExtResource("8_7c7ne")
 
 [node name="Spawner" type="Node2D" parent="."]
 script = ExtResource("7_i7040")
+deco_scene = ExtResource("6_1hb7r")
 ai_scene = ExtResource("5_5vdco")
 player_scene = ExtResource("5_ft0ge")
 

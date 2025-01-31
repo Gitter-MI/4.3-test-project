@@ -1,13 +1,36 @@
-Experienced removal of last request in the elevator queue when not wanted.
+Shuffling elevator queue for sprite:AI_SPRITE
+maybe it's working as expected, it's just that the 'AI' is completely random
+
+- it appears the function is called at the wrong moment?
+- when in elevator room the process is not properly stopped, looks like the timer is still running
+- shuffle doesn't work. but it's getting called
+- sprite is not being moved to the back when returning
+
+
+- it appears it is changing the destination floor # solved: was set to random
+- on click elevator room the sprites are moving to a random floor?  # solved was set to random
 
 
 #################
 
-implement the room state thing
-do crazy clicks
-find any other bug that could be in the way: 4
+implement the room state thing:
+    Remember to defer inputs when entering and exiting rooms
+    Example: _on_elevator_ready    
+
 add more sprites to find out if shuffle really works as expected
+    Double check the:
+        - shuffle
+        - timer
+        - queue order
+        - crazy clicks
+        - elevator on same floor
+        - elevator on other floor
+        - waiting and walking away
+        - waiting and entering: if another sprite is already waiting
+
+find any other bug that could be in the way: 6
+
 
 
 otherwise: 
-    Congrats. You are closer than ever. 
+    Congrats! You are closer than ever. 

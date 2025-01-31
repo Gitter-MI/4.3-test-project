@@ -16,7 +16,10 @@ func _ready():
     # print_all_registered()
 
     SignalBus.navigation_click.connect(_on_navigation_click)
-    SignalBus.all_sprites_ready.connect(_on_sprites_ready)
+    SignalBus.all_sprites_ready.connect(_on_sprites_ready)    
+    
+    '''For testing the elevator with random AI sprite destination floors'''
+    # randomize()
 
 
 
@@ -75,9 +78,19 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     #if count == 0:
         #_on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
         #count = count + 1
-    if count == 0:
-        _on_navigation_command("AI_SPRITE", 5, door_index, commander, adjusted_click_position)
-        count = count + 1  
+    # if count == 0:
+    var random_floor = get_random_floor()
+    # setting room to -1 so the AI sprite does not get caught up in the elevator room (where it should never be)
+    _on_navigation_command("AI_SPRITE", random_floor, -1, commander, adjusted_click_position)
+    _on_navigation_command("DECO_SPRITE", random_floor + 1, -1, commander, adjusted_click_position)
+    count += 1
+
+
+func get_random_floor() -> int:
+    # randi() % 14 yields an integer from 0 to 13.
+    return randi() % 5
+
+
 
 
 

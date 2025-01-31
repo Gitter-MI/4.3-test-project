@@ -53,7 +53,8 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
         sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:
             _process_in_elevator_transit(sprite_data_new)
         sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:
-            print("In elevator room")
+            pass
+            # print("In elevator room")
         
         #sprite_data_new.ElevatorState.AT_ELEVATOR_DESTINATION:
             #_process_exiting_elevator(sprite_data_new)    
@@ -113,8 +114,8 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         ## move this to the player script without the state setter: function move_sprite inside the if clause
         # Cancel elevator usage and switch to movement
         sprite_data_new.reset_elevator_status()        
-        sprite_data_new.reset_stored_data()
-        sprite_data_new.reset_elevator_request_id()        
+        sprite_data_new.reset_stored_data()        
+        sprite_data_new.reset_elevator_request_id()
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         return
 

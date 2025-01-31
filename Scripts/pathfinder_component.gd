@@ -21,6 +21,9 @@ func _ready():
 
 func determine_path(sprite: SpriteDataNew) -> void:
     
+    if sprite.defer_input:
+        return
+    
     if not sprite.has_nav_data:        
         return    
     

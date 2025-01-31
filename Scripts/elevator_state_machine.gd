@@ -61,7 +61,9 @@ func process_departing() -> void:
 
 func process_transit() -> void:
     
+    
     if cabin_data.elevator_direction == 0:
+        # print("switching to arriving")
         cabin_data.set_elevator_state(CabinData.ElevatorState.ARRIVING)
 
 func process_arriving() -> void:

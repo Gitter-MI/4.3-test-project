@@ -1,6 +1,6 @@
 extends Node2D
 
-# @export var deco_scene: PackedScene
+@export var deco_scene: PackedScene
 @export var ai_scene: PackedScene
 @export var player_scene: PackedScene
 
@@ -13,7 +13,7 @@ extends Node2D
 func _ready():
     spawn_player()
     spawn_ai(1)
-    # spawn_decorations(1)
+    spawn_decorations(1)
     
     
     SignalBus.all_sprites_ready.emit()  
@@ -31,9 +31,10 @@ func spawn_ai(count: int):
         var ai_instance = ai_scene.instantiate()
         ai_instance.add_to_group("sprites")
         add_child(ai_instance)
-#
-#func spawn_decorations(count: int):
-    #for i in range(count):
-        #var deco_instance = deco_scene.instantiate()
-        #deco_instance.add_to_group("sprites")
-        #add_child(deco_instance)
+        
+        
+func spawn_decorations(count: int):
+    for i in range(count):
+        var deco_instance = deco_scene.instantiate()
+        deco_instance.add_to_group("sprites")
+        add_child(deco_instance)

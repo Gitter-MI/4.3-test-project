@@ -18,6 +18,11 @@ var sprite_height: int = -1
 var sprite_width: int = -1
 var speed: float = 400.0
 
+
+var defer_input:bool = false
+
+
+
 var current_position: Vector2 = Vector2.ZERO
 var current_floor_number: int = -1                   # initial spawn floor
 var current_room: int = -1                          # spawns 'on the floor'
@@ -54,6 +59,7 @@ func needs_elevator(destination_floor: int) -> bool:
     return current_floor_number != destination_floor
     
 func reset_elevator_request_id() -> void:
+    # print("resetting request id")
     elevator_request_id = -1
  
 func reset_elevator_status() -> void:
@@ -65,6 +71,7 @@ func reset_elevator_status() -> void:
     elevator_destination_reached = false
     exiting_elevator = false
     exited_elevator = false
+    defer_input = false
 
  
 #region Set and Re-Set Position Data
