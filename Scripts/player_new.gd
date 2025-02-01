@@ -330,9 +330,10 @@ func _on_adjusted_navigation_command(_commander: String, sprite_name: String, fl
     
     if not sprite_name == sprite_data_new.sprite_name:
         return
-    
+    # print("player door index from navigation command: ", door_index)
     # if target is elevator room on another floor, ensure we are setting destination to that position not the room
     if door_index == -2 and floor_number != sprite_data_new.current_floor_number:
+        # print("resetting door index for player sprite")
         door_index = -1
         # print("Adjusted door index by player script: ", door_index)
     sprite_data_new.set_sprite_nav_data(click_global_position, floor_number, door_index)

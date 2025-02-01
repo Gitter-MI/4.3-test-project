@@ -199,14 +199,24 @@ func handle_new_request(request_data: Dictionary) -> void:
 
 
 
-func shuffle_elevator_queue_with_new_request() -> void:#
-    
+func shuffle_elevator_queue_with_new_request() -> void:
     # 1) Confirm there's a new request to process
     if elevator_request_queue.is_empty():
         return
 
     # 2) Reference the first pending request directly
     var request_data = elevator_request_queue[0]
+    print("elevator_request_queue[0]: ", elevator_request_queue[0])
+    print("elevator_queue[0]: ", elevator_queue[0])
+    
+    # 2.1) Early return:
+    # If the first pending elevator request's destination floor is the same as the pick_up_floor of the first elevator queue entry,
+    # then return early.
+    if elevator_queue.size() > 0 and request_data["destination_floor"] == request_data["pick_up_floor"]:
+        print("Early return: new request destination matches current queue's pick-up floor.")
+        return
+
+    # 3) Continue with the rest of the logic
     var sprite_name = request_data["sprite_name"]
     var pick_up_floor = request_data["pick_up_floor"]
     var destination_floor = request_data["destination_floor"]
@@ -214,7 +224,7 @@ func shuffle_elevator_queue_with_new_request() -> void:#
 
     print("Shuffling elevator queue for sprite:", sprite_name, ", pick_up_floor:", pick_up_floor)
     
-    # 3) Remove the old request from this sprite, if it exists in elevator_queue
+    # 4) Remove the old request from this sprite, if it exists in elevator_queue
     var old_index = find_request_index_by_sprite(sprite_name)
     if old_index != -1:
         print("  -> Removing existing request at index:", old_index, "for sprite:", sprite_name)
@@ -222,7 +232,7 @@ func shuffle_elevator_queue_with_new_request() -> void:#
     else:
         print("  -> No existing request found to remove for sprite:", sprite_name)
 
-    # 4) Build a new request, similar to 'add_to_elevator_queue' logic
+    # 5) Build a new request, similar to 'add_to_elevator_queue' logic
     next_request_id += 1
     var new_request = {
         "request_id":         next_request_id,      # internal elevator ID
@@ -232,7 +242,7 @@ func shuffle_elevator_queue_with_new_request() -> void:#
         "destination_floor":  destination_floor
     }
 
-    # 5) Find insertion position behind all requests on the same pick_up_floor
+    # 6) Find insertion position behind all requests on the same pick_up_floor
     var insertion_index = -1
     for i in range(elevator_queue.size()):
         if elevator_queue[i].has("pick_up_floor") and elevator_queue[i]["pick_up_floor"] == pick_up_floor:
@@ -243,17 +253,17 @@ func shuffle_elevator_queue_with_new_request() -> void:#
         return
 
     print("  -> Inserting new request behind index:", insertion_index, ", for floor:", pick_up_floor)
-
     elevator_queue.insert(insertion_index + 1, new_request)
 
-    # 6) Confirm the request back to the sprite
+    # 7) Confirm the request back to the sprite
     SignalBus.elevator_request_confirmed.emit(
         new_request["sprite_name"], 
         new_request["request_id"]
     )
 
-    # 7) Remove this item from elevator_request_queue now that we're done shuffling
+    # 8) Remove this item from elevator_request_queue now that we're done shuffling
     elevator_request_queue.remove_at(0)
+
 
 
 

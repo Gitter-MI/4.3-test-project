@@ -11,6 +11,12 @@ maybe it's working as expected, it's just that the 'AI' is completely random
 - on click elevator room the sprites are moving to a random floor?  # solved was set to random
 
 
+
+- When the sprite issues a new request for the elevator room while in front of the queue, then we don't want to reshuffle
+- We call reshuffle when the request_id of the sprite is -1. 
+
+
+
 #################
 
 implement the room state thing:
