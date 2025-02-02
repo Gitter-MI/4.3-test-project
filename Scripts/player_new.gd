@@ -68,6 +68,8 @@ func _process_elevator_actions() -> void:
                 call_elevator()
         
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:   
+            
+            
             # if sprite_data_new.elevator_ready =          
             # call_elevator()
             pass
@@ -89,7 +91,15 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
-    # print("Calling Elevator: ", sprite_data_new.sprite_name)
+    var active_state = sprite_data_new.get_active_state()
+    
+    if active_state == sprite_data_new.ActiveState.MOVEMENT:   
+        return
+    
+    if sprite_data_new.stored_target_floor == -1:
+        print("------------------------ Calling Elevator: ", sprite_data_new.sprite_name)
+        print("stored target floor: ", sprite_data_new.stored_target_floor)
+        
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
         sprite_data_new.current_floor_number, # pick_up_floor
@@ -136,8 +146,9 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
         return           
     
         
-    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:    
+    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR and not sprite_data_new.ElevatorState.CALLING_ELEVATOR and not sprite_data_new.current_floor_number == sprite_data_new.stored_target_floor:    
         # print("sprite state is not waiting for elevator")
+        
         SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
         return
     # print("sprite_data_new.elevator_ready = true")        

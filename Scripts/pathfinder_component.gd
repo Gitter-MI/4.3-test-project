@@ -34,7 +34,7 @@ func determine_path(sprite: SpriteDataNew) -> void:
     #print("nav_target_room: ", sprite.nav_target_room)
     
     if sprite.needs_elevator(sprite.nav_target_floor):
-        print("Elevator needed to reach floor:", sprite.nav_target_floor)        
+        # print("Elevator needed to reach floor:", sprite.nav_target_floor)        
         var elevator_info = navigation_controller.elevators.get(sprite.current_floor_number, null)        
         var elevator_position = elevator_info["position"]
         var new_target_position = Vector2(elevator_position.x, sprite.current_position.y)

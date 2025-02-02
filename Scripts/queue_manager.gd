@@ -4,7 +4,8 @@ extends Node
 
 var new_requests: bool = false
 
-var next_request_id: int = 10
+
+var next_request_id: int = 10  # for the actual elevator_queue
 
 
 # elevator queue: jobs the elevator needs to process
@@ -91,13 +92,14 @@ func _on_request_skippable(sprite_name: String, _request_id: int):
 
     # print("elevator queue after skipabble: ", elevator_queue)
 
+
     if first_request_for_floor and first_request_for_floor != skip_request:
         SignalBus.elevator_request_confirmed.emit(
             first_request_for_floor["sprite_name"],
             first_request_for_floor["request_id"]
         )
         # print(" -> Emitted elevator_request_confirmed for sprite '%s' now at the front."
-        #      % first_request_for_floor["sprite_name"])
+        #     % first_request_for_floor["sprite_name"])
     else:
         pass
         # print(" -> No other sprite is ahead; no confirmation emitted.")
@@ -126,6 +128,7 @@ func _on_elevator_request(sprite_name: String, pick_up_floor: int, destination_f
         "destination_floor": destination_floor,
         "request_id": request_id
     }
+    
     elevator_request_queue.append(request_data)
     # print("request_data: ", request_data)
     new_requests = true # needs to be reset after adding it to the actual elevator queue
@@ -165,7 +168,7 @@ func pre_process_new_elevator_requests() -> void:
 
     while not elevator_request_queue.is_empty():
         
-        # print("New Elevator Request Queue: ", elevator_request_queue)        
+        print("New Elevator Request Queue: ", elevator_request_queue)        
         var request_data = elevator_request_queue[0]
         var sprite_name  = request_data["sprite_name"]        
         var existing_index = find_request_index_by_sprite(sprite_name)
@@ -176,7 +179,7 @@ func pre_process_new_elevator_requests() -> void:
         else:
             var others_waiting = check_if_other_sprites_waiting_on_floor()
             
-            if not others_waiting:
+            if not others_waiting or others_waiting and request_data["request_id"] != -1:
                 # print("New: Update Elevator Queue")
                 update_elevator_queue()
             else:
@@ -200,6 +203,9 @@ func handle_new_request(request_data: Dictionary) -> void:
 
 
 func shuffle_elevator_queue_with_new_request() -> void:
+    
+    print("!!!!!!!!! shuffle in queue")
+    
     # 1) Confirm there's a new request to process
     if elevator_request_queue.is_empty():
         return

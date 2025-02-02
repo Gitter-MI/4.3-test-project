@@ -94,9 +94,22 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
 
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
     # print("sprite is waiting for elevator")
+
+    # Sprite is walking away, interrupting the waiting state
+    # if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
+    if sprite_data_new.stored_target_position == Vector2.ZERO:
+        
+        ## move this to the player script without the state setter: function move_sprite inside the if clause
+        # Cancel elevator usage and switch to movement
+        sprite_data_new.reset_elevator_status()        
+        sprite_data_new.reset_stored_data()        
+        sprite_data_new.reset_elevator_request_id()
+        sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+        return
+
     
     if not sprite_data_new.elevator_requested and not sprite_data_new.elevator_request_confirmed:
-        # print("sprite reset from WAITING to CALLING ELEVATOR")
+        print("sprite reset from WAITING to CALLING ELEVATOR")
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
         return        
     
@@ -106,18 +119,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
         return
 
-    # Sprite is walking away, interrupting the waiting state
-    if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
-        
-        
-        
-        ## move this to the player script without the state setter: function move_sprite inside the if clause
-        # Cancel elevator usage and switch to movement
-        sprite_data_new.reset_elevator_status()        
-        sprite_data_new.reset_stored_data()        
-        sprite_data_new.reset_elevator_request_id()
-        sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
-        return
+
 
 
 
