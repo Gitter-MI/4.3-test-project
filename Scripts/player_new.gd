@@ -50,7 +50,7 @@ func _ready():
     
     # Create and configure the Timer node to call _on_timer_timeout every 2 seconds
     timer = Timer.new()
-    timer.wait_time = 2.0  # Change to 2.0 seconds for production; was 0.05 for testing
+    timer.wait_time = 1.0  # Change to 2.0 seconds for production; was 0.05 for testing
     timer.one_shot = false
     timer.autostart = true
     add_child(timer)
@@ -81,6 +81,7 @@ func _process(delta: float) -> void:
     
     pathfinder.determine_path(sprite_data_new)
     # print("process state") 
+    # print("sprite script calls process_state")
     state_manager.process_state(sprite_data_new)
     var active_state = sprite_data_new.get_active_state()
     
@@ -131,6 +132,10 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
+    
+    if not confirm_sprite_can_interact_with_elevator():
+        return
+    
     var active_state = sprite_data_new.get_active_state()
     
     if active_state == sprite_data_new.ActiveState.MOVEMENT:   
@@ -175,7 +180,7 @@ func confirm_sprite_can_interact_with_elevator() -> bool:
     # Retrieve the elevator data from the Navigation Controller using the elevator_request_id.
     var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number)
     if elevator_data == null:
-        print("Elevator not found for id: ", sprite_data_new.elevator_request_id)
+        # print("Elevator not found for id: ", sprite_data_new.elevator_request_id)
         return false
 
     # Get the center position of the elevator.
@@ -183,7 +188,8 @@ func confirm_sprite_can_interact_with_elevator() -> bool:
 
     # Check if the sprite is at the elevator's x position (ignoring y-coordinate).
     if not is_equal_approx(current_position.x, elevator_center.x):
-        print("Sprite is not at the elevator's x position")
+        print("Sprite is not at the elevator's x position: ", sprite_data_new.sprite_name)
+        # get_tree().paused = true
         return false
 
     # Check if the stored target floor is valid.
@@ -197,7 +203,7 @@ func confirm_sprite_can_interact_with_elevator() -> bool:
     # Ensure the sprite's active state is ELEVATOR.
     var active_state = sprite_data_new.get_active_state()
     if active_state != sprite_data_new.ActiveState.ELEVATOR:
-        print("Sprite is not in elevator active state")
+        # print("Sprite is not in elevator active state")
         return false
 
     # Retrieve elevator sub-state correctly as an ENUM (not a dictionary).
@@ -209,7 +215,7 @@ func confirm_sprite_can_interact_with_elevator() -> bool:
             return true  # Valid states, return true
 
     # If we reach here, the sprite is in an invalid state.
-    print("Invalid elevator sub-state:", active_sub_state)
+    # print("Invalid elevator sub-state:", active_sub_state)
     return false
 
 
@@ -492,7 +498,16 @@ func connect_to_signals():
     SignalBus.elevator_ready.connect(_on_elevator_ready) # 
     SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
-    SignalBus.queue_reordered.connect(request_elevator_ready_status)
+    # SignalBus.queue_reordered.connect(request_elevator_ready_status)
+    SignalBus.queue_reordered.connect(_on_queue_reordered)
+    
+func _on_queue_reordered(sprite_name, request_id):
+    
+    if sprite_data_new.sprite_name == sprite_name and sprite_data_new.elevator_request_id == request_id:    
+        request_elevator_ready_status()
+    
+    else:
+        return
     
     
 

@@ -28,7 +28,7 @@ signal elevator_ready(sprite_name: String, request_id: int) # ensures that the c
 
 signal request_elevator_ready_status(sprite_name: String, request_id: int)
 signal request_skippable(sprite_name: String, request_id: int)
-signal queue_reordered()
+signal queue_reordered(sprite_name: String, request_id: int)
 
 
 
@@ -121,7 +121,7 @@ func _on_request_skippable(_sprite_name: String, _request_id: int):
     _increment_call_count("_on_request_skippable")
 
 
-func _on_queue_reordered():
+func _on_queue_reordered(_sprite_name: String, _request_id: int):
     _increment_call_count("_on_queue_reordered")
 
 

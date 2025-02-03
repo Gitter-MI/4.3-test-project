@@ -6,6 +6,9 @@ func _ready() -> void:
     pass
 
 func process_state(sprite_data_new: Resource) -> void:
+    
+    # print("state component process state for: ", sprite_data_new.sprite_name)
+    
     # Decide if we need to change from MOVEMENT to ROOM/ELEVATOR/etc.
     var state = sprite_data_new.get_active_state()
     # print("state : ", state)
@@ -63,7 +66,12 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
             _process_exiting_elevator(sprite_data_new)
         
         _:
-            push_warning("_process_elevator_state: Unknown elevator sub-state!")
+            
+            sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+            
+            print(sprite_data_new.sprite_name, " is in Elevator main state, but has Elevator sub-state: ", sprite_data_new.elevator_state)
+            print("set sprite to MOVEMENT State")
+            # push_warning("_process_elevator_state: Unknown elevator sub-state!")
 
 
 func _process_calling_elevator(sprite_data_new: Resource) -> void:
@@ -109,7 +117,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
 
     
     if not sprite_data_new.elevator_requested and not sprite_data_new.elevator_request_confirmed:
-        print("sprite reset from WAITING to CALLING ELEVATOR")
+        # print("sprite reset from WAITING to CALLING ELEVATOR")
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
         return        
     

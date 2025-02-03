@@ -167,7 +167,7 @@ func _on_sprite_exiting(sprite_name: String, request_id: int) -> void:
     reset_elevator(sprite_name, request_id)
 
 
-func _on_queue_reordered():
+func _on_queue_reordered(_sprite_name: String, _request_id: int):
     cabin_data.elevator_queue_reordered = true
   
 func reset_elevator(sprite_name: String, request_id: int) -> void:    

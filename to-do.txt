@@ -1,4 +1,17 @@
+Sprite A is calling the elevator and walking away
+The elevator arrives, emits ready and retrieves skippable
+There is no other sprite waiting for the elevator right now on the same floor
+Timer period 
+Another sprite arrives at the waiting elevator in ready state
+Sprite is not getting the ready confirmed from the elevator because the other sprite (in timer mode) is bloking the queue
+
+-> Would need to confirm: timer is on (confirms that the elevator is ready)
+-> Would need to get a new request from the same floor
+-> would then need to shuffle the queue to allow the new sprite to enter timely. 
+////////////////////////////////////////////////////////
+
 Unknown elevator sub state needs to be handled
+- sprites are in elevator state NONE when the warning triggers
 
 When the elevator arrives , sprite exits and another sprite is waiting BUT it's not the turn of the sprite that is already waiting in front of the open doors: it will not enter
 -> sprites should enter when they are standing in front of the open doors, regardless of the queue order
@@ -51,7 +64,7 @@ add more sprites to find out if shuffle really works as expected
         - waiting and walking away
         - waiting and entering: if another sprite is already waiting
 
-find any other bug that could be in the way: 8
+find any other bug that could be in the way: 9
 
 
 

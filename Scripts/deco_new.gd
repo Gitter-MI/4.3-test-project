@@ -50,7 +50,7 @@ func _ready():
     
     # Create and configure the Timer node to call _on_timer_timeout every 2 seconds
     timer = Timer.new()
-    timer.wait_time = 2.0  # Change to 2.0 seconds for production; was 0.05 for testing
+    timer.wait_time = 1.0  # Change to 2.0 seconds for production; was 0.05 for testing
     timer.one_shot = false
     timer.autostart = true
     add_child(timer)
@@ -131,6 +131,10 @@ func _process_elevator_actions() -> void:
 
 
 func call_elevator() -> void:
+
+    if not confirm_sprite_can_interact_with_elevator():
+        return
+
     var active_state = sprite_data_new.get_active_state()
     
     if active_state == sprite_data_new.ActiveState.MOVEMENT:   
@@ -183,7 +187,8 @@ func confirm_sprite_can_interact_with_elevator() -> bool:
 
     # Check if the sprite is at the elevator's x position (ignoring y-coordinate).
     if not is_equal_approx(current_position.x, elevator_center.x):
-        print("Sprite is not at the elevator's x position")
+        print("Sprite is not at the elevator's x position: ", sprite_data_new.sprite_name)
+        # get_tree().paused = true
         return false
 
     # Check if the stored target floor is valid.
@@ -492,7 +497,15 @@ func connect_to_signals():
     SignalBus.elevator_ready.connect(_on_elevator_ready) # 
     SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
-    SignalBus.queue_reordered.connect(request_elevator_ready_status)
+    SignalBus.queue_reordered.connect(_on_queue_reordered)
+    
+func _on_queue_reordered(sprite_name, request_id):
+    
+    if sprite_data_new.sprite_name == sprite_name and sprite_data_new.elevator_request_id == request_id:    
+        request_elevator_ready_status()
+    
+    else:
+        return
     
     
 
