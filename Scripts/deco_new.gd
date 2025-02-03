@@ -22,8 +22,15 @@ var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
 var previous_elevator_position: Vector2 = Vector2.ZERO
 
 
+'''Testing'''
+var initial_x: float
+var timer: Timer
+var prev_floor: int = -1  # Holds the previous random floor number
+
+
 
 func _ready():
+    # print("deco ready")
     
     sprite_data_new = SpriteDataScript.new()
     instantiate_sprite()
@@ -34,6 +41,39 @@ func _ready():
     
     ## signal should be emitted by the spawner instead once when all sprites are ready
     # SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
+  
+    '''Testing'''
+    randomize()  # Seed the RNG
+    
+    # Store the initial x-coordinate from sprite_data_new
+    initial_x = sprite_data_new.current_position.x
+    
+    # Create and configure the Timer node to call _on_timer_timeout every 2 seconds
+    timer = Timer.new()
+    timer.wait_time = 2.0  # Change to 2.0 seconds for production; was 0.05 for testing
+    timer.one_shot = false
+    timer.autostart = true
+    add_child(timer)
+    timer.timeout.connect(_on_timer_timeout)
+
+'''Testing'''
+
+func _on_timer_timeout() -> void:
+    # Calculate a new x position by adding a random offset (here between -250 and 250) to the initial x
+    var offset: float = randf_range(-250.0, 250.0)
+    var new_x: float = initial_x + offset
+    var new_position: Vector2 = Vector2(new_x, sprite_data_new.current_position.y)
+    
+    # Generate a random floor between 1 and 10.
+    var random_floor: int = randi() % 3
+    # Ensure that the new random floor is not the same as the previous one.
+    while random_floor == prev_floor:
+        random_floor = randi() % 3
+    # Store the current random floor for the next call.
+    prev_floor = random_floor
+    
+    # Call the navigation command with the new random floor and position.
+    navigation_controller._on_navigation_command("DECO_SPRITE", random_floor, -1, "player_input", new_position)
     
 
 func _process(delta: float) -> void:   
@@ -129,8 +169,57 @@ func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: in
         
         request_elevator_ready_status()
 
-func request_elevator_ready_status():
+func confirm_sprite_can_interact_with_elevator() -> bool:
+    var current_position: Vector2 = sprite_data_new.current_position
+
+    # Retrieve the elevator data from the Navigation Controller using the elevator_request_id.
+    var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number)
+    if elevator_data == null:
+        print("Elevator not found for id: ", sprite_data_new.elevator_request_id)
+        return false
+
+    # Get the center position of the elevator.
+    var elevator_center: Vector2 = elevator_data["position"]
+
+    # Check if the sprite is at the elevator's x position (ignoring y-coordinate).
+    if not is_equal_approx(current_position.x, elevator_center.x):
+        print("Sprite is not at the elevator's x position")
+        return false
+
+    # Check if the stored target floor is valid.
+    if sprite_data_new.stored_target_floor == -1:
+        return false
+
+    # Check if the sprite is already on the target floor.
+    if sprite_data_new.current_floor_number == sprite_data_new.stored_target_floor:
+        return false
+
+    # Ensure the sprite's active state is ELEVATOR.
+    var active_state = sprite_data_new.get_active_state()
+    if active_state != sprite_data_new.ActiveState.ELEVATOR:
+        print("Sprite is not in elevator active state")
+        return false
+
+    # Retrieve elevator sub-state correctly as an ENUM (not a dictionary).
+    var active_sub_state = sprite_data_new.elevator_state
+
+    # Ensure the sub-state is either WAITING_FOR_ELEVATOR or CALLING_ELEVATOR.
+    match active_sub_state:
+        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR, sprite_data_new.ElevatorState.CALLING_ELEVATOR:
+            return true  # Valid states, return true
+
+    # If we reach here, the sprite is in an invalid state.
+    print("Invalid elevator sub-state:", active_sub_state)
+    return false
+
+
+func request_elevator_ready_status() -> void:
+    if not confirm_sprite_can_interact_with_elevator():
+        return
+    
+    # If everything is valid, emit the signal.
     SignalBus.request_elevator_ready_status.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
+  
             
 
 func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
