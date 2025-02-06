@@ -70,17 +70,16 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     var adjusted_click_position: Vector2 = _adjust_click_position(edges, initial_click_pos)
     # print("adjusted_click_position: ", adjusted_click_position)
     var commander: String = "player_input"
-    # print("_on_navigation_click: global_position: ", global_position)
-    
+    # print("_on_navigation_click: global_position: ", global_position)    
     _on_navigation_command("Player", floor_number, door_index, commander, adjusted_click_position)
     
     
     if count == 0:
-        #_on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
-        #count = count + 1
-    # if count == 0:
-        # var random_floor = get_random_floor()
-        # setting room to -1 so the AI sprite does not get caught up in the elevator room (where it should never be)
+        _on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
+        count = count + 1
+    if count == 0:
+        var random_floor = get_random_floor()
+         # setting room to -1 so the AI sprite does not get caught up in the elevator room (where it should never be)
         _on_navigation_command("AI_SPRITE", 4, -1, commander, adjusted_click_position)
         _on_navigation_command("DECO_SPRITE", 4 + 1, -1, commander, adjusted_click_position)
         count += 1

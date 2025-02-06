@@ -1,3 +1,45 @@
+What is the definition of the elevator being ready for anyone who just walks up to it?
+STATE IDLE
+
+Question: Does the elevator idle at least for one cycle even when the queue is not empty?
+No. If the queue is not empty the ELEVATOR is not IDLE. 
+
+Define again:
+    What are the conditions necessary to allow any sprite to use the elevator regardless of the current state of the elevator queue?
+    
+    - Doors are open
+    - Elevator is not occupied
+    
+    => WAITING
+
+If ELEVATOR is WAITING and new request with pick-up floor == elevator current floor then
+    -> add the new request at the top of the elevator queue: insert (0, request)
+    -> if there is another request that should be served (timer is on, or more general pick-up floor is the same as the current floor but the corresponding sprite is not in any ELEVATOR state) then
+        -> additionally to the insert remove the request at elevator_queue[1]
+        
+
+What is the process needed to implement this requirement?
+    - the elevator queue confirms the new request to the sprite that can skip the queue
+    -> the elevator queue needs to know if the queue can be skipped
+        - elevator doors are open
+        - elevator is not occupied
+        - if exists, the sprite from the first request in the queue is not in any ELEVATOR state
+
+What if, we recreate the ELEVATOR WAITING for SPRITE situation?
+Or if we recreate the ELEVATOR IDLE behavior
+->Treat the queue as if it was empty while the timer is on. 
+
+If elevator is busy and WAITING and timer has started then
+    set elevator to IDLE state 
+    allowing any sprite to enter
+    
+If the timer times out, the elevator will switch back to the expected flow immediately
+
+
+
+
+
+
 Sprite A is calling the elevator and walking away
 The elevator arrives, emits ready and retrieves skippable
 There is no other sprite waiting for the elevator right now on the same floor

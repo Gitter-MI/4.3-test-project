@@ -1,6 +1,6 @@
 [gd_scene load_steps=24 format=3 uid="uid://cy6lj0x2yoi8h"]
 
-[ext_resource type="Script" path="res://Scripts/elevator.gd" id="1_g5yyx"]
+[ext_resource type="Script" uid="uid://cfmumctvjeg5j" path="res://Scripts/elevator.gd" id="1_g5yyx"]
 [ext_resource type="Texture2D" uid="uid://bx8wvp0ufymii" path="res://Building/Elevators/elevator_doors_open.png" id="2_3tirm"]
 [ext_resource type="Texture2D" uid="uid://b5dcoowdbf1id" path="res://Building/Elevators/elevator_doors_spritesheet_8_frames.png" id="3_prk3l"]
 

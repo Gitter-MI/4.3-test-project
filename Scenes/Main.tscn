@@ -1,17 +1,17 @@
-[gd_scene load_steps=10 format=3 uid="uid://dauc0o8e2gap3"]
+[gd_scene load_steps=11 format=3 uid="uid://dauc0o8e2gap3"]
 
-[ext_resource type="Script" path="res://Scenes/main.gd" id="1_0iuxt"]
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Scenes/Building.tscn" id="1_avx81"]
-[ext_resource type="Script" path="res://Scripts/camera_2d.gd" id="4_a875k"]
+[ext_resource type="PackedScene" uid="uid://ddgu340ss41q8" path="res://Scenes/Magical_Elevator.tscn" id="4_8yijo"]
+[ext_resource type="Script" uid="uid://bwmxgeb5gc88s" path="res://Scripts/camera_2d.gd" id="4_a875k"]
 [ext_resource type="PackedScene" uid="uid://cs1nq0fh8p8n8" path="res://Scenes/Cabin_new.tscn" id="4_atnqe"]
-[ext_resource type="PackedScene" uid="uid://d34esq11ri6sa" path="res://Scenes/ai_new.tscn" id="5_5vdco"]
-[ext_resource type="PackedScene" uid="uid://boabwgamfwv0b" path="res://Scenes/player_new.tscn" id="5_ft0ge"]
-[ext_resource type="PackedScene" uid="uid://dg7s8upxd5tvp" path="res://Scenes/deco_new.tscn" id="6_1hb7r"]
-[ext_resource type="Script" path="res://Scripts/spawner.gd" id="7_i7040"]
-[ext_resource type="Script" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
+[ext_resource type="PackedScene" uid="uid://d34esq11ri6sa" path="res://Scenes/AI_new.tscn" id="5_5vdco"]
+[ext_resource type="Script" uid="uid://bymp2i771v7a1" path="res://Scripts/magical_elevator.gd" id="5_buysw"]
+[ext_resource type="PackedScene" uid="uid://boabwgamfwv0b" path="res://Scenes/Player_new.tscn" id="5_ft0ge"]
+[ext_resource type="PackedScene" uid="uid://dg7s8upxd5tvp" path="res://Scenes/Deco_new.tscn" id="6_1hb7r"]
+[ext_resource type="Script" uid="uid://x1qwp1k0do03" path="res://Scripts/spawner.gd" id="7_i7040"]
+[ext_resource type="Script" uid="uid://cvsrr031gvuuy" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
 
 [node name="Main" type="Node2D"]
-script = ExtResource("1_0iuxt")
 
 [node name="Building" parent="." instance=ExtResource("1_avx81")]
 
@@ -19,7 +19,8 @@ script = ExtResource("1_0iuxt")
 unique_name_in_owner = true
 script = ExtResource("8_7c7ne")
 
-[node name="Cabin_new" parent="." instance=ExtResource("4_atnqe")]
+[node name="Magical_Elevator" parent="." instance=ExtResource("4_8yijo")]
+script = ExtResource("5_buysw")
 
 [node name="Spawner" type="Node2D" parent="."]
 script = ExtResource("7_i7040")
@@ -27,22 +28,10 @@ deco_scene = ExtResource("6_1hb7r")
 ai_scene = ExtResource("5_5vdco")
 player_scene = ExtResource("5_ft0ge")
 
+[node name="Cabin_new" parent="." instance=ExtResource("4_atnqe")]
+
 [node name="Camera" type="Node2D" parent="."]
 metadata/_edit_group_ = true
 
 [node name="Camera2D" type="Camera2D" parent="Camera"]
 script = ExtResource("4_a875k")
-
-[node name="Button_Player" type="Button" parent="."]
-offset_right = 8.0
-offset_bottom = 8.0
-text = "Player Sprite"
-
-[node name="Button_Cabin" type="Button" parent="."]
-offset_top = 37.0
-offset_right = 53.0
-offset_bottom = 68.0
-text = "Cabin"
-
-[connection signal="pressed" from="Button_Player" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="Button_Cabin" to="." method="_on_button_cabin_pressed"]

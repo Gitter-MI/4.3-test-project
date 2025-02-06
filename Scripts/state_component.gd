@@ -69,10 +69,9 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
             
             sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
             
-            print(sprite_data_new.sprite_name, " is in Elevator main state, but has Elevator sub-state: ", sprite_data_new.elevator_state)
-            print("set sprite to MOVEMENT State")
+            # print(sprite_data_new.sprite_name, " is in Elevator main state, but has Elevator sub-state: ", sprite_data_new.elevator_state)
+            # print("set sprite to MOVEMENT State")
             # push_warning("_process_elevator_state: Unknown elevator sub-state!")
-
 
 func _process_calling_elevator(sprite_data_new: Resource) -> void:
     # print("func _process_calling_elevator")
@@ -127,17 +126,13 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
         return
 
-
-
-
-
-
 func _process_entering_elevator(sprite_data_new: Resource) -> void:
     # print("func _process_entering_elevator: ", sprite_data_new.sprite_name)
     # The sprite is currently entering the elevator
     # We might check if 'entering_elevator' is done or not.
 
     if sprite_data_new.entered_elevator:
+        # print("sprite has entered the elevator")
         # sprite is now inside the elevator
         if sprite_data_new.target_room == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM)
@@ -154,10 +149,8 @@ func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
         # print("sprite is now exiting the elevator")      
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
 
-
 #func _process_exiting_elevator(sprite_data_new: Resource) -> void:
-    
-
+  
 func _process_exiting_elevator(sprite_data_new: Resource) -> void:
     # print("in exiting elevator in state ")
     if sprite_data_new.exited_elevator:
@@ -196,7 +189,7 @@ func _process_movement_idle(sprite_data_new: Resource) -> void:
     else:
         push_warning("_process_movement_idle: Unexpected condition in IDLE state!")
 
-func _process_movement_walking(sprite_data_new: Resource) -> void:
+func _process_movement_walking(sprite_data_new: Resource) -> void:    
     if sprite_data_new.current_position == sprite_data_new.target_position:
         _update_movement_state(sprite_data_new)
     else:

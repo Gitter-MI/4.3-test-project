@@ -71,7 +71,7 @@ func process_waiting():
             # print("process_waiting - if cabin_data.elevator_queue_reordered")
             emit_ready_signal()    
         return
-     
+    
     else:
         return
 

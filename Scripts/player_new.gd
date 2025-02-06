@@ -14,10 +14,11 @@ extends Area2D
 
 
 const SpriteDataScript = preload("res://Scripts/SpriteData_new.gd")
+var sprite_data_new: Resource = SpriteDataScript.new()
 
 const SCALE_FACTOR = 2.3
 # var sprite_data_new: SpriteDataNew
-var sprite_data_new: Resource
+# var sprite_data_new: Resource
 var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
 var previous_elevator_position: Vector2 = Vector2.ZERO
 
@@ -32,15 +33,11 @@ var prev_floor: int = -1  # Holds the previous random floor number
 func _ready():
     # print("deco ready")
     
-    sprite_data_new = SpriteDataScript.new()
+    # sprite_data_new = SpriteDataScript.new()
     instantiate_sprite()
-    connect_to_signals()
-    set_initial_data()
+    connect_to_signals()    
     set_initial_position()
-    #  print("Player sprite ready") # is not being printed
-    
-    ## signal should be emitted by the spawner instead once when all sprites are ready
-    # SignalBus.player_sprite_ready.emit()  # for debugging but player sprite is ready before nav controller is invoked
+
   
     '''Testing'''
     randomize()  # Seed the RNG
@@ -73,8 +70,24 @@ func _on_timer_timeout() -> void:
     prev_floor = random_floor
     
     # Call the navigation command with the new random floor and position.
-    navigation_controller._on_navigation_command("Player", random_floor, -1, "player_input", new_position)
-    
+    navigation_controller._on_navigation_command(sprite_data_new.sprite_name, random_floor, -1, "player_input", new_position)
+
+
+func set_data(
+    current_floor_number: int,
+    current_room: int,
+    target_floor_number: int,
+    sprite_name: String,
+    elevator_request_id: int
+):
+    # This replaces the old 'set_initial_data' from _ready().
+    sprite_data_new.current_floor_number = current_floor_number
+    sprite_data_new.current_room = current_room
+    sprite_data_new.target_floor_number = target_floor_number
+    sprite_data_new.sprite_name = sprite_name
+    sprite_data_new.elevator_request_id = elevator_request_id
+
+
 
 func _process(delta: float) -> void:   
     
@@ -96,30 +109,18 @@ func _process(delta: float) -> void:
 
         
 
-
-
-
-#region Elevator Movement
 func _process_elevator_actions() -> void:
     # print(" in elevator state in player script")
     match sprite_data_new.elevator_state:
         
         sprite_data_new.ElevatorState.CALLING_ELEVATOR:            
             if not sprite_data_new.elevator_requested:
-                call_elevator()
-        
+                call_elevator()        
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:   
-            
-            
-            # if sprite_data_new.elevator_ready =          
-            # call_elevator()
             pass
-
-        sprite_data_new.ElevatorState.ENTERING_ELEVATOR:            
-            if not sprite_data_new.entering_elevator and not sprite_data_new.entered_elevator:
-                enter_elevator()
-            else: 
-                on_sprite_entered_elevator()
+        sprite_data_new.ElevatorState.ENTERING_ELEVATOR:               
+            if not sprite_data_new.entered_elevator:                
+                enter_elevator()                            
         sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:      
             _animate_sprite()
         sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:      
@@ -129,6 +130,10 @@ func _process_elevator_actions() -> void:
         _:
                         
             pass
+
+
+#region Elevator Movement
+
 
 
 func call_elevator() -> void:
@@ -141,9 +146,10 @@ func call_elevator() -> void:
     if active_state == sprite_data_new.ActiveState.MOVEMENT:   
         return
     
-    if sprite_data_new.stored_target_floor == -1:
-        print("------------------------ Calling Elevator: ", sprite_data_new.sprite_name)
-        print("stored target floor: ", sprite_data_new.stored_target_floor)
+    if sprite_data_new.stored_target_floor == -1:                
+        # print("------------------------ Calling Elevator: ", sprite_data_new.sprite_name)
+        # print("stored target floor: ", sprite_data_new.stored_target_floor)
+        return
         
     SignalBus.elevator_called.emit(
         sprite_data_new.sprite_name,
@@ -188,7 +194,7 @@ func confirm_sprite_can_interact_with_elevator() -> bool:
 
     # Check if the sprite is at the elevator's x position (ignoring y-coordinate).
     if not is_equal_approx(current_position.x, elevator_center.x):
-        print("Sprite is not at the elevator's x position: ", sprite_data_new.sprite_name)
+        # print("Sprite is not at the elevator's x position: ", sprite_data_new.sprite_name)
         # get_tree().paused = true
         return false
 
@@ -251,30 +257,33 @@ func _on_elevator_ready(incoming_sprite_name: String, request_id: int):
     sprite_data_new.defer_input = true
 
 
-func enter_elevator():
-    # print("enter_elevator")
-    sprite_data_new.entering_elevator = true
-    var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
-    var cabin_height = cabin.get_cabin_height()
-    var cabin_bottom_y = elevator_data["position"].y + (cabin_height * 0.5)
-    var new_position = Vector2(
-        elevator_data["position"].x,
-        cabin_bottom_y - (sprite_data_new.sprite_height * 0.5)
-    )
-    sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
-    global_position = sprite_data_new.current_position
-    z_index = -9
-    # print("Sprite emits entering elevator signal")
-    SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id, sprite_data_new.target_room)
-    _animate_sprite()
+func enter_elevator():    
+    
+    if not sprite_data_new.entering_elevator:        
+        sprite_data_new.entering_elevator = true
+        _animate_sprite() # $AnimatedSprite2D.play("enter")        
+           
+        var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
+        var cabin_height = cabin.get_cabin_height()
+        var cabin_bottom_y = elevator_data["position"].y + (cabin_height * 0.5)
+        var new_position = Vector2(
+            elevator_data["position"].x,
+            cabin_bottom_y - (sprite_data_new.sprite_height * 0.5)
+        )
+        sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
+        global_position = sprite_data_new.current_position
+        z_index = -9
+        # print("Sprite emits entering elevator signal")
+        SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id, sprite_data_new.target_room)
+    else:        
+        return
 
-func on_sprite_entered_elevator():
-    # print("on_sprite_entered_elevator")
-    var current_anim = $AnimatedSprite2D.animation    
-    if current_anim == "enter" and sprite_data_new.entering_elevator == true:
-        sprite_data_new.entered_elevator = true
-        SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
-        _animate_sprite()
+    
+
+func on_sprite_entered_elevator():    
+    sprite_data_new.entered_elevator = true
+    SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
+    _animate_sprite()
 
 func _on_elevator_ride(elevator_pos: Vector2, request_id: int) -> void:
     
@@ -296,36 +305,43 @@ func _on_elevator_ride(elevator_pos: Vector2, request_id: int) -> void:
         global_position = sprite_data_new.current_position
         _animate_sprite()
 
-
-
-
 func _on_elevator_at_destination(incoming_sprite_name: String, request_id: int):    
-    #print("from signal")
-    #print("incoming_sprite_name: ", incoming_sprite_name)
-    #print("request_id: ", request_id)
-    #
-    #print("from sprite")
-    #print("sprite_data_new.sprite_name: ", sprite_data_new.sprite_name)
-    #print("sprite_data_new.elevator_request_id: ", sprite_data_new.elevator_request_id)
-    #print("sprite_data_new.entered_elevator: ", sprite_data_new.entered_elevator)
-    if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == true:
-        # print("destination signal received in player")
+    if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == true:        
         sprite_data_new.elevator_destination_reached = true
 
-func exit_elevator():
-    _animate_sprite()
-    var current_anim = $AnimatedSprite2D.animation
-    if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
-        z_index = 0
-        SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
-        sprite_data_new.exited_elevator = true
-        sprite_data_new.set_target_position(
-            sprite_data_new.stored_target_position,
-            sprite_data_new.stored_target_floor,
-            sprite_data_new.stored_target_room
-        )
-        sprite_data_new.reset_stored_data()
-         
+#func exit_elevator():
+    #_animate_sprite()
+    #var current_anim = $AnimatedSprite2D.animation
+    #if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
+        #z_index = 0
+        #SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
+        #sprite_data_new.exited_elevator = true
+        #sprite_data_new.set_target_position(
+            #sprite_data_new.stored_target_position,
+            #sprite_data_new.stored_target_floor,
+            #sprite_data_new.stored_target_room
+        #)
+        #sprite_data_new.reset_stored_data()
+
+func exit_elevator():    
+    if not sprite_data_new.exiting_elevator:
+        sprite_data_new.exiting_elevator = true
+        _animate_sprite() 
+    else:
+        return
+ 
+
+func on_sprite_exited_elevator():
+    z_index = 0
+    SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
+    sprite_data_new.exited_elevator = true
+    sprite_data_new.set_target_position(
+        sprite_data_new.stored_target_position,
+        sprite_data_new.stored_target_floor,
+        sprite_data_new.stored_target_room
+    )
+    sprite_data_new.reset_stored_data()    
+        
 #endregion
         
         
@@ -345,8 +361,8 @@ func _animate_sprite() -> void:
                         $AnimatedSprite2D.play("walk_to_left")
                 sprite_data_new.MovementState.IDLE:
                     $AnimatedSprite2D.play("idle")
-                _:
-                    # e.g., MovementState.NONE or future expansions
+                _:                    
+                    push_warning("in _animate_sprite: Sprite is in no recognized state in _animate_sprite! - MovementState")
                     $AnimatedSprite2D.play("idle")
         
         sprite_data_new.ActiveState.ROOM:
@@ -356,9 +372,9 @@ func _animate_sprite() -> void:
                 sprite_data_new.RoomState.EXITING_ROOM:
                     $AnimatedSprite2D.play("exit")
                 sprite_data_new.RoomState.IN_ROOM:
-                    $AnimatedSprite2D.play("idle")
-                # etc.
+                    $AnimatedSprite2D.play("idle")                
                 _:
+                    push_warning("in _animate_sprite: Sprite is in no recognized state in _animate_sprite! - RoomState")
                     $AnimatedSprite2D.play("idle")
         
         sprite_data_new.ActiveState.ELEVATOR:
@@ -376,30 +392,28 @@ func _animate_sprite() -> void:
                 sprite_data_new.ElevatorState.EXITING_ELEVATOR:
                     $AnimatedSprite2D.play("exit")                    
                 _:
+                    push_warning("in _animate_sprite: Sprite is in no recognized state in _animate_sprite! - ElevatorState")
                     $AnimatedSprite2D.play("idle")
 
         _:
-            # Fallback if none of the above states apply
-            push_warning("in _animate_sprite: Sprite is in no recognized state!")
+            push_warning("in _animate_sprite: Sprite is in no recognized state in _animate_sprite!")
             $AnimatedSprite2D.play("idle")
 #endregion
 
-#region Sprite Movement
-func move_sprite(delta: float) -> void:
-    
-    var active_state = sprite_data_new.get_active_state()
-    if active_state == sprite_data_new.ActiveState.MOVEMENT:
-        if sprite_data_new.movement_state == sprite_data_new.MovementState.WALKING:
-            move_towards_position(sprite_data_new.target_position, delta)
 
-func move_towards_position(target_position: Vector2, delta: float) -> void:
-    # Force horizontal-only movement by locking the target's Y to current_position.y
-    target_position.y = sprite_data_new.current_position.y
+#region Sprite Movement
+
+func move_sprite(delta: float) -> void:
+    if sprite_data_new.movement_state == sprite_data_new.MovementState.WALKING:
+        move_towards_position(sprite_data_new.target_position, delta)
+
+func move_towards_position(target_position: Vector2, delta: float) -> void:    
+    target_position.y = sprite_data_new.current_position.y # Force horizontal-only movement by locking the target's Y to current_position.y
     
     var direction = (target_position - sprite_data_new.current_position).normalized()
     var distance = sprite_data_new.current_position.distance_to(target_position)
     
-    if distance > 1.0:
+    if distance > 13.0:   # Speed / FPS
         var new_x = sprite_data_new.current_position.x + direction.x * sprite_data_new.speed * delta
         sprite_data_new.set_current_position(
             Vector2(new_x, sprite_data_new.current_position.y),
@@ -417,36 +431,9 @@ func move_towards_position(target_position: Vector2, delta: float) -> void:
         )
         global_position.x = new_x
     
-func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
-    if area == self:
-        sprite_data_new.set_current_position(
-            sprite_data_new.current_position,  # keep the same position
-            floor_number,                      # update floor
-            sprite_data_new.current_room       # keep the same room index
-        )
-        # print("I, %s, have entered floor #%d" % [name, floor_number])
+
 
 #endregion
-
-
-   
-
-func _on_adjusted_navigation_command(_commander: String, sprite_name: String, floor_number: int, door_index: int, click_global_position: Vector2) -> void:       
-    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")        
-    
-    if not sprite_name == sprite_data_new.sprite_name:
-        return
-    # print("player door index from navigation command: ", door_index)
-    # if target is elevator room on another floor, ensure we are setting destination to that position not the room
-    if door_index == -2 and floor_number != sprite_data_new.current_floor_number:
-        # print("resetting door index for player sprite")
-        door_index = -1
-        # print("Adjusted door index by player script: ", door_index)
-    sprite_data_new.set_sprite_nav_data(click_global_position, floor_number, door_index)
-#endregion
-
-
-
 
 
 #region set_initial_position
@@ -475,12 +462,6 @@ func set_initial_position() -> void:
     )
     # print("in set_initial_position: ", global_position)
 
-func set_initial_data():
-    sprite_data_new.current_floor_number = 3 
-    sprite_data_new.current_room = -1  
-    sprite_data_new.target_floor_number = 3
-    sprite_data_new.sprite_name = "Player"
-    sprite_data_new.elevator_request_id = 1
 
 
 #endregion
@@ -488,30 +469,62 @@ func set_initial_data():
 
 #region connect_to_signals
 func connect_to_signals():
-    
-    # SignalBus.adjusted_navigation_click.connect(_on_adjusted_navigation_click)    
-    SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)    
-    
-    
-    SignalBus.floor_area_entered.connect(_on_floor_area_entered)        
-    SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed) # 
-    SignalBus.elevator_ready.connect(_on_elevator_ready) # 
-    SignalBus.elevator_ready.connect(_on_elevator_at_destination) # 
-    SignalBus.elevator_position_updated.connect(_on_elevator_ride)  # 
-    # SignalBus.queue_reordered.connect(request_elevator_ready_status)
+    SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)
+    SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
+    SignalBus.elevator_ready.connect(_on_elevator_ready)
+    SignalBus.elevator_ready.connect(_on_elevator_at_destination)
+    SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     SignalBus.queue_reordered.connect(_on_queue_reordered)
     
+    $AnimatedSprite2D.animation_finished.connect(_on_animation_finished)
+
+func _on_animation_finished() -> void:    
+    var anim_name = $AnimatedSprite2D.animation
+    
+    match anim_name:
+        "enter":
+            if sprite_data_new.elevator_ready:
+                on_sprite_entered_elevator()
+
+        "exit":
+            if sprite_data_new.elevator_destination_reached:
+                on_sprite_exited_elevator()        
+            
+            #sprite_data_new.entered_elevator = true
+            #SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
+            ## Maybe switch to idle or next state
+            #_animate_sprite()
+
 func _on_queue_reordered(sprite_name, request_id):
     
     if sprite_data_new.sprite_name == sprite_name and sprite_data_new.elevator_request_id == request_id:    
-        request_elevator_ready_status()
+        sprite_data_new.elevator_ready = true
+        _process_elevator_actions()
+        # request_elevator_ready_status()
     
     else:
         return
     
-    
 
-    
+func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
+    if area == self:
+        sprite_data_new.set_current_position(
+            sprite_data_new.current_position,  # keep the same position
+            floor_number,                      # update floor
+            sprite_data_new.current_room       # keep the same room index
+        )
+        # print("I, %s, have entered floor #%d" % [name, floor_number])    
+
+
+func _on_adjusted_navigation_command(_commander: String, sprite_name: String, floor_number: int, door_index: int, click_global_position: Vector2) -> void:       
+    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")            
+    if not sprite_name == sprite_data_new.sprite_name:
+        return    
+    # if target is elevator room on another floor, ensure we are setting destination to that position not the room
+    if door_index == -2 and floor_number != sprite_data_new.current_floor_number:        
+        door_index = -1            
+    sprite_data_new.set_sprite_nav_data(click_global_position, floor_number, door_index)
     
     
 #endregion

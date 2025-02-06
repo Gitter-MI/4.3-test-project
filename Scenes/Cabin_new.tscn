@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://cs1nq0fh8p8n8"]
 
-[ext_resource type="Script" path="res://Scripts/cabin_new.gd" id="1_xi3jd"]
+[ext_resource type="Script" uid="uid://bjt7qn4752rqx" path="res://Scripts/cabin_new.gd" id="1_xi3jd"]
 [ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="2_3c41o"]
-[ext_resource type="Script" path="res://Scripts/cabin_data.gd" id="3_htjsw"]
-[ext_resource type="Script" path="res://Scripts/queue_manager.gd" id="4_j8kbg"]
-[ext_resource type="Script" path="res://Scripts/elevator_state_machine.gd" id="5_eywy4"]
+[ext_resource type="Script" uid="uid://mktmjickmyts" path="res://Scripts/cabin_data.gd" id="3_htjsw"]
+[ext_resource type="Script" uid="uid://doyjkwxwfcxnr" path="res://Scripts/queue_manager.gd" id="4_j8kbg"]
+[ext_resource type="Script" uid="uid://d07sc4d5ipigj" path="res://Scripts/elevator_state_machine.gd" id="5_eywy4"]
 
 [node name="Cabin_new" type="Node2D"]
 script = ExtResource("1_xi3jd")

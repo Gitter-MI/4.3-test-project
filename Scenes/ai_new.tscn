@@ -1,9 +1,9 @@
 [gd_scene load_steps=20 format=3 uid="uid://d34esq11ri6sa"]
 
-[ext_resource type="Script" path="res://Scripts/ai_new.gd" id="1_qdau5"]
-[ext_resource type="Script" path="res://Scripts/pathfinder_component.gd" id="1_qsrug"]
+[ext_resource type="Script" uid="uid://ddullp7flkyea" path="res://Scripts/player_new.gd" id="1_oxrmg"]
+[ext_resource type="Script" uid="uid://bdel5w2lwam25" path="res://Scripts/pathfinder_component.gd" id="1_qsrug"]
 [ext_resource type="Texture2D" uid="uid://brljunjwagarj" path="res://Sprites/Arab_man_white.png" id="2_1k5yn"]
-[ext_resource type="Script" path="res://Scripts/state_component.gd" id="2_uqh0m"]
+[ext_resource type="Script" uid="uid://bs44xfwkdxl5t" path="res://Scripts/state_component.gd" id="2_uqh0m"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eujd1"]
 atlas = ExtResource("2_1k5yn")
@@ -127,7 +127,7 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sd83v"]
 
 [node name="AI_new" type="Area2D" node_paths=PackedStringArray("state_manager", "pathfinder")]
-script = ExtResource("1_qdau5")
+script = ExtResource("1_oxrmg")
 state_manager = NodePath("State_Component")
 pathfinder = NodePath("Pathfinder_Component")
 

@@ -78,6 +78,8 @@ func _on_request_skippable(sprite_name: String, _request_id: int):
     if skip_index < last_same_floor_index:
         last_same_floor_index -= 1
 
+    
+
     # Insert the skippable request after the last same-floor request
     elevator_queue.insert(last_same_floor_index + 1, skip_request)
     # print(" -> Moved request for sprite '%s' behind others on floor %d." % [sprite_name, skip_floor])
@@ -92,17 +94,18 @@ func _on_request_skippable(sprite_name: String, _request_id: int):
 
     # print("elevator queue after skipabble: ", elevator_queue)
 
+    
 
     if first_request_for_floor and first_request_for_floor != skip_request:
         SignalBus.elevator_request_confirmed.emit(
             first_request_for_floor["sprite_name"],
             first_request_for_floor["request_id"]
         )
-        # print(" -> Emitted elevator_request_confirmed for sprite '%s' now at the front."
-        #     % first_request_for_floor["sprite_name"])
+        print(" -> Emitted elevator_request_confirmed for sprite '%s' now at the front."
+            % first_request_for_floor["sprite_name"])
     else:
         pass
-        # print(" -> No other sprite is ahead; no confirmation emitted.")
+        print(" -> No other sprite is ahead; no confirmation emitted.")
 
     # print("****************** queue at the end of the skippable function")
     var new_first_request = get_first_elevator_request()
@@ -243,7 +246,7 @@ func shuffle_elevator_queue_with_new_request() -> void:
     next_request_id += 1
     var new_request = {
         "request_id":         next_request_id,      # internal elevator ID
-        "sprite_request_id":  sprite_request_id,    # external sprite request ID
+        # "sprite_request_id":  sprite_request_id,    # external sprite request ID
         "sprite_name":        sprite_name,
         "pick_up_floor":      pick_up_floor,
         "destination_floor":  destination_floor
@@ -261,7 +264,7 @@ func shuffle_elevator_queue_with_new_request() -> void:
 
     # print("  -> Inserting new request behind index:", insertion_index, ", for floor:", pick_up_floor)
     elevator_queue.insert(insertion_index + 1, new_request)
-
+    
     # 7) Confirm the request back to the sprite
     SignalBus.elevator_request_confirmed.emit(
         new_request["sprite_name"], 
