@@ -13,10 +13,13 @@ func _ready():
     setup_cabin_timer(2.0)    
     add_to_group("cabin")    
     
+
+    
 func _process(_delta: float) -> void:
     
     queue_manager.pre_process_new_elevator_requests()    
     elevator_logic(_delta)
+    
         
 
 func elevator_logic(_delta) -> void:
@@ -118,26 +121,57 @@ func connect_to_signals():
     
     SignalBus.request_elevator_ready_status.connect(_on_ready_status_requested)
     SignalBus.queue_reordered.connect(_on_queue_reordered)
-    # ...
-
+    
 
     
+
+    
+#func _on_ready_status_requested(sprite_name: String, request_id: int) -> void:
+    ##print("!!!!!------------------------!!!!!")
+    ##print("this sprite is requesting ready: ", sprite_name)
+    ##print("this is the request id of the requesting sprite: ", request_id)
+    #
+    ## print("on_ready_status_requested: ", queue_manager.elevator_queue)
+    #var request = queue_manager.elevator_queue[0]
+    ##print("this is the first sprite name in the queue: ", request["sprite_name"])
+    ##print("this is the first request_id in the queue: ", request["request_id"])
+    ##print("cabin_data.elevator_ready: ", cabin_data.elevator_ready)
+    #
+    #if cabin_data.current_floor == request["pick_up_floor"]:
+    #
+        #if cabin_data.elevator_ready and request["sprite_name"] == sprite_name and request["request_id"] == request_id:
+            ## print("_on_ready_status_requested")
+            #emit_ready_signal()    
+
 func _on_ready_status_requested(sprite_name: String, request_id: int) -> void:
-    #print("!!!!!------------------------!!!!!")
-    #print("this sprite is requesting ready: ", sprite_name)
-    #print("this is the request id of the requesting sprite: ", request_id)
+     
+    if not cabin_data.doors_open:
+        return
     
-    # print("on_ready_status_requested: ", queue_manager.elevator_queue)
-    var request = queue_manager.elevator_queue[0]
-    #print("this is the first sprite name in the queue: ", request["sprite_name"])
-    #print("this is the first request_id in the queue: ", request["request_id"])
-    #print("cabin_data.elevator_ready: ", cabin_data.elevator_ready)
+    if cabin_data.elevator_occupied == true:
+        return    
     
-    if cabin_data.current_floor == request["pick_up_floor"]:
+    # 1. Find request in the elevator_queue matching this sprite and request_id
+    var index = queue_manager.find_request_index(request_id, sprite_name)
+    if index == -1:
+        print("no request found in _on_ready_status_requested")
+        # If not found, nothing to do.
+        return
+
     
-        if cabin_data.elevator_ready and request["sprite_name"] == sprite_name and request["request_id"] == request_id:
-            # print("_on_ready_status_requested")
-            emit_ready_signal()    
+
+    # 2. Reorder the queue so that this request is at the front (position 0)
+    var request = queue_manager.elevator_queue[index]
+    queue_manager.elevator_queue.remove_at(index)
+    queue_manager.elevator_queue.insert(0, request)
+
+    # 3. Now perform your readiness checks:
+    if cabin_data.current_floor == request["pick_up_floor"] \
+    and cabin_data.elevator_ready \
+    and request["sprite_name"] == sprite_name \
+    and request["request_id"] == request_id:
+        emit_ready_signal()
+        
 
 
 func emit_ready_signal():
@@ -185,6 +219,7 @@ func reset_elevator(sprite_name: String, request_id: int) -> void:
 
 
 
+
 func _on_elevator_door_state_changed(new_state):
 
     var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)
@@ -194,7 +229,7 @@ func _on_elevator_door_state_changed(new_state):
     match new_state:
         elevator.DoorState.OPEN:
             cabin_data.doors_open = true
-            cabin_data.doors_opening = false
+            cabin_data.doors_opening = false            
             reset_elevator_direction()      # still needed?
             
             if queue_manager.elevator_queue.size() >= 2:

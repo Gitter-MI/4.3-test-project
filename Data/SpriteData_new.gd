@@ -59,6 +59,9 @@ func reset_elevator_request_id() -> void:
     elevator_request_id = -1
  
 func reset_elevator_status() -> void:
+    print("resetting the elevator status")
+    elevator_request_id = -1
+    
     elevator_requested = false
     elevator_request_confirmed = false
     elevator_ready = false

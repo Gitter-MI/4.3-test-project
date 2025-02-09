@@ -1,4 +1,4 @@
-# elevator queue manager script
+# queue_manager_new.gd
 extends Node
 
 
@@ -24,6 +24,19 @@ func _ready():
     
     _previous_elevator_queue = elevator_queue.duplicate(true)
 
+
+
+func find_request_index(request_id: int, sprite_name: String) -> int:
+    """
+    Returns the index of the request in the elevator_queue that matches
+    the given request_id and sprite_name, or -1 if not found.
+    """
+    for i in range(elevator_queue.size()):
+        var req = elevator_queue[i]
+        if req.has("request_id") and req.has("sprite_name"):
+            if req["request_id"] == request_id and req["sprite_name"] == sprite_name:
+                return i
+    return -1
 
 #func _process(delta: float) -> void:
     # Check if the queue has changed
@@ -103,6 +116,7 @@ func _on_request_skippable(sprite_name: String, _request_id: int):
         )
         print(" -> Emitted elevator_request_confirmed for sprite '%s' now at the front."
             % first_request_for_floor["sprite_name"])
+        return
     else:
         pass
         print(" -> No other sprite is ahead; no confirmation emitted.")

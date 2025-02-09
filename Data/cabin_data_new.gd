@@ -1,4 +1,4 @@
-# cabin_data.gd
+# cabin_data_new.gd
 extends Node
 
 enum ElevatorState { IDLE, WAITING, DEPARTING, TRANSIT, ARRIVING}

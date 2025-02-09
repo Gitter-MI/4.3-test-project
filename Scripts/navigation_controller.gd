@@ -30,33 +30,6 @@ func _on_sprites_ready():
 
 
 func _on_navigation_command(sprite_name: String, destination_floor_number: int, destination_door_index: int, commander: String, adjusted_position: Vector2) -> void:
-    
-
-    # Originally intended for the AI controller to issue navigation commands to the AI sprites, we can also use this to issue commands to the player sprite from a game controller. 
-    # For example: when event X: override and ignore player input. Make player sprite do Y instead. 
-    # The player input can still be managed via the navigation input signal chain. It could also be integrated into the flow described above. 
-    
-    ## additional ideas:
-    # include the emittent to the signal message: game controller, AI, player ("adjusted_navigation_ai_command", "adjusted_navigation_game_command", "adjusted_navigation_player_command")
-    # include target event to the message: interact with object
-    # log an event for observability and consumption
-    
-    ## key takeaway:
-    ## if everything becomes a navigation command then we don't have to change the player script besides renaming the signal connection and the receiving function
-    ## we pass the source with the signal and can then differentiate in the process function/state machine
-    ## when the nav click has been adjusted we forward it with the commander enum to this function and then process it fast. 
-    
-        
-    # get_door_center_x using the door index
-    # get the corresponding y coordinate for this sprite for the requested floor
-    # calculate the corresponding destination position
-    # emit the signal
-    
-    # var destination_position # needs to be calculated here    
-    
-    
-    '''Most tasks are now done in the function that receives the signal'''
-    
     SignalBus.adjusted_navigation_command.emit(commander, sprite_name, destination_floor_number, destination_door_index, adjusted_position )
 
 
@@ -74,15 +47,15 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     _on_navigation_command("Player", floor_number, door_index, commander, adjusted_click_position)
     
     
-    if count == 0:
-        _on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
-        count = count + 1
-    if count == 0:
-        var random_floor = get_random_floor()
-         # setting room to -1 so the AI sprite does not get caught up in the elevator room (where it should never be)
-        _on_navigation_command("AI_SPRITE", 4, -1, commander, adjusted_click_position)
-        _on_navigation_command("DECO_SPRITE", 4 + 1, -1, commander, adjusted_click_position)
-        count += 1
+    #if count == 0:
+        #_on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
+        #count = count + 1
+    #if count == 0:
+        #var random_floor = get_random_floor()
+         ## setting room to -1 so the AI sprite does not get caught up in the elevator room (where it should never be)
+        #_on_navigation_command("AI_SPRITE", 4, -1, commander, adjusted_click_position)
+        #_on_navigation_command("DECO_SPRITE", 4 + 1, -1, commander, adjusted_click_position)
+        #count += 1
 
 
 func get_random_floor() -> int:
@@ -128,8 +101,9 @@ func _determine_click_type(door_index: int, floor_number: int, global_position: 
 
 func _adjust_click_position(collision_edges: Dictionary, click_position: Vector2) -> Vector2:
     # Correct way to access sprite dimensions from the nested dictionary
-    var sprite_width: float = player["Player_new"]["width"]
-    var sprite_height: float = player["Player_new"]["height"]
+    var _sprite_data = player["Player"] # Player == name of the player sprite, player == name of the dictionary where we store the data
+    var sprite_width: float = player["Player"]["width"]
+    var sprite_height: float = player["Player"]["height"]
 
     var left_bound: float = collision_edges["left"]
     var right_bound: float = collision_edges["right"]
@@ -269,7 +243,8 @@ func register_all_sprites(player_node: Area2D):
     var sprite_data_new = player_node.get("sprite_data_new")
     # print("var data: ", data)
     if sprite_data_new is Resource:
-        player[player_node.name] = {
+        var sprite_name = sprite_data_new.sprite_name
+        player[sprite_name] = {
             "name": sprite_data_new.sprite_name,
             "width": sprite_data_new.sprite_width,
             "height": sprite_data_new.sprite_height,

@@ -1,6 +1,6 @@
-# elevator_state_machine_new.gd
+# elevator_state_machine.gd
 extends Node
-const CabinData = preload("res://Scripts/cabin_data.gd")
+const CabinData = preload("res://Data/cabin_data_new.gd")
 
 
 # @export var cabin_data: Node

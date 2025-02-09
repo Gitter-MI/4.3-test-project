@@ -1,71 +1,44 @@
 # Pathfinder.gd
 extends Node
-# class_name Pathfinder
-const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
+const SpriteDataNew = preload("res://Data/SpriteData_new.gd")
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
-#
-#@onready var data: Resource = SpriteDataNew.new()
-
-const MOVEMENT = SpriteDataNew.MovementState
-const ROOM = SpriteDataNew.RoomState
-const ELEVATOR = SpriteDataNew.ElevatorState
-
-#func some_function():
-    #data.set_elevator_state(ELEVATOR.WAITING_FOR_ELEVATOR)
 
 
-func _ready():
-    # print("Pathfinder component")    
-    pass
-    
+func determine_path(sprite_data_new: SpriteDataNew) -> bool:
+    var stored_position_updated: bool = false
+        
+    if sprite_data_new.defer_input or not sprite_data_new.has_nav_data:
+        # print("input defered / no new nav data: returning")
+        return false
 
-func determine_path(sprite: SpriteDataNew) -> void:
     
-    if sprite.defer_input:
-        return
-    
-    if not sprite.has_nav_data:        
-        return    
-    
-    #print("at the beginning of determine_path")
-    #print("current room: ", sprite.current_room)
-    #print("target room: ", sprite.target_room)
-    #print("stored_target_room: ", sprite.stored_target_room)
-    #print("nav_target_room: ", sprite.nav_target_room)
-    
-    if sprite.needs_elevator(sprite.nav_target_floor):
-        # print("Elevator needed to reach floor:", sprite.nav_target_floor)        
-        var elevator_info = navigation_controller.elevators.get(sprite.current_floor_number, null)        
-        var elevator_position = elevator_info["position"]
-        var new_target_position = Vector2(elevator_position.x, sprite.current_position.y)
-        # sprite.elevator_requested = false
-        # sprite.elevator_request_confirmed = false
-        sprite.set_target_position(new_target_position, sprite.current_floor_number, sprite.current_room)        
-        sprite.set_stored_position(sprite.nav_target_position, sprite.nav_target_floor, sprite.nav_target_room)
-        sprite.reset_elevator_status()
-        # print("Original navigation data stored in stored data.")
-        # print("Target position set to Elevator at:", new_target_position)
+    if sprite_data_new.needs_elevator(sprite_data_new.nav_target_floor):
+        #print(sprite_data_new.sprite_name, " needs to use the elevator.")
+        var elevator_info = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)        
+        var elevator_position = elevator_info["position"]        
+        var new_target_position = Vector2(elevator_position.x, sprite_data_new.current_position.y)
+        sprite_data_new.set_target_position(new_target_position, sprite_data_new.current_floor_number, sprite_data_new.current_room)
+        sprite_data_new.set_stored_position(sprite_data_new.nav_target_position, sprite_data_new.nav_target_floor, sprite_data_new.nav_target_room)
+        stored_position_updated = true
+        # sprite_data_new.reset_elevator_status()
         
     else:
-        # print("I can walk there directly.")        
-        sprite.set_target_position(sprite.nav_target_position, sprite.nav_target_floor, sprite.nav_target_room)
-        sprite.reset_stored_data()
+        #print(sprite_data_new.sprite_name, " does not need the elevator to switch floors.")
+        sprite_data_new.set_target_position(
+            sprite_data_new.nav_target_position, 
+            sprite_data_new.nav_target_floor, 
+            sprite_data_new.nav_target_room
+        )
         
-        if sprite.target_room == -2:
-            print("sprite wants to enter the elevator room")
-            sprite.reset_nav_data()
-            return
-        
-        sprite.reset_elevator_status()
+        if sprite_data_new.target_room == -2:
+            print(sprite_data_new.sprite_name, " wants to enter the elevator room")            
+            
+        sprite_data_new.reset_stored_data()
+        #print("sprite is walking, resetting the elevator status")
+        sprite_data_new.reset_elevator_status()
+        stored_position_updated = false
  
-    #print("-------------------------------")
-    #print("at the end of determine_path")
-    #print("current room: ", sprite.current_room)
-    #print("target room: ", sprite.target_room)
-    #print("stored_target_room: ", sprite.stored_target_room)
-    #print("nav_target_room: ", sprite.nav_target_room)
-   
-    sprite.reset_nav_data()
-    # print("Navigation data has been reset.")
+    sprite_data_new.reset_nav_data()
+    return stored_position_updated
 
     

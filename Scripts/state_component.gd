@@ -2,14 +2,8 @@
 extends Node
 const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
 
-func _ready() -> void:
-    pass
-
-func process_state(sprite_data_new: Resource) -> void:
-    
+func process_state(sprite_data_new: Resource) -> void:    
     # print("state component process state for: ", sprite_data_new.sprite_name)
-    
-    # Decide if we need to change from MOVEMENT to ROOM/ELEVATOR/etc.
     var state = sprite_data_new.get_active_state()
     # print("state : ", state)
     match state:
@@ -17,27 +11,11 @@ func process_state(sprite_data_new: Resource) -> void:
             _process_movement_state(sprite_data_new)
         sprite_data_new.ActiveState.ROOM:
             # room state management will go here
-           pass
-            
+           pass            
         sprite_data_new.ActiveState.ELEVATOR:
-            _process_elevator_state(sprite_data_new)
-            
+            _process_elevator_state(sprite_data_new)            
         _:
-            push_warning("In state_component _process: Sprite is in no recognized state!")
-
-
-
-
-# func _process_elevator_state(sprite_data_new: Resource) -> void:
-    # if elevator has not been called 
-    # state = calling elevator
-    # if elevator request has been confirmed
-    # state = waiting for elevator
-    # if we receive the signal that the elevator has arrived, the doors are open AND it's this sprite's turn then
-    # state = entering elevator
-
-    
-    pass
+            push_warning("In state_component _process: Sprite is in no recognized Main-state!")
 
 #region Elevator State
 func _process_elevator_state(sprite_data_new: Resource) -> void:
@@ -45,65 +23,45 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
     match sprite_data_new.elevator_state:
         sprite_data_new.ElevatorState.CALLING_ELEVATOR:
             # print("_process_elevator_state->ElevatorState.CALLING_ELEVATOR")
+            
             _process_calling_elevator(sprite_data_new)
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
-            # ("_process_elevator_state->ElevatorState.WAITING_FOR_ELEVATOR")
+            print("_process_elevator_state->ElevatorState.WAITING_FOR_ELEVATOR")
             _process_waiting_for_elevator(sprite_data_new)
         sprite_data_new.ElevatorState.ENTERING_ELEVATOR:
             # print("_process_elevator_state->ElevatorState.ENTERING_ELEVATOR")
-            _process_entering_elevator(sprite_data_new)
-        
+            _process_entering_elevator(sprite_data_new)        
         sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:
             _process_in_elevator_transit(sprite_data_new)
         sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:
             pass
-            # print("In elevator room")
-        
-        #sprite_data_new.ElevatorState.AT_ELEVATOR_DESTINATION:
-            #_process_exiting_elevator(sprite_data_new)    
-            
+            # print("In elevator room")            
         sprite_data_new.ElevatorState.EXITING_ELEVATOR:
-            _process_exiting_elevator(sprite_data_new)
-        
-        _:
-            
-            sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
-            
+            _process_exiting_elevator(sprite_data_new)        
+        _:            
+            sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)            
             # print(sprite_data_new.sprite_name, " is in Elevator main state, but has Elevator sub-state: ", sprite_data_new.elevator_state)
             # print("set sprite to MOVEMENT State")
             # push_warning("_process_elevator_state: Unknown elevator sub-state!")
 
 func _process_calling_elevator(sprite_data_new: Resource) -> void:
-    # print("func _process_calling_elevator")
-    # The sprite has asked to call the elevator. 
-    # - If the request hasn't been sent yet, we stay in CALLING_ELEVATOR 
-    #   until the sprite actually emits the signal and sets elevator_requested = true.
-    # - Once it's sent, we wait for elevator_request_confirmed from the elevator system.
+    
+    # print("sprite_data_new.elevator_requested: ", sprite_data_new.elevator_requested)
+    # print("sprite_data_new.elevator_request_confirmed: ", sprite_data_new.elevator_request_confirmed)
 
+    ## case 1: proceeding with the elevator flow
     if sprite_data_new.elevator_requested and sprite_data_new.elevator_request_confirmed:
-        # print("elevator_request_confirmed, Transition to WAITING state")
-        # The system has confirmed it's accepted the request.
-        # we don't reset the flags, yet. 
-
-       # Transition to WAITING state
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR)
-
-
-#func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
-    ## print("func _process_waiting_for_elevator")
-    ## WAITING until the elevator arrives and is ready for this sprite
-    #if sprite_data_new.elevator_ready: # elevator emits signal also before leaving. 
-        ## print("elevator_ready confirmed, Transition to ENTERING_ELEVATOR")
-        ## This indicates the elevator arrived and doors are open for this sprite
-        ## sprite_data_new.elevator_ready = false   ## it is not up to the sprite to decide if the elevator is ready or not. 
-        #
-        #sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
+    
+    ## case 2: sprite has interrupted the elevator flow
+    if sprite_data_new.stored_target_floor == -1 and not sprite_data_new.target_room == -2:
+        # print("sprite ", sprite_data_new.sprite_name, " is switching to MOVEMENT")
+        sprite_data_new.set_movement_state(SpriteDataNew.MovementState.IDLE)
 
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
     # print("sprite is waiting for elevator")
-
+    
     # Sprite is walking away, interrupting the waiting state
-    # if sprite_data_new.target_floor_number == sprite_data_new.current_floor_number and sprite_data_new.current_position != sprite_data_new.target_position:
     if sprite_data_new.stored_target_position == Vector2.ZERO:
         
         ## move this to the player script without the state setter: function move_sprite inside the if clause
@@ -113,34 +71,29 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.reset_elevator_request_id()
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         return
-
     
+    # Sprite is in WAITING state without having a request confirmed: which happens in pathfinder    
     if not sprite_data_new.elevator_requested and not sprite_data_new.elevator_request_confirmed:
         # print("sprite reset from WAITING to CALLING ELEVATOR")
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
         return        
     
-    
-    if sprite_data_new.elevator_ready:
-        # Elevator is here → go ENTERING_ELEVATOR
+    # Elevator is here → go ENTERING_ELEVATOR
+    if sprite_data_new.elevator_ready:        
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
         return
 
 func _process_entering_elevator(sprite_data_new: Resource) -> void:
     # print("func _process_entering_elevator: ", sprite_data_new.sprite_name)
-    # The sprite is currently entering the elevator
-    # We might check if 'entering_elevator' is done or not.
-
+    
     if sprite_data_new.entered_elevator:
-        # print("sprite has entered the elevator")
-        # sprite is now inside the elevator
+        # print("sprite has entered the elevator")    
         if sprite_data_new.target_room == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM)
             print("Sprite is now in Elevator Room")
-        else:
-            #  or sprite_data_new.target_room >= 0
+        else:            
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
-            # print("Sprite is now in Elevator Transit")
+            # print("Sprite is switching to Transit State")
         pass
 
 func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
@@ -148,17 +101,12 @@ func _process_in_elevator_transit(sprite_data_new: Resource) -> void:
     if sprite_data_new.elevator_destination_reached:  
         # print("sprite is now exiting the elevator")      
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
-
-#func _process_exiting_elevator(sprite_data_new: Resource) -> void:
   
 func _process_exiting_elevator(sprite_data_new: Resource) -> void:
     # print("in exiting elevator in state ")
-    if sprite_data_new.exited_elevator:
-        
+    if sprite_data_new.exited_elevator:        
         sprite_data_new.set_movement_state(SpriteDataNew.MovementState.IDLE)
-        
-        
-        # switch to movement state idle
+  
 #endregion
 
 #region Movement State
@@ -208,7 +156,7 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
     #print("sprite_data_new.target_position: ", sprite_data_new.target_position)
     
 
-    if not x_differs and not has_stored:
+    if not x_differs and not has_stored:        
         # Arrived at final destination
         if room_index < 0 and room_index != -2:
             sprite_data_new.set_movement_state(sprite_data_new.MovementState.IDLE)
@@ -216,16 +164,17 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
             sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)            
         elif room_index == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
-            # print("!!!! sprite is now calling elevator")
+            print("sprite ", sprite_data_new.sprite_name, " is switching to CALLING_ELEVATOR-Elevator ROOM")
         else:
             push_warning("_update_movement_state: Unhandled target_room value: %d" % room_index)
 
     elif not x_differs and has_stored:
-        
+        # print("sprite ", sprite_data_new.sprite_name, " is switching to CALLING_ELEVATOR")
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
     elif x_differs:        
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
-        sprite_data_new.reset_elevator_status() # belongs into sprite 
+        # print("in state component: _update_movement_state -> re-setting the elevator state")
+        # sprite_data_new.reset_elevator_status() # belongs into sprite 
     else:
         push_warning("_update_movement_state: Bad error in _update_movement_state!")
 #endregion

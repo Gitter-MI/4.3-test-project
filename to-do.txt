@@ -1,3 +1,18 @@
+Elevator ready should be a state not just a signal
+It's fine to emit a ready signal for immediate action but otherwise if a sprite needs an elevator it should always be able to check if the elevator is ready/available
+
+
+Re-Setting the whole elevator status every time in the pathfinder module (!)
+even if a simple update would suffice
+
+
+Queue reordered loop when all sprites on the same floor who have called the elevator are not there
+-> queue manager will keep sending ready until one of the sprites enters (or hopefully the timer removes the requests)
+
+Why do the sprites get stuck in the elevator?
+
+
+
 What is the definition of the elevator being ready for anyone who just walks up to it?
 STATE IDLE
 

@@ -1,0 +1,72 @@
+elevator - queue - management
+
+Sprites call the elevator when they arrive at the elevator position and stored floor is not -1
+The elevator logic receives the signal
+
+
+	QUESTION: 	elevator logic stores all new requests in a pre-processing queue
+				vs.
+				elevator logic processes requests immediately
+
+Elevator logic can check if:
+	sprite already has a request in the queue
+		- if no: forward signal to add to queue
+		- if yes:
+			check if request_id is >=0 -> name
+				if yes: update current request from the sprite_name(!) not the request id  
+						skip if they are the same
+				if no: 	is new request while a request from the same sprite is already in the queue:
+						update update current request from the sprite
+						shuffle: insert new request to last position of all requests from the same floor
+							skip if there are no other requests on the same floor 
+
+
+queue manager needs:
+	to process new requests:
+		- has sprite request in queue
+		- update or shuffle needed (request id from sprite >= 0 vs. ==-1)
+		- add 
+		- update by sprite name
+		- shuffle
+		- callback to elevator logic: request added at queue[x] with id[y] for sprite[name]
+		
+	to manage the queue while processing it:
+		- return list of all sprites who requested the elevator to the current floor
+		- move request to top of the queue
+		- insert new request at the top(????)
+		- overwrite by sprite name (timer case)
+		- remove request
+		- 
+	
+
+elevator logic needs:
+	- categorize new request:
+		a) add
+		b) update
+		c) shuffle
+	- forward request to queue manager with category: direct callback
+		- receive confirmation from queue manager: request added at queue[x] with id[y] for sprite[name]
+	
+	- respond to sprite with the confirmation and the current ready status (single signal)
+	-> if ready: sprite can switch to entering and must respond with entering
+	-> if not: sprite can switch to waiting if not ready
+	
+	
+	
+	ready status: 
+		can the sprite enter immediately, or not?
+		
+		## is this needed? we could also use a callback during the next cycle
+		## the call -> request processing -> confirmation happens during sprite logic
+		## could emit the ready signal next cycle: but then scene order must never be changed
+		-> elevator should know if is ready or not. can answer immediately
+		
+		
+		
+
+The Ready - Enter - Cycle:
+The elevator can emit ready on two events:
+	a) the doors are open and the sprite has exited
+	b) a sprite requests the ready status, for example when calling the elevator
+	
+	case b here: if elevator is waiting or idle then emit ready immediately 

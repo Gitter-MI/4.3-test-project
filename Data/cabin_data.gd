@@ -1,8 +1,8 @@
 # cabin_data.gd
 extends Node
 
-enum ElevatorState { IDLE, WAITING, DEPARTING, TRANSIT, ARRIVING}
-var elevator_state: ElevatorState = ElevatorState.IDLE  # initial state
+enum ElevatorState { WAITING, DEPARTING, TRANSIT, ARRIVING}   # idle removed, waiting is the new base state
+var elevator_state: ElevatorState = ElevatorState.WAITING  # initial state
 
 func set_elevator_state(new_state: ElevatorState) -> void:    
     elevator_state = new_state
