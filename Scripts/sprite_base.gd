@@ -128,22 +128,24 @@ func _process_elevator_actions() -> void:
 
 
 
-func call_elevator() -> void:    
-    # print("calling the elevator from sprite_base for ", sprite_data_new.sprite_name)
+func call_elevator() -> void:
     if not confirm_sprite_can_interact_with_elevator():
         push_warning("Sprite ", sprite_data_new.sprite_name, " cannot interact with elevator: returning")
         get_tree().paused = true
         return
-    
-    SignalBus.elevator_called.emit(
-        sprite_data_new.sprite_name,
-        sprite_data_new.current_floor_number, # pick_up_floor
-        sprite_data_new.stored_target_floor,  # destination_floor
-        sprite_data_new.elevator_request_id
-    )
+
+    var request_data: Dictionary = {
+        "sprite_name": sprite_data_new.sprite_name,
+        "pick_up_floor": sprite_data_new.current_floor_number,
+        "destination_floor": sprite_data_new.stored_target_floor,
+        "sprite_elevator_request_id": sprite_data_new.elevator_request_id
+    }
+
+    SignalBus.elevator_called.emit(request_data)
     _animate_sprite()
-    #print("Sprite ", sprite_data_new.sprite_name, " has requested the elevator")
+
     sprite_data_new.elevator_requested = true
+
 
 
 

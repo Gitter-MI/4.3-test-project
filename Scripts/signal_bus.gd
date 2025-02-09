@@ -5,7 +5,8 @@
 
 extends Node
 
-signal elevator_called(sprite_name: String, pick_up_floor: int, destination_floor: int, sprite_elevator_request_id: int)
+signal elevator_called(elevator_request_data: Dictionary)
+# signal elevator_called(sprite_name: String, pick_up_floor: int, destination_floor: int, sprite_elevator_request_id: int)
 
 signal elevator_request_confirmed(sprite_name: String, request_id: int)
 

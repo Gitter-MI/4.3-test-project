@@ -49,6 +49,7 @@ func _process(_float) -> void:
                 #push_warning("unknow state in process_cabin_states")                            
                 #pass
 
+#region Process New Requests
 
 enum ElevatorRequestType {
     ADD,
@@ -57,42 +58,47 @@ enum ElevatorRequestType {
     SHUFFLE,
 }
 
-func _on_elevator_request(sprite_name: String, pick_up_floor: int, destination_floor: int, sprite_elevator_request_id: int):
+func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     print("Magical Elevator has received the request")
-    var added_request: Dictionary = {}
-    
+    var new_request: Dictionary = elevator_request_data
+    var sprite_name: String = elevator_request_data["sprite_name"]
+    var sprite_elevator_request_id: int = elevator_request_data["sprite_elevator_request_id"]    
     
     var request_type = categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)
     print("Elevator request type: ", request_type)
     
-    # Build a dictionary for the new request. The request_id will be assigned by the queue manager.
-    var new_request: Dictionary = {
-        "pick_up_floor": pick_up_floor,
-        "destination_floor": destination_floor,
-        "sprite_name": sprite_name
-    }
-    
-    match request_type:
-        ElevatorRequestType.ADD:
-            added_request = queue_manager.add_to_elevator_queue(new_request)
-        ElevatorRequestType.OVERWRITE:
-            added_request = queue_manager.overwrite_elevator_request(new_request)
-        ElevatorRequestType.UPDATE:
-            added_request = queue_manager.update_elevator_request(new_request)
-        ElevatorRequestType.SHUFFLE:
-            added_request = queue_manager.shuffle(new_request)
+    var processed_request = handle_request_by_type(request_type, new_request)
 
     var elevator_ready_on_request: bool = false
+    
     elevator_ready_on_request = check_ready_status_on_request(elevator_ready_on_request)
     print("This would be the final signal: ")
-    print("Added request with sprite_name: ", added_request["sprite_name"])
-    print("Added request with request_id: ", added_request["request_id"])
+    print("Added request with sprite_name: ", processed_request["sprite_name"])
+    print("Added request with request_id: ", processed_request["request_id"])
     print("The elevator is ready: ", elevator_ready_on_request)    
             
     # SignalBus.elevator_request_confirmed.emit(added_request["sprite_name"], added_request["request_id"], elevator_ready_on_request)
 
 
+func handle_request_by_type(request_type: int, new_request: Dictionary) -> Dictionary:
+    match request_type:
+        ElevatorRequestType.ADD:
+            return queue_manager.add_to_elevator_queue(new_request)
+        ElevatorRequestType.OVERWRITE:
+            return queue_manager.overwrite_elevator_request(new_request)
+        ElevatorRequestType.UPDATE:
+            return queue_manager.update_elevator_request(new_request)
+        ElevatorRequestType.SHUFFLE:
+            return queue_manager.shuffle(new_request)
+        _:
+            push_warning("Unknown request type: ", str(request_type))
+            return {}
+
+
 func check_ready_status_on_request(elevator_ready_on_request: bool):
+    # when the sprite calls the elevator we want to know if the elevator is available in the very same moment
+    # this is different from the elevator determining it's ready state when processing requests
+    # here the elevator is doing nothing with doors open while not occupied -> sprite can enter immediately
     var current_state = cabin_data.elevator_state    
     
     match current_state:
@@ -135,6 +141,7 @@ func categorize_incomming_elevator_request(sprite_name: String, sprite_elevator_
         else: 
             # edge case: sprite has walked away after making a request earlier and will now be repositioned to end of the queue at the current floor (other sprites have taken the spot)
             return ElevatorRequestType.SHUFFLE
+#endregion
 
        
 func connect_to_signals():
