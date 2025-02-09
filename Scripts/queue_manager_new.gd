@@ -9,13 +9,13 @@ func _ready():
     '''1) Add request in ready: for overwrite, activate waiting/idle criterion in elevator script categorize function''' 
     '''2) Add request when adding a request for the Player for shuffle, deactivate waiting/idle criterion in elevator script categorize function'''
     '''3) No dummy requests: Add and update'''
-    var dummy_request_three: Dictionary = {
-        "pick_up_floor": 1,
-        "destination_floor": 2,
-        "sprite_name": "Test_Sprite",
-        "request_id": 0
-    }
-    elevator_queue.append(dummy_request_three)  
+    #var dummy_request_three: Dictionary = {
+        #"pick_up_floor": 1,
+        #"destination_floor": 2,
+        #"sprite_name": "Test_Sprite",
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request_three)  
     pass
     
 
@@ -40,21 +40,21 @@ func does_request_id_match(sprite_elevator_request_id: int) -> bool:
 func add_to_elevator_queue(request: Dictionary) -> Dictionary:    
     request.request_id = get_next_request_id()
     elevator_queue.append(request)
-    var dummy_request: Dictionary = {
-        "pick_up_floor": 3,
-        "destination_floor": 2,
-        "sprite_name": "Test_Sprite",
-        "request_id": 0
-    }
-    elevator_queue.append(dummy_request)   
-    var dummy_request_two: Dictionary = {
-        "pick_up_floor": 4,
-        "destination_floor": 2,
-        "sprite_name": "Test_Sprite_two",
-        "request_id": 0
-    }
-    elevator_queue.append(dummy_request_two)   
-    return request    
+    #var dummy_request: Dictionary = {
+        #"pick_up_floor": 3,
+        #"destination_floor": 2,
+        #"sprite_name": "Test_Sprite",
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request)   
+    #var dummy_request_two: Dictionary = {
+        #"pick_up_floor": 4,
+        #"destination_floor": 2,
+        #"sprite_name": "Test_Sprite_two",
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request_two)   
+    return request
 
 func overwrite_elevator_request(request: Dictionary) -> Dictionary:    
     request.request_id = get_next_request_id()

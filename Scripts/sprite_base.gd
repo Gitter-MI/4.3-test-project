@@ -138,7 +138,7 @@ func call_elevator() -> void:
         "sprite_name": sprite_data_new.sprite_name,
         "pick_up_floor": sprite_data_new.current_floor_number,
         "destination_floor": sprite_data_new.stored_target_floor,
-        "sprite_elevator_request_id": sprite_data_new.elevator_request_id
+        "request_id": sprite_data_new.elevator_request_id
     }
 
     SignalBus.elevator_called.emit(request_data)

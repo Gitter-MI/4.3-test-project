@@ -62,7 +62,7 @@ func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     print("Magical Elevator has received the request")
     var new_request: Dictionary = elevator_request_data
     var sprite_name: String = elevator_request_data["sprite_name"]
-    var sprite_elevator_request_id: int = elevator_request_data["sprite_elevator_request_id"]    
+    var sprite_elevator_request_id: int = elevator_request_data["request_id"]    
     
     var request_type = categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)
     print("Elevator request type: ", request_type)
