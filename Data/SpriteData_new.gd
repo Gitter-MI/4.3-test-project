@@ -59,7 +59,7 @@ func reset_elevator_request_id() -> void:
     elevator_request_id = -1
  
 func reset_elevator_status() -> void:
-    print("resetting the elevator status")
+    # print("resetting the elevator status")
     elevator_request_id = -1
     
     elevator_requested = false
@@ -114,6 +114,7 @@ func reset_nav_data() -> void:
     nav_target_room = -1
 
 func reset_stored_data() -> void:
+    # print("reset_stored_data")
     has_stored_data = false
     stored_target_position = Vector2.ZERO
     stored_target_floor = -1

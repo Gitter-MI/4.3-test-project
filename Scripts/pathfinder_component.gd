@@ -34,8 +34,8 @@ func determine_path(sprite_data_new: SpriteDataNew) -> bool:
             print(sprite_data_new.sprite_name, " wants to enter the elevator room")            
             
         sprite_data_new.reset_stored_data()
-        #print("sprite is walking, resetting the elevator status")
-        sprite_data_new.reset_elevator_status()
+        # print("sprite is walking, resetting the elevator status")
+        # sprite_data_new.reset_elevator_status()
         stored_position_updated = false
  
     sprite_data_new.reset_nav_data()

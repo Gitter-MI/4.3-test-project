@@ -1,6 +1,6 @@
 # state_component.gd
 extends Node
-const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
+const SpriteDataNew = preload("res://Data/SpriteData_new.gd")
 
 
 '''on state change during _process function -> call the next _process function immediately'''
@@ -81,10 +81,11 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         
         ## move this to the player script without the state setter: function move_sprite inside the if clause
         # Cancel elevator usage and switch to movement
-        sprite_data_new.reset_elevator_status()        
-        sprite_data_new.reset_stored_data()        
-        sprite_data_new.reset_elevator_request_id()
-        sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+        _update_movement_state(sprite_data_new)
+        # sprite_data_new.reset_elevator_status()        
+        # sprite_data_new.reset_stored_data()        
+        # sprite_data_new.reset_elevator_request_id()
+        # sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
         return
     
     # Sprite is in WAITING state without having a request confirmed: which happens in pathfinder    
@@ -175,6 +176,7 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
         # Arrived at final destination
         if room_index < 0 and room_index != -2:
             sprite_data_new.set_movement_state(sprite_data_new.MovementState.IDLE)
+            sprite_data_new.reset_elevator_status()
         elif room_index >= 0:
             sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)            
         elif room_index == -2:
@@ -188,6 +190,7 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
     elif x_differs:        
         sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+        sprite_data_new.reset_elevator_status()    
         # print("in state component: _update_movement_state -> re-setting the elevator state")
         # sprite_data_new.reset_elevator_status() # belongs into sprite 
     else:

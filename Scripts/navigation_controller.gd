@@ -1,7 +1,7 @@
 # navigation_controller.gd
 extends Node
 
-const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
+const SpriteDataNew = preload("res://Data/SpriteData_new.gd")
 
 var floors: Dictionary = {}
 var doors: Dictionary = {}
@@ -47,9 +47,9 @@ func _on_navigation_click(global_position: Vector2, floor_number: int, door_inde
     _on_navigation_command("Player", floor_number, door_index, commander, adjusted_click_position)
     
     
-    if count == 0:
-        _on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
-        count = count + 1
+    #if count == 0:
+        #_on_navigation_command("AI_SPRITE", floor_number, door_index, commander, adjusted_click_position)
+        #count = count + 1
     if count == 0:
         # var random_floor = get_random_floor()
         # setting room to -1 so the AI sprite does not get caught up in the elevator room (where it should never be)

@@ -155,13 +155,9 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
     if not incoming_sprite_name == sprite_data_new.sprite_name:        
         return
     
-    print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")
-    
+    # print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")    
     sprite_data_new.elevator_request_id = incoming_request_id
     sprite_data_new.elevator_request_confirmed = true
-    
-    # Process state changes (if needed).
-    # 
     
     if elevator_ready_status:
         # print("The elevator is ready for ", sprite_data_new.sprite_name)
@@ -170,6 +166,7 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
         # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
         ## consider emitting the signal from inside the state specific functions
         SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
+        '''ensure sprite is locked down for the entering period'''
         
 
 
@@ -534,13 +531,14 @@ func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
 
 
 func _on_adjusted_navigation_command(_commander: String, sprite_name: String, floor_number: int, door_index: int, click_global_position: Vector2) -> void:       
-    # print("Navigation click received in ", sprite_data_new.sprite_name, " script")            
+    # print("Navigation click received in ", sprite_data_new.sprite_name, " script with sprite_name: ", sprite_name)
     if not sprite_name == sprite_data_new.sprite_name:
         return    
     # if target is elevator room on another floor, ensure we are setting destination to that position not the room
     if door_index == -2 and floor_number != sprite_data_new.current_floor_number:        
         door_index = -1            
     sprite_data_new.set_sprite_nav_data(click_global_position, floor_number, door_index)
+    # print("_on_adjusted_navigation_command for: ", sprite_data_new.sprite_name, " floor_number: ", floor_number)
     
     
 #endregion

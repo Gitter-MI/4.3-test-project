@@ -46,9 +46,11 @@ enum ElevatorRequestType {
 func _on_elevator_request(elevator_request_data: Dictionary) -> void:
         
     var new_request: Dictionary = elevator_request_data
+    
     var sprite_name: String = elevator_request_data["sprite_name"]
     var sprite_elevator_request_id: int = elevator_request_data["request_id"]        
-    var request_type = _categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)        
+    var request_type = _categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)
+    # print("request type for ", sprite_name, " is ", request_type)     
     var processed_request = _handle_request_by_type(request_type, new_request)
     var elevator_ready_status: bool = _check_ready_status_on_request(new_request) ## ensure ready status on request is independent of position in queue
     '''move the request of the sprite currently inside the elevator to [0] upon entering, if necessary'''
