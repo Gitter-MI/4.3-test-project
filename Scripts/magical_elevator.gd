@@ -6,20 +6,6 @@ extends Node2D
 @onready var queue_manager: Node = $Queue_Manager
 @onready var elevator_state_manager: Node = $Elevator_StateMachine
 
-#When a sprite needs the elevator
-#you spawn a cabin at the pick-up floor
-#open the doors
-#enter the sprite
-#close the doors
-#move the sprite
-#eject the sprite with the doors open
-#de-spawn the elevator
-#
-#
-#
-#When two sprites need an elevator at the same time, you wait for the sprite cabin to have left the current floor
-#When two sprites need to exit at the same floor at the same time, you slow down one of the two elevators
-
 func _ready():    
     set_up_elevator_cabin()    
     z_index = -10
@@ -57,30 +43,35 @@ enum ElevatorRequestType {
     OVERWRITE,
     SHUFFLE,
 }
-
 func _on_elevator_request(elevator_request_data: Dictionary) -> void:
-    print("Magical Elevator has received the request")
+        
     var new_request: Dictionary = elevator_request_data
     var sprite_name: String = elevator_request_data["sprite_name"]
-    var sprite_elevator_request_id: int = elevator_request_data["request_id"]    
+    var sprite_elevator_request_id: int = elevator_request_data["request_id"]        
+    var request_type = _categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)        
+    var processed_request = _handle_request_by_type(request_type, new_request)
+    var elevator_ready_status: bool = _check_ready_status_on_request(new_request) ## ensure ready status on request is independent of position in queue
+    '''move the request of the sprite currently inside the elevator to [0] upon entering, if necessary'''
     
-    var request_type = categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)
-    print("Elevator request type: ", request_type)
-    
-    var processed_request = handle_request_by_type(request_type, new_request)
+    SignalBus.elevator_request_confirmed.emit(processed_request, elevator_ready_status)
 
-    var elevator_ready_on_request: bool = false
+    #print("This would be the final signal: ")
+    #print("Added request with sprite_name: ", processed_request["sprite_name"])
+    #print("Added request with request_id: ", processed_request["request_id"])
+    #print("Pick-up floor of this request: ", processed_request["pick_up_floor"])
+    #print("Destination floor of this request: ", processed_request["destination_floor"])
+    #print("The elevator is ready: ", elevator_ready_on_request)    
     
-    elevator_ready_on_request = check_ready_status_on_request(elevator_ready_on_request)
-    print("This would be the final signal: ")
-    print("Added request with sprite_name: ", processed_request["sprite_name"])
-    print("Added request with request_id: ", processed_request["request_id"])
-    print("The elevator is ready: ", elevator_ready_on_request)    
+    '''Destination floor in case of elevator room should be pick-up floor'''
             
-    # SignalBus.elevator_request_confirmed.emit(added_request["sprite_name"], added_request["request_id"], elevator_ready_on_request)
+    '''Next task: return new request data and ready status to sprite'''
+    '''Make sure only the expected sprite switches to entering and only when expected to enter at all'''
+    
+            
+    
 
 
-func handle_request_by_type(request_type: int, new_request: Dictionary) -> Dictionary:
+func _handle_request_by_type(request_type: int, new_request: Dictionary) -> Dictionary:
     match request_type:
         ElevatorRequestType.ADD:
             return queue_manager.add_to_elevator_queue(new_request)
@@ -95,22 +86,29 @@ func handle_request_by_type(request_type: int, new_request: Dictionary) -> Dicti
             return {}
 
 
-func check_ready_status_on_request(elevator_ready_on_request: bool):
-    # when the sprite calls the elevator we want to know if the elevator is available in the very same moment
-    # this is different from the elevator determining it's ready state when processing requests
-    # here the elevator is doing nothing with doors open while not occupied -> sprite can enter immediately
-    var current_state = cabin_data.elevator_state    
+func _is_elevator_on_same_floor(current_floor: int, pickup_floor: int) -> bool:
+    return current_floor == pickup_floor
+
+func _is_elevator_available(current_state: int) -> bool:
+    return current_state == cabin_data.ElevatorState.IDLE \
+        or current_state == cabin_data.ElevatorState.WAITING
+
+func _check_ready_status_on_request(elevator_request_data: Dictionary) -> bool:
+    var pickup_floor: int = elevator_request_data["pick_up_floor"]    
+    var current_state: int = cabin_data.elevator_state    
+    var current_floor: int = cabin_data.current_floor
+    var occupied: bool = cabin_data.elevator_occupied
     
-    match current_state:
-        cabin_data.ElevatorState.IDLE:
-            elevator_ready_on_request = true            
-            return elevator_ready_on_request              
-        
-        cabin_data.ElevatorState.WAITING:
-            elevator_ready_on_request = true            
-            return elevator_ready_on_request
+    var elevator_on_same_floor: bool = _is_elevator_on_same_floor(current_floor, pickup_floor)
+    var elevator_available: bool = _is_elevator_available(current_state)
+
+    if elevator_on_same_floor and elevator_available and not occupied:
+        return true
+    
+    return false
+
  
-func categorize_incomming_elevator_request(sprite_name: String, sprite_elevator_request_id: int) -> ElevatorRequestType:
+func _categorize_incomming_elevator_request(sprite_name: String, sprite_elevator_request_id: int) -> ElevatorRequestType:
     
     ## the final check for the elevator state will be added later
     ## ignore for now:
@@ -143,10 +141,25 @@ func categorize_incomming_elevator_request(sprite_name: String, sprite_elevator_
             return ElevatorRequestType.SHUFFLE
 #endregion
 
-       
+
+func _on_sprite_entering_elevator(sprite_name):
+    '''store the request dict in the sprite data'''
+    '''use the request dict and the target room'''
+    '''ensure branch to elevator room -> not needed here'''
+    print("Elevator: Sprite ", sprite_name, " has begun to enter the elevator")
+    ## lock the elevator for other sprites
+    cabin_data.elevator_occupied = true
+    # later: stop timer
+
+
 func connect_to_signals():
     # move to elevator logic component or ensure that the elevator itself does only perform actions 
     SignalBus.elevator_called.connect(_on_elevator_request)
+    SignalBus.entering_elevator.connect(_on_sprite_entering_elevator)
+    
+
+
+
 
 
 

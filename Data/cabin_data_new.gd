@@ -10,7 +10,7 @@ func set_elevator_state(new_state: ElevatorState) -> void:
 var elevator_busy: bool = false
 var pick_up_on_current_floor: bool = false    
 var elevator_ready: bool = false
-var elevator_occupied: bool = false
+var elevator_occupied: bool = false ## used in the new implementation
 var timer_started: bool = false
 
 
@@ -28,14 +28,14 @@ var doors_closed: bool = false
 
 
 
-var current_floor: int = 1  # for spawning only.
-var destination_floor: int = 1  # for spawning only. If not used, remove
+var current_floor: int = 3 ## used in the new implementation  # for spawning only.
+var destination_floor: int = 3  # for spawning only. If not used, remove
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
 
-var floor_boundaries = {}
-var floor_to_elevator = {}
-var floor_to_target_position = {}
+var floor_boundaries = {} ## used in the new implementation
+var floor_to_elevator = {} ## used in the new implementation
+var floor_to_target_position = {} ## used in the new implementation
 var target_position: Vector2 = Vector2.ZERO
 
 const SCALE_FACTOR: float = 2.3 

@@ -2,6 +2,10 @@
 extends Node
 const SpriteDataNew = preload("res://Scripts/SpriteData_new.gd")
 
+
+'''on state change during _process function -> call the next _process function immediately'''
+
+
 func process_state(sprite_data_new: Resource) -> void:    
     # print("state component process state for: ", sprite_data_new.sprite_name)
     var state = sprite_data_new.get_active_state()
@@ -22,14 +26,14 @@ func _process_elevator_state(sprite_data_new: Resource) -> void:
     # print("state: ", sprite_data_new.elevator_state)
     match sprite_data_new.elevator_state:
         sprite_data_new.ElevatorState.CALLING_ELEVATOR:
-            # print("_process_elevator_state->ElevatorState.CALLING_ELEVATOR")
+            # print(sprite_data_new.sprite_name, " ->ElevatorState.CALLING_ELEVATOR")
             
             _process_calling_elevator(sprite_data_new)
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
-            print("_process_elevator_state->ElevatorState.WAITING_FOR_ELEVATOR")
+            # print(sprite_data_new.sprite_name, " ->ElevatorState.WAITING_FOR_ELEVATOR")
             _process_waiting_for_elevator(sprite_data_new)
         sprite_data_new.ElevatorState.ENTERING_ELEVATOR:
-            # print("_process_elevator_state->ElevatorState.ENTERING_ELEVATOR")
+            # print(sprite_data_new.sprite_name, " ->ElevatorState.ENTERING_ELEVATOR")
             _process_entering_elevator(sprite_data_new)        
         sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:
             _process_in_elevator_transit(sprite_data_new)
@@ -49,14 +53,25 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
     # print("sprite_data_new.elevator_requested: ", sprite_data_new.elevator_requested)
     # print("sprite_data_new.elevator_request_confirmed: ", sprite_data_new.elevator_request_confirmed)
 
+
+    ## case 0: elevator is available immediately
+    ## new
+    if sprite_data_new.elevator_ready:
+        # print("elevator ready? ", sprite_data_new.elevator_ready)
+        sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
+        _process_entering_elevator(sprite_data_new)       
+        return
+
     ## case 1: proceeding with the elevator flow
     if sprite_data_new.elevator_requested and sprite_data_new.elevator_request_confirmed:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR)
+        return
     
     ## case 2: sprite has interrupted the elevator flow
     if sprite_data_new.stored_target_floor == -1 and not sprite_data_new.target_room == -2:
         # print("sprite ", sprite_data_new.sprite_name, " is switching to MOVEMENT")
         sprite_data_new.set_movement_state(SpriteDataNew.MovementState.IDLE)
+        return
 
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
     # print("sprite is waiting for elevator")
@@ -83,7 +98,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
         sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.ENTERING_ELEVATOR)
         return
 
-func _process_entering_elevator(sprite_data_new: Resource) -> void:
+func _process_entering_elevator(sprite_data_new: Resource) -> void:    
     # print("func _process_entering_elevator: ", sprite_data_new.sprite_name)
     
     if sprite_data_new.entered_elevator:

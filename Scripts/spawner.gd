@@ -15,7 +15,7 @@ func _ready():
     
     spawn_base_sprite()
     # spawn_player()
-    # spawn_ai(1)
+    spawn_ai(1)
     # spawn_decorations(1)
     
     

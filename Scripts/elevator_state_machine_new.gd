@@ -15,22 +15,22 @@ func _ready() -> void:
     pass
     
     
-func _process(_float) -> void:
-        match cabin_data.elevator_state:
-        
-            cabin_data.ElevatorState.IDLE:            
-                process_idle()       
-            cabin_data.ElevatorState.WAITING:
-                process_waiting()       
-            cabin_data.ElevatorState.DEPARTING:            
-                process_departing()       
-            cabin_data.ElevatorState.TRANSIT:      
-                process_transit()       
-            cabin_data.ElevatorState.ARRIVING:      
-                process_arriving()       
-            _:
-                push_warning("unknow state in process_cabin_states")                            
-                pass
+func _process(_float) -> void:    
+    match cabin_data.elevator_state:
+    
+        cabin_data.ElevatorState.IDLE:            
+            process_idle()       
+        cabin_data.ElevatorState.WAITING:
+            process_waiting()       
+        cabin_data.ElevatorState.DEPARTING:            
+            process_departing()       
+        cabin_data.ElevatorState.TRANSIT:      
+            process_transit()       
+        cabin_data.ElevatorState.ARRIVING:      
+            process_arriving()       
+        _:
+            push_warning("unknow state in process_cabin_states")                            
+            pass
 
 func process_idle() -> void:        
     if not cabin_data.elevator_busy:

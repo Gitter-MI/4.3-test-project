@@ -108,7 +108,7 @@ func _process_elevator_actions() -> void:
             if stored_position_updated:
                 call_elevator()
             
-            request_elevator_ready_status() 
+            # request_elevator_ready_status() 
                 # pass
         sprite_data_new.ElevatorState.ENTERING_ELEVATOR:               
             if not sprite_data_new.entered_elevator:                
@@ -148,24 +148,48 @@ func call_elevator() -> void:
 
 
 
-
-
-
-func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: int) -> void:
+func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_ready_status: bool) -> void:
+    var incoming_sprite_name = elevator_request_data["sprite_name"]
+    var incoming_request_id = elevator_request_data["request_id"]
     
-    # print("destination_floor of the confirmed request: ", destination_floor)
-    # print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
+    if not incoming_sprite_name == sprite_data_new.sprite_name:        
+        return
     
-    if incoming_sprite_name == sprite_data_new.sprite_name:            
-        sprite_data_new.elevator_request_id = request_id
-        # print("Elevator request confirmed. Request ID =", request_id)            
-        sprite_data_new.elevator_request_confirmed = true
-        # print("request confirmed, requesting ready status")
+    print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")
+    
+    sprite_data_new.elevator_request_id = incoming_request_id
+    sprite_data_new.elevator_request_confirmed = true
+    
+    # Process state changes (if needed).
+    # 
+    
+    if elevator_ready_status:
+        # print("The elevator is ready for ", sprite_data_new.sprite_name)
+        sprite_data_new.elevator_ready = true
+        sprite_data_new.defer_input = true
+        # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
+        ## consider emitting the signal from inside the state specific functions
+        SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
         
-        # check if a state update is needed
-        state_manager._process_elevator_state(sprite_data_new)
-        
-        request_elevator_ready_status()
+
+
+
+
+
+
+#func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: int) -> void:
+    #
+    ## print("destination_floor of the confirmed request: ", destination_floor)
+    ## print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
+    #
+    #if incoming_sprite_name == sprite_data_new.sprite_name:            
+        #sprite_data_new.elevator_request_id = request_id
+        ## print("Elevator request confirmed. Request ID =", request_id)            
+        #sprite_data_new.elevator_request_confirmed = true        
+        ## check if a state update is needed
+        #state_manager._process_elevator_state(sprite_data_new)
+        #
+        #request_elevator_ready_status()
 
 func confirm_sprite_can_interact_with_elevator() -> bool:
     #print("confirm_sprite_can_interact_with_elevator: ")
@@ -265,7 +289,7 @@ func enter_elevator():
         global_position = sprite_data_new.current_position
         z_index = -9
         # print("Sprite emits entering elevator signal")
-        SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id, sprite_data_new.target_room)
+        # SignalBus.entering_elevator.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id, sprite_data_new.target_room)
     else:        
         return
 

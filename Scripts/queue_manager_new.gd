@@ -19,10 +19,8 @@ func _ready():
     pass
     
 
-
-'''We are not adding the expected dict to the queue. Request id is in there twice, once with the value of the requesting sprite, but should be only the final request id'''
     
-    
+#region Process new requests
 func does_sprite_have_a_request_in_queue(sprite_name: String) -> bool:
     for request in elevator_queue:        
         if request["sprite_name"] == sprite_name:
@@ -112,3 +110,4 @@ func find_last_request_index_for_floor(floor_number: int) -> int:
 func get_next_request_id() -> int:
     next_request_id += 1
     return next_request_id 
+#endregion
