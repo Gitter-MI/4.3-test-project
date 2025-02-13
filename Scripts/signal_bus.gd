@@ -8,6 +8,7 @@ extends Node
 signal elevator_called(elevator_request_data: Dictionary) ## used in the new implementation
 signal elevator_request_confirmed(elevator_request_data: Dictionary, ready_status: bool)  ## used in the new implementation
 signal entering_elevator(sprite_name: String)  ## used in the new implementation
+signal elevator_waiting_ready(elevator_request_data: Dictionary, elevator_ready_status: bool)
 
 
 # signal elevator_called(sprite_name: String, pick_up_floor: int, destination_floor: int, sprite_elevator_request_id: int)

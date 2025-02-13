@@ -10,7 +10,7 @@ func _ready():
     '''2) Add request when adding a request for the Player for shuffle, deactivate waiting/idle criterion in elevator script categorize function'''
     '''3) No dummy requests: Add and update'''
     #var dummy_request_three: Dictionary = {
-        #"pick_up_floor": 1,
+        #"pick_up_floor": 3,
         #"destination_floor": 2,
         #"sprite_name": "Test_Sprite",
         #"request_id": 0
@@ -18,6 +18,13 @@ func _ready():
     #elevator_queue.append(dummy_request_three)  
     pass
     
+
+func _process(_delta: float) -> void:
+    # print("process elevator state")
+    pass
+
+
+
 
     
 #region Process new requests
@@ -39,7 +46,7 @@ func add_to_elevator_queue(request: Dictionary) -> Dictionary:
     request.request_id = get_next_request_id()
     elevator_queue.append(request)
     #var dummy_request: Dictionary = {
-        #"pick_up_floor": 3,
+        #"pick_up_floor": 4,
         #"destination_floor": 2,
         #"sprite_name": "Test_Sprite",
         #"request_id": 0

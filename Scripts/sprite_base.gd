@@ -169,8 +169,23 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
         '''ensure sprite is locked down for the entering period'''
         
 
-
-
+func _on_elevator_waiting_ready(elevator_request_data: Dictionary, elevator_ready_status: bool) -> void:
+    print(sprite_data_new.sprite_name, " received _on_elevator_waiting_ready")
+    
+    var incoming_sprite_name = elevator_request_data["sprite_name"]
+    var incoming_request_id = elevator_request_data["request_id"]
+    
+    if not incoming_sprite_name == sprite_data_new.sprite_name:     
+        print(sprite_data_new.sprite_name, " is not the sprite who can enter right now")   
+        return
+        
+    if elevator_ready_status:
+        # print("The elevator is ready for ", sprite_data_new.sprite_name)
+        sprite_data_new.elevator_ready = true
+        sprite_data_new.defer_input = true
+        # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
+        ## consider emitting the signal from inside the state specific functions
+        SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
 
 
 
@@ -483,7 +498,12 @@ func set_initial_position() -> void:
 func connect_to_signals():
     SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
+    
     SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
+    SignalBus.elevator_waiting_ready.connect(_on_elevator_waiting_ready)
+    
+    # _on_elevator_waiting_ready
+    
     SignalBus.elevator_ready.connect(_on_elevator_ready)
     SignalBus.elevator_ready.connect(_on_elevator_at_destination)
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)

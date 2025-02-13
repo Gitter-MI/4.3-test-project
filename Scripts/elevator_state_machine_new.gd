@@ -15,7 +15,7 @@ func _ready() -> void:
     pass
     
     
-func _process(_float) -> void:    
+func _process_elevator_state() -> void:    
     match cabin_data.elevator_state:
     
         cabin_data.ElevatorState.IDLE:            
@@ -34,20 +34,44 @@ func _process(_float) -> void:
 
 func process_idle() -> void:        
     if not cabin_data.elevator_busy:
+        # print("in elevator state machine: not busy")
         return
-    else:    
+    else:
+        # print("in elevator state machine: switching to waiting")
         cabin_data.set_elevator_state(CabinData.ElevatorState.WAITING)
     
     
 func process_waiting() -> void:
     if not cabin_data.elevator_busy:
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
+        
+    ''' maybe just add a waiting timer function'''
+    ''' or add the subcase in the processing function in main script'''
+        
+    # if not cabin_data.elevator_ready_signal_send:
+            # return send_elevator_ready_signal   # to all sprites waiting on the floor
     
-    if cabin_data.elevator_busy and not cabin_data.pick_up_on_current_floor:
-        cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
+    # if 
     
-    if cabin_data.elevator_busy and cabin_data.elevator_ready and cabin_data.elevator_occupied:
-        cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
+    
+    # if cabin_data.pick_up_on_current_floor and timer not already running:
+        # start timer
+    
+    # if cabin_data.elevator_occupied or not cabin_data.pick_up_on_current_floor:
+        # elevator room
+        # depart
+        # stop timer    
+    
+
+    
+    
+      
+    
+    #if cabin_data.elevator_busy and not cabin_data.pick_up_on_current_floor:
+        #cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
+    #
+    #if cabin_data.elevator_busy and cabin_data.elevator_ready and cabin_data.elevator_occupied:
+        #cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
     
 
             

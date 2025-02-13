@@ -16,24 +16,73 @@ func _ready():
 
 func _process(_float) -> void:
     
-    # print("cabin_data.elevator_state: ", cabin_data.elevator_state)
+    elevator_state_manager._process_elevator_state()
     
-    return
-        #match cabin_data.elevator_state:
-        #
-            #cabin_data.ElevatorState.IDLE:            
-                #print("process_idle()")
-            #cabin_data.ElevatorState.WAITING:
-                #print("process_waiting()")
-            #cabin_data.ElevatorState.DEPARTING:            
-                #print("process_departing()")     
-            #cabin_data.ElevatorState.TRANSIT:      
-                #print("process_transit()")   
-            #cabin_data.ElevatorState.ARRIVING:      
-                #print("process_arriving()")      
-            #_:
-                #push_warning("unknow state in process_cabin_states")                            
-                #pass
+    match cabin_data.elevator_state:
+        cabin_data.ElevatorState.IDLE:
+            process_idle()
+        cabin_data.ElevatorState.WAITING:  # -> is busy? -> is ready emitted? -> is occupied? no -> depart in both cases either to sprite destination or to next pick up, remember to update queue if needed
+            process_waiting()
+            # print("process_waiting()")
+        #cabin_data.ElevatorState.DEPARTING:  -> did sprite enter -> did door close?
+            #print("process_departing()")     
+        #cabin_data.ElevatorState.TRANSIT:      -> until at destination 
+            #print("process_transit()")   
+        #cabin_data.ElevatorState.ARRIVING:      -> open door -> eject sprite -> 
+            #print("process_arriving()")      
+        _:
+            push_warning("unknow state in process_cabin_states")                            
+            pass
+
+
+func process_idle():
+    # print("process idle")
+    check_elevator_queue()
+
+func process_waiting():
+    check_elevator_queue() # if not busy then switch back to idle
+    '''you can do this!'''
+    
+    # if not cabin_data.elevator_ready_emitted:
+        # emit_ready_on_waiting()
+    
+    if not cabin_data.wait_timer_started:
+        pass
+        # start timer    
+        ## start timer, will be implemented later
+
+func emit_ready_on_waiting():
+    # print("emit_ready_on_waiting")
+    var current_floor = cabin_data.current_floor
+    var elevator_ready_status: bool = true
+    var elevator_queue = queue_manager.elevator_queue        
+    var requests_at_floor: Array = []
+    for request in elevator_queue:
+        if request["pick_up_floor"] == current_floor:
+            requests_at_floor.append(request)
+    
+    
+    for request_data in requests_at_floor:
+        # print("emitting the elevator_waiting_ready signal")
+        SignalBus.elevator_waiting_ready.emit(request_data, elevator_ready_status)
+        
+        if cabin_data.elevator_occupied:
+            cabin_data.elevator_ready_emitted = true
+            break
+    cabin_data.elevator_ready_emitted = true
+
+func is_at_first_request_pickup_floor() -> void:
+    # print("cabin_data.current_floor: ", cabin_data.current_floor)
+    var first_request = queue_manager.elevator_queue[0]
+    if first_request["pick_up_floor"] == cabin_data.current_floor:
+        cabin_data.pick_up_on_current_floor = true
+    else: 
+        cabin_data.pick_up_on_current_floor = false
+
+func check_elevator_queue() -> void:
+    cabin_data.elevator_busy = queue_manager.elevator_queue.size() != 0
+    # print("elevator busy?: ", cabin_data.elevator_busy)
+
 
 #region Process New Requests
 
@@ -53,7 +102,7 @@ func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     # print("request type for ", sprite_name, " is ", request_type)     
     var processed_request = _handle_request_by_type(request_type, new_request)
     var elevator_ready_status: bool = _check_ready_status_on_request(new_request) ## ensure ready status on request is independent of position in queue
-    '''move the request of the sprite currently inside the elevator to [0] upon entering, if necessary'''
+    
     
     SignalBus.elevator_request_confirmed.emit(processed_request, elevator_ready_status)
 
@@ -63,11 +112,11 @@ func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     #print("Pick-up floor of this request: ", processed_request["pick_up_floor"])
     #print("Destination floor of this request: ", processed_request["destination_floor"])
     #print("The elevator is ready: ", elevator_ready_on_request)    
-    
-    '''Destination floor in case of elevator room should be pick-up floor'''
             
-    '''Next task: return new request data and ready status to sprite'''
-    '''Make sure only the expected sprite switches to entering and only when expected to enter at all'''
+    '''update the elevator status when the sprite has entered'''
+    '''lift the lock on the sprite / confirm if needed at all, or not, or if it remains in nav (expected case)'''
+    '''remember to lift the lock on the elevator after drop-off to emit new, intermittent ready signal''' ## maybe use busy instead?
+    '''move the request of the sprite currently inside the elevator to [0] upon entering'''
     
             
     
