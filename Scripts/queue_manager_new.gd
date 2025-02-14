@@ -10,21 +10,21 @@ func _ready():
     '''2) Add request when adding a request for the Player for shuffle, deactivate waiting/idle criterion in elevator script categorize function'''
     '''3) No dummy requests: Add and update'''
     #var dummy_request_three: Dictionary = {
-        #"pick_up_floor": 3,
-        #"destination_floor": 2,
-        #"sprite_name": "Test_Sprite",
+        #"pick_up_floor": 2,
+        #"destination_floor": 3,
+        #"sprite_name": "Player",
         #"request_id": 0
     #}
-    #elevator_queue.append(dummy_request_three)  
+    #elevator_queue.append(dummy_request_three)
+    #var dummy_request_four: Dictionary = {
+        #"pick_up_floor": 3,
+        #"destination_floor": 3,
+        #"sprite_name": "AI_SPRITE",
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request_four)  
     pass
     
-
-func _process(_delta: float) -> void:
-    # print("process elevator state")
-    pass
-
-
-
 
     
 #region Process new requests
@@ -46,7 +46,7 @@ func add_to_elevator_queue(request: Dictionary) -> Dictionary:
     request.request_id = get_next_request_id()
     elevator_queue.append(request)
     #var dummy_request: Dictionary = {
-        #"pick_up_floor": 4,
+        #"pick_up_floor": 3,
         #"destination_floor": 2,
         #"sprite_name": "Test_Sprite",
         #"request_id": 0
@@ -88,6 +88,13 @@ func shuffle(request: Dictionary) -> Dictionary:
     var insertion_index = find_last_request_index_for_floor(pick_up_floor)    
     elevator_queue.insert(insertion_index + 1, request)
     return request
+    
+
+func move_request_to_top(sprite_name: String) -> void:
+    var index = find_request_index_by_sprite(sprite_name)
+    var request = elevator_queue[index]
+    elevator_queue.remove_at(index)
+    elevator_queue.insert(0, request)
 
 
 func find_request_index_by_sprite(sprite_name: String) -> int:    

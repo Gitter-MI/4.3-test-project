@@ -28,9 +28,9 @@ func spawn_base_sprite():
     base_sprite_instance.add_to_group("sprites")
 
     base_sprite_instance.set_data(
-        3,    # current_floor_number
+        2,    # current_floor_number
         -1,   # current_room
-        3,    # target_floor_number
+        2,    # target_floor_number
         "Player", # sprite_name
         1     # elevator_request_id
     )
@@ -45,9 +45,9 @@ func spawn_player():
     
     # Directly call set_data with the desired initial values:
     player_instance.set_data(
-        3,    # current_floor_number
+        2,    # current_floor_number
         -1,   # current_room
-        3,    # target_floor_number
+        2,    # target_floor_number
         "Player", # sprite_name
         1     # elevator_request_id
     )

@@ -7,22 +7,19 @@ var elevator_state: ElevatorState = ElevatorState.IDLE  # initial state
 func set_elevator_state(new_state: ElevatorState) -> void:    
     elevator_state = new_state
 
-var elevator_busy: bool = false ## at least one request in queue  ## used in the new implementation
-var elevator_occupied: bool = false ## used in the new implementation
-var pick_up_on_current_floor: bool = false ## used in the new implementation
-var wait_timer_started: bool = false ## used in the new implementation
+var elevator_busy: bool = false # are there requests in the elevator queue?
+var pick_up_on_current_floor: bool = false  # does the next request in the queue have pick-up at the current floor
 
-var elevator_ready_emitted: bool = false
+var elevator_occupied: bool = false ## when occupied other sprites cannot enter the elevator (only one sprite in the elevator)
+var sprite_entered: bool = false
 
-
-
-
+var wait_timer_started: bool = false # 2 seconds wait timer
+var elevator_ready_emitted: bool = false # used in WAITING state
 
 
-var re_emit_ready_signal: bool = false
 var elevator_queue_reordered: bool = false
 
-
+var elevator_ready: bool = false # is used?
 
 var doors_opening: bool = false
 var doors_open: bool = true
@@ -45,6 +42,7 @@ var target_position: Vector2 = Vector2.ZERO
 
 const SCALE_FACTOR: float = 2.3 
 const SPEED: float = 800.0  # Pixels per second
+
 
 var cabin_timer: Timer
 var cabin_timer_timeout: int = 2

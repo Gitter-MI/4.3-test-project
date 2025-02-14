@@ -5,9 +5,9 @@ enum RoomState { CHECKING_ROOM_STATE, ENTERING_ROOM, IN_ROOM, EXITING_ROOM, NONE
 enum ElevatorState { CALLING_ELEVATOR, WAITING_FOR_ELEVATOR, ENTERING_ELEVATOR, IN_ELEVATOR_ROOM, IN_ELEVATOR_TRANSIT, EXITING_ELEVATOR, NONE }
 enum ActiveState { NONE, MOVEMENT, ROOM, ELEVATOR }
 
-var movement_state: MovementState = MovementState.IDLE
+var movement_state: MovementState = MovementState.NONE
 var room_state: RoomState = RoomState.NONE
-var elevator_state: ElevatorState = ElevatorState.NONE
+var elevator_state: ElevatorState = ElevatorState.WAITING_FOR_ELEVATOR
 
 var sprite_name: String = ""
 var sprite_height: int = -1

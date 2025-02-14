@@ -79,6 +79,7 @@ func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
     # Sprite is walking away, interrupting the waiting state
     if sprite_data_new.stored_target_position == Vector2.ZERO:
         
+        
         ## move this to the player script without the state setter: function move_sprite inside the if clause
         # Cancel elevator usage and switch to movement
         _update_movement_state(sprite_data_new)
