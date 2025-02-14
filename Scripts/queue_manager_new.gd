@@ -24,7 +24,9 @@ func _ready():
     #}
     #elevator_queue.append(dummy_request_four)  
     pass
-    
+
+func test():
+    pass
 
     
 #region Process new requests
