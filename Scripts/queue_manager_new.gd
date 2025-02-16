@@ -15,20 +15,38 @@ func _ready():
         #"sprite_name": "Player",
         #"request_id": 0
     #}
-    #elevator_queue.append(dummy_request_three)
-    #var dummy_request_four: Dictionary = {
-        #"pick_up_floor": 3,
-        #"destination_floor": 3,
-        #"sprite_name": "AI_SPRITE",
-        #"request_id": 0
-    #}
-    #elevator_queue.append(dummy_request_four)  
+    # elevator_queue.append(dummy_request_three)
+    var dummy_request_four: Dictionary = {
+        "pick_up_floor": 3,
+        "destination_floor": 3,
+        "sprite_name": "TEST_SPRITE", #AI_SPRITE
+        "request_id": 0
+    }
+    elevator_queue.append(dummy_request_four)  
     pass
 
-func test():
-    pass
 
+#region Cabin Wait Timer
     
+func remove_request_on_waiting_timer_timeout(current_floor: int) -> void:
+    while elevator_queue.size() > 0 and elevator_queue[0]["pick_up_floor"] == current_floor:
+        remove_request_from_queue()    
+    
+#endregion
+
+
+func remove_request_from_queue() -> void:
+    if elevator_queue.is_empty():
+        push_warning("Elevator queue is empty. Cannot remove first request.")
+        return
+        
+    print("Removing request: ", elevator_queue[0])
+    elevator_queue.remove_at(0)
+    return
+
+
+
+
 #region Process new requests
 func does_sprite_have_a_request_in_queue(sprite_name: String) -> bool:
     for request in elevator_queue:        

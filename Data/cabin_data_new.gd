@@ -13,7 +13,7 @@ var pick_up_on_current_floor: bool = false  # does the next request in the queue
 var elevator_occupied: bool = false ## when occupied other sprites cannot enter the elevator (only one sprite in the elevator)
 var sprite_entered: bool = false
 
-var wait_timer_started: bool = false # 2 seconds wait timer
+
 var elevator_ready_emitted: bool = false # used in WAITING state
 
 

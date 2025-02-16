@@ -45,10 +45,11 @@ func process_waiting() -> void:
          return
      if not cabin_data.elevator_ready_emitted:
          return
+        
      if (not cabin_data.pick_up_on_current_floor) or cabin_data.elevator_occupied:
          cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
          return
-     if cabin_data.pick_up_on_current_floor and (not cabin_data.elevator_occupied) and cabin_data.wait_timer_started:
+     if cabin_data.pick_up_on_current_floor and (not cabin_data.elevator_occupied) and not cabin_data.cabin_timer.is_stopped():         
          return
     
     
