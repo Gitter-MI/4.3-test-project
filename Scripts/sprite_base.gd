@@ -154,7 +154,7 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
     var incoming_request_id = elevator_request_data["request_id"]
     
     if not incoming_sprite_name == sprite_data_new.sprite_name:
-        print("not my sprite name")
+        print("not my sprite name: ", sprite_data_new.sprite_name)
         return
     
     # print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")    
@@ -167,6 +167,7 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
         sprite_data_new.defer_input = true
         # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
         ## consider emitting the signal from inside the state specific functions
+        print("emitting entering elevator in _on_elevator_request_confirmed for: ", sprite_data_new.sprite_name)
         SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
         '''ensure sprite is locked down for the entering period'''
         
@@ -197,6 +198,7 @@ func _on_elevator_waiting_ready_received(elevator_request_data: Dictionary, elev
                 sprite_data_new.defer_input = true
                 # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
                 ## consider emitting the signal from inside the state specific functions
+                print("emitting entering elevator in _on_elevator_waiting_ready_received for: ", sprite_data_new.sprite_name)
                 SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
                 '''ensure sprite is locked down for the entering period'''
 
@@ -318,6 +320,7 @@ func enter_elevator():
     else:        
         return
 
+
     
 
 func on_sprite_entered_elevator():    
@@ -325,9 +328,12 @@ func on_sprite_entered_elevator():
     SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
     _animate_sprite()
 
-func _on_elevator_ride(elevator_pos: Vector2, request_id: int) -> void:
+
+
+
+func _on_elevator_ride(elevator_pos: Vector2, sprite_name: String) -> void:
     
-    if sprite_data_new.elevator_request_id != request_id:
+    if sprite_data_new.sprite_name != sprite_name:
         return 
 
     if sprite_data_new.entered_elevator:
@@ -345,8 +351,9 @@ func _on_elevator_ride(elevator_pos: Vector2, request_id: int) -> void:
         global_position = sprite_data_new.current_position
         _animate_sprite()
 
-func _on_elevator_at_destination(incoming_sprite_name: String, request_id: int):    
-    if incoming_sprite_name == sprite_data_new.sprite_name and request_id == sprite_data_new.elevator_request_id and sprite_data_new.entered_elevator == true:        
+func _on_elevator_at_destination(incoming_sprite_name: String):
+    print("_on_elevator_at_destination") ## is being called twice
+    if incoming_sprite_name == sprite_data_new.sprite_name:        
         sprite_data_new.elevator_destination_reached = true
 
 #func exit_elevator():
@@ -363,7 +370,8 @@ func _on_elevator_at_destination(incoming_sprite_name: String, request_id: int):
         #)
         #sprite_data_new.reset_stored_data()
 
-func exit_elevator():    
+func exit_elevator():
+    print("exit elevator in sprite base") 
     if not sprite_data_new.exiting_elevator:
         sprite_data_new.exiting_elevator = true
         _animate_sprite() 
@@ -372,6 +380,7 @@ func exit_elevator():
  
 
 func on_sprite_exited_elevator():
+    print("on_sprite_exited_elevator in sprite base") 
     z_index = 0
     SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
     sprite_data_new.exited_elevator = true
@@ -513,7 +522,7 @@ func connect_to_signals():
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
     SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
     SignalBus.elevator_ready.connect(_on_elevator_ready)
-    SignalBus.elevator_ready.connect(_on_elevator_at_destination)
+    SignalBus.elevator_arrived_at_destination.connect(_on_elevator_at_destination) ## not needed any more -> handled by elevator's waiting function
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
     SignalBus.queue_reordered.connect(_on_queue_reordered)
     

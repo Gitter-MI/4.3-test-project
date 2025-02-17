@@ -9,12 +9,15 @@ signal elevator_called(elevator_request_data: Dictionary) ## used in the new imp
 signal elevator_request_confirmed(elevator_request_data: Dictionary, ready_status: bool)  ## used in the new implementation
 signal entering_elevator(sprite_name: String)  ## used in the new implementation
 
+signal enter_animation_finished(sprite_name: String, target_floor: int)  ## used in the new implementation
+signal elevator_arrived_at_destination(sprite_name: String)
+
 
 # signal elevator_called(sprite_name: String, pick_up_floor: int, destination_floor: int, sprite_elevator_request_id: int)
 
 # signal elevator_request_confirmed(sprite_name: String, request_id: int)
 
-signal elevator_position_updated(global_pos: Vector2, request_id: int)  # used to move sprites along with the elevator cabin
+signal elevator_position_updated(global_pos: Vector2, sprite_name: String)  # used to move sprites along with the elevator cabin
 signal elevator_ready(sprite_name: String, request_id: int)  # ensures that the correct sprite will enter the elevator next
 
 '''is this connected? and why is it not???'''
@@ -25,7 +28,7 @@ signal request_skippable(sprite_name: String, request_id: int)
 signal queue_reordered(sprite_name: String, request_id: int)
 
 # signal entering_elevator(sprite_name: String, request_id: int, destination_room: int)
-signal enter_animation_finished(sprite_name: String, target_floor: int)
+
 signal exit_animation_finished(sprite_name: String, request_id: int)
 
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)

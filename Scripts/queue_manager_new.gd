@@ -10,25 +10,40 @@ func _ready():
     '''2) Add request when adding a request for the Player for shuffle, deactivate waiting/idle criterion in elevator script categorize function'''
     '''3) No dummy requests: Add and update'''
     #var dummy_request_three: Dictionary = {
-        #"pick_up_floor": 2,
+        #"pick_up_floor": 3,
         #"destination_floor": 3,
-        #"sprite_name": "Player",
+        #"sprite_name": "TEST_Player",
         #"request_id": 0
     #}
-    # elevator_queue.append(dummy_request_three)
-    var dummy_request_four: Dictionary = {
-        "pick_up_floor": 3,
-        "destination_floor": 3,
-        "sprite_name": "TEST_SPRITE", #AI_SPRITE
-        "request_id": 0
-    }
-    elevator_queue.append(dummy_request_four)  
+    #elevator_queue.append(dummy_request_three)
+    #var dummy_request_four: Dictionary = {
+        #"pick_up_floor": 3,
+        #"destination_floor": 3,
+        #"sprite_name": "TEST_SPRITE", #AI_SPRITE
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request_four)  
+    #var dummy_request_five: Dictionary = {
+        #"pick_up_floor": 4,
+        #"destination_floor": 4,
+        #"sprite_name": "TEST_SPRITE_2", #AI_SPRITE
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request_five)  
+    #var dummy_request_six: Dictionary = {
+        #"pick_up_floor": 3,
+        #"destination_floor": 3,
+        #"sprite_name": "TEST_SPRITE", #AI_SPRITE
+        #"request_id": 0
+    #}
+    #elevator_queue.append(dummy_request_six)  
     pass
 
 
 #region Cabin Wait Timer
     
 func remove_request_on_waiting_timer_timeout(current_floor: int) -> void:
+    print("in remove_request_on_waiting_timer_timeout")
     while elevator_queue.size() > 0 and elevator_queue[0]["pick_up_floor"] == current_floor:
         remove_request_from_queue()    
     
@@ -36,6 +51,7 @@ func remove_request_on_waiting_timer_timeout(current_floor: int) -> void:
 
 
 func remove_request_from_queue() -> void:
+    print("in remove_request_from_queue")
     if elevator_queue.is_empty():
         push_warning("Elevator queue is empty. Cannot remove first request.")
         return
