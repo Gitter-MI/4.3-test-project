@@ -28,6 +28,9 @@ var target_floor_number: int = -1                    # initial spawn floor
 var target_room: int = -1
 
 var has_stored_data: bool = false
+#########
+var stored_position_updated: bool = false
+##########
 var stored_target_position: Vector2 = Vector2.ZERO
 var stored_target_floor: int = -1
 var stored_target_room: int = -1
@@ -54,14 +57,10 @@ var exited_elevator: bool = false
 func needs_elevator(destination_floor: int) -> bool:
     return current_floor_number != destination_floor
     
-func reset_elevator_request_id() -> void:
-    # print("resetting request id")
-    elevator_request_id = -1
  
 func reset_elevator_status() -> void:
     # print("resetting the elevator status")
     elevator_request_id = -1
-    
     elevator_requested = false
     elevator_request_confirmed = false
     elevator_ready = false

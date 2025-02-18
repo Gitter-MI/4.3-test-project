@@ -74,19 +74,11 @@ func _process_calling_elevator(sprite_data_new: Resource) -> void:
         return
 
 func _process_waiting_for_elevator(sprite_data_new: Resource) -> void:
-    # print("sprite is waiting for elevator")
-    
+    # print("sprite is waiting for elevator")    
     # Sprite is walking away, interrupting the waiting state
     if sprite_data_new.stored_target_position == Vector2.ZERO:
-        
-        
-        ## move this to the player script without the state setter: function move_sprite inside the if clause
         # Cancel elevator usage and switch to movement
-        _update_movement_state(sprite_data_new)
-        # sprite_data_new.reset_elevator_status()        
-        # sprite_data_new.reset_stored_data()        
-        # sprite_data_new.reset_elevator_request_id()
-        # sprite_data_new.set_movement_state(sprite_data_new.MovementState.WALKING)
+        _update_movement_state(sprite_data_new)        
         return
     
     # Sprite is in WAITING state without having a request confirmed: which happens in pathfinder    
@@ -107,7 +99,9 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
         # print("sprite has entered the elevator")    
         if sprite_data_new.target_room == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM)
-            print("Sprite is now in Elevator Room")
+            push_warning("Sprite is now in Elevator Room: 2 second timeout before exiting") # switch to idle animation if needed
+            await get_tree().create_timer(2.0).timeout
+            sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
         else:            
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
             # print("Sprite is switching to Transit State")

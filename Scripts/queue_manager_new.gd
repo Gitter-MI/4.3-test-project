@@ -43,7 +43,7 @@ func _ready():
 #region Cabin Wait Timer
     
 func remove_request_on_waiting_timer_timeout(current_floor: int) -> void:
-    print("in remove_request_on_waiting_timer_timeout")
+    # print("in remove_request_on_waiting_timer_timeout")
     while elevator_queue.size() > 0 and elevator_queue[0]["pick_up_floor"] == current_floor:
         remove_request_from_queue()    
     
@@ -51,12 +51,12 @@ func remove_request_on_waiting_timer_timeout(current_floor: int) -> void:
 
 
 func remove_request_from_queue() -> void:
-    print("in remove_request_from_queue")
+    # print("in remove_request_from_queue")
     if elevator_queue.is_empty():
         push_warning("Elevator queue is empty. Cannot remove first request.")
         return
         
-    print("Removing request: ", elevator_queue[0])
+    # print("Removing request: ", elevator_queue[0])
     elevator_queue.remove_at(0)
     return
 
@@ -78,7 +78,10 @@ func does_request_id_match(sprite_elevator_request_id: int) -> bool:
         return true
 
 
-func add_to_elevator_queue(request: Dictionary) -> Dictionary:    
+
+func add_to_elevator_queue(request: Dictionary) -> Dictionary:
+    
+    # print("add to elevator queue")
     request.request_id = get_next_request_id()
     elevator_queue.append(request)
     #var dummy_request: Dictionary = {

@@ -39,7 +39,7 @@ func process_idle() -> void:
     if not cabin_data.elevator_busy:
         return
     else:
-        print("elevator is now busy")
+        # print("elevator is now busy")
         cabin_data.set_elevator_state(CabinData.ElevatorState.WAITING)
         return
         # process_waiting()
@@ -47,18 +47,18 @@ func process_idle() -> void:
     
     
 func process_waiting() -> void:
-    print("process_waiting in elevator state machine")
+    # print("process_waiting in elevator state machine")
     # print("cabin occupied? ", cabin_data.elevator_occupied)
 
     # 1) If there are no more requests, go idle.
     if not cabin_data.elevator_busy:
-        print("in elevator state machine: not busy")
+        # print("in elevator state machine: not busy")
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
         return
 
     # 2) If the elevator is already occupied, we need to depart next.
     if cabin_data.elevator_occupied:
-        print("in elevator state machine: occupied")
+        # print("in elevator state machine: occupied")
         cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
         process_departing()
         return
@@ -68,13 +68,13 @@ func process_waiting() -> void:
     if not cabin_data.pick_up_on_current_floor:
         # print("in state machine: ")
         # print("Setting state to departing ")
-        print("in elevator state machine: pick-up not on current floor")
+        # print("in elevator state machine: pick-up not on current floor")
         cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
         process_departing()
         return
 
     ## 5) If the next pickup IS on this floor, but no one has entered yet, we wait (timer running).
-    print("timer is running")
+    # print("timer is running")
     return
 
 

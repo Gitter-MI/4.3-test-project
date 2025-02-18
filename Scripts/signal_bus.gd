@@ -29,7 +29,7 @@ signal queue_reordered(sprite_name: String, request_id: int)
 
 # signal entering_elevator(sprite_name: String, request_id: int, destination_room: int)
 
-signal exit_animation_finished(sprite_name: String, request_id: int)
+signal exit_animation_finished(sprite_name: String)
 
 signal navigation_click(global_position: Vector2, floor_number: int, door_index: int)
 

@@ -62,9 +62,9 @@ func spawn_ai(count: int):
         
         # Different or same defaults for AIs:
         ai_instance.set_data(
-            3,     # current_floor_number
+            8,     # current_floor_number
             -1,    # current_room
-            3,     # target_floor_number
+            8,     # target_floor_number
             "AI_SPRITE",
             1
         )

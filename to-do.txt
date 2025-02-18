@@ -1,3 +1,24 @@
+ME: Don't emit ready waiting to sprite that just exited, in fact block that sprite from entering again
+-> store last sprite_name in elevator data and update it after starting to process the next request.
+-> unless the queue is otherwise empty or we are waiting at the last floor, then possible
+
+: already has last_elevator_request as global variable in sprite_base
+: move last elevator position to sprite_data_new
+
+
+check why player sprite is called base in remote
+
+
+
+
+
+
+
+
+
+
+
+
 Elevator ready should be a state not just a signal
 It's fine to emit a ready signal for immediate action but otherwise if a sprite needs an elevator it should always be able to check if the elevator is ready/available
 

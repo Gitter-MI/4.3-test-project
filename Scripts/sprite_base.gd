@@ -65,14 +65,12 @@ func _on_timer_timeout() -> void:
 
 
 
-var stored_position_updated: bool = false
-
 
 func _process(delta: float) -> void:   
     
     
-    stored_position_updated = pathfinder.determine_path(sprite_data_new)
-    # print("stored position updated? ", stored_position_updated)
+    sprite_data_new.stored_position_updated = pathfinder.determine_path(sprite_data_new)
+    # print("stored position updated? ", sprite_data_new.stored_position_updated)
     
     # print("process state") 
     # print("sprite script calls process_state")
@@ -88,24 +86,19 @@ func _process(delta: float) -> void:
         # print("process elevator actions")
         _process_elevator_actions()
 
-        
-
 func _process_elevator_actions() -> void:
     # print(" in elevator state in player script")
     match sprite_data_new.elevator_state:
         
         sprite_data_new.ElevatorState.CALLING_ELEVATOR:     
                    
-            if not sprite_data_new.elevator_requested or stored_position_updated:                
+            if not sprite_data_new.elevator_requested or sprite_data_new.stored_position_updated:                
                 #print("sprite_data_new.elevator_requested: ", sprite_data_new.elevator_requested)
                 #print("stored_position_updated: ", stored_position_updated)                
                 call_elevator()        
                 
-                
-                
-                
         sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:     
-            if stored_position_updated:
+            if sprite_data_new.stored_position_updated:
                 call_elevator()
             
             # request_elevator_ready_status() 
@@ -126,13 +119,7 @@ func _process_elevator_actions() -> void:
 
 #region Elevator Movement
 
-
-
 func call_elevator() -> void:
-    if not confirm_sprite_can_interact_with_elevator():
-        push_warning("Sprite ", sprite_data_new.sprite_name, " cannot interact with elevator: returning")
-        get_tree().paused = true
-        return
 
     var request_data: Dictionary = {
         "sprite_name": sprite_data_new.sprite_name,
@@ -146,15 +133,13 @@ func call_elevator() -> void:
 
     sprite_data_new.elevator_requested = true
 
-
-
 func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_ready_status: bool) -> void:
-    print("elevator request confirmed signal received")
+    # print("elevator request confirmed signal received")
     var incoming_sprite_name = elevator_request_data["sprite_name"]
     var incoming_request_id = elevator_request_data["request_id"]
     
     if not incoming_sprite_name == sprite_data_new.sprite_name:
-        print("not my sprite name: ", sprite_data_new.sprite_name)
+        # print("not my sprite name: ", sprite_data_new.sprite_name)
         return
     
     # print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")    
@@ -167,21 +152,24 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
         sprite_data_new.defer_input = true
         # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
         ## consider emitting the signal from inside the state specific functions
-        print("emitting entering elevator in _on_elevator_request_confirmed for: ", sprite_data_new.sprite_name)
+        # print("emitting entering elevator in _on_elevator_request_confirmed for: ", sprite_data_new.sprite_name)
         SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
         '''ensure sprite is locked down for the entering period'''
-        
+    else:
+        # print("not entering because blocked")
+        return
+
 
 func _on_elevator_waiting_ready_received(elevator_request_data: Dictionary, elevator_ready_status: bool) -> void:
     
     ### case of the DRY here and in the _on_elevator_request_confirmed function
     
-    print("elevator_waiting_ready signal received: ", sprite_data_new.sprite_name)
+    # print("elevator_waiting_ready signal received: ", sprite_data_new.sprite_name)
     var incoming_sprite_name = elevator_request_data["sprite_name"]
     var incoming_request_id = elevator_request_data["request_id"]
     
     if not incoming_sprite_name == sprite_data_new.sprite_name:
-        print("not my sprite name: ", sprite_data_new.sprite_name)
+        # print("not my sprite name: ", sprite_data_new.sprite_name)
         return   
         
     match sprite_data_new.elevator_state:        
@@ -198,106 +186,14 @@ func _on_elevator_waiting_ready_received(elevator_request_data: Dictionary, elev
                 sprite_data_new.defer_input = true
                 # state_manager._process_elevator_state(sprite_data_new) ## update sprite state immediately
                 ## consider emitting the signal from inside the state specific functions
-                print("emitting entering elevator in _on_elevator_waiting_ready_received for: ", sprite_data_new.sprite_name)
+                # print("emitting entering elevator in _on_elevator_waiting_ready_received for: ", sprite_data_new.sprite_name)
+                # print("entering because the elevator is waiting")
                 SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
                 '''ensure sprite is locked down for the entering period'''
 
         _:
-            print(sprite_data_new.sprite_name, " is not waiting for the elevator.")
-            
-#func _on_elevator_request_confirmed(incoming_sprite_name: String, request_id: int) -> void:
-    #
-    ## print("destination_floor of the confirmed request: ", destination_floor)
-    ## print("destination_floor of the sprite: ", sprite_data_new.stored_target_floor)
-    #
-    #if incoming_sprite_name == sprite_data_new.sprite_name:            
-        #sprite_data_new.elevator_request_id = request_id
-        ## print("Elevator request confirmed. Request ID =", request_id)            
-        #sprite_data_new.elevator_request_confirmed = true        
-        ## check if a state update is needed
-        #state_manager._process_elevator_state(sprite_data_new)
-        #
-        #request_elevator_ready_status()
-
-func confirm_sprite_can_interact_with_elevator() -> bool:
-    #print("confirm_sprite_can_interact_with_elevator: ")
-    var current_position: Vector2 = sprite_data_new.current_position
-
-    # Retrieve the elevator data from the Navigation Controller using the elevator_request_id.
-    var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number)
-    if elevator_data == null:
-        #print("Elevator not found for id: ", sprite_data_new.elevator_request_id)
-        return false
-
-    # Get the center position of the elevator.
-    var elevator_center: Vector2 = elevator_data["position"]
-
-    # Check if the sprite is at the elevator's x position (ignoring y-coordinate).
-    if not is_equal_approx(current_position.x, elevator_center.x):
-        #print("Sprite is not at the elevator's x position: ", sprite_data_new.sprite_name)
-        # get_tree().paused = true
-        return false
-
-    # Check if the stored target floor is valid.
-    if sprite_data_new.stored_target_floor == -1 and not sprite_data_new.target_room == -2:
-        #print("sprite ", sprite_data_new.sprite_name, " does not have a stored taget floor")
-        return false
-
-    # Check if the sprite is already on the target floor.
-    if sprite_data_new.current_floor_number == sprite_data_new.stored_target_floor:
-        #print("sprite ", sprite_data_new.sprite_name, " has current floor == taget floor")
-        return false
-
-    # Ensure the sprite's active state is ELEVATOR.
-    var active_state = sprite_data_new.get_active_state()
-    if active_state != sprite_data_new.ActiveState.ELEVATOR:
-        #print("Sprite is not in elevator active state")
-        return false
-
-    # Retrieve elevator sub-state correctly as an ENUM (not a dictionary).
-    var active_sub_state = sprite_data_new.elevator_state
-
-    # Ensure the sub-state is either WAITING_FOR_ELEVATOR or CALLING_ELEVATOR.
-    match active_sub_state:
-        sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR, sprite_data_new.ElevatorState.CALLING_ELEVATOR:
-            #print("sprite ", sprite_data_new.sprite_name, " can interact with the elevator")
-            return true  # Valid states, return true
-
-    # If we reach here, the sprite is in an invalid state.
-    #print("Invalid elevator sub-state:", active_sub_state)
-    return false
-
-
-#func request_elevator_ready_status() -> void:
-    #if not confirm_sprite_can_interact_with_elevator():
-        #return
-    #
-    ## If everything is valid, emit the signal.
-    #SignalBus.request_elevator_ready_status.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
-  
-           
-func _on_elevator_ready(incoming_sprite_name: String, request_id: int):   
-    #print("-----------PLAYER-----------")
-    #print("ready signal received!")
-    #print("ready signal request id: ", request_id)
-    #print("sprite data request id: ", sprite_data_new.elevator_request_id)       
-    if incoming_sprite_name != sprite_data_new.sprite_name:
-        return
-        
-    if request_id != sprite_data_new.elevator_request_id:
-        SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
-        return           
-    
-        
-    if sprite_data_new.elevator_state != sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR and not sprite_data_new.ElevatorState.CALLING_ELEVATOR and not sprite_data_new.current_floor_number == sprite_data_new.stored_target_floor:    
-        # print("sprite state is not waiting for elevator")
-        
-        SignalBus.request_skippable.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
-        return
-    # print("sprite_data_new.elevator_ready = true")     
-    sprite_data_new.elevator_ready = true
-    sprite_data_new.defer_input = true
-
+            # print(sprite_data_new.sprite_name, " is not waiting for the elevator.")
+            pass
 
 func enter_elevator():    
     
@@ -320,16 +216,10 @@ func enter_elevator():
     else:        
         return
 
-
-    
-
 func on_sprite_entered_elevator():    
     sprite_data_new.entered_elevator = true
     SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
     _animate_sprite()
-
-
-
 
 func _on_elevator_ride(elevator_pos: Vector2, sprite_name: String) -> void:
     
@@ -352,37 +242,22 @@ func _on_elevator_ride(elevator_pos: Vector2, sprite_name: String) -> void:
         _animate_sprite()
 
 func _on_elevator_at_destination(incoming_sprite_name: String):
-    print("_on_elevator_at_destination") ## is being called twice
+    # print("_on_elevator_at_destination") ## is being called twice
     if incoming_sprite_name == sprite_data_new.sprite_name:        
         sprite_data_new.elevator_destination_reached = true
 
-#func exit_elevator():
-    #_animate_sprite()
-    #var current_anim = $AnimatedSprite2D.animation
-    #if current_anim == "exit" and sprite_data_new.elevator_destination_reached:
-        #z_index = 0
-        #SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
-        #sprite_data_new.exited_elevator = true
-        #sprite_data_new.set_target_position(
-            #sprite_data_new.stored_target_position,
-            #sprite_data_new.stored_target_floor,
-            #sprite_data_new.stored_target_room
-        #)
-        #sprite_data_new.reset_stored_data()
-
 func exit_elevator():
-    print("exit elevator in sprite base") 
+    # print("exit elevator in sprite base") 
     if not sprite_data_new.exiting_elevator:
         sprite_data_new.exiting_elevator = true
         _animate_sprite() 
     else:
         return
- 
 
 func on_sprite_exited_elevator():
-    print("on_sprite_exited_elevator in sprite base") 
+    # print("on_sprite_exited_elevator in sprite base")
     z_index = 0
-    SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.elevator_request_id)
+    SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name)
     sprite_data_new.exited_elevator = true
     sprite_data_new.set_target_position(
         sprite_data_new.stored_target_position,
@@ -447,6 +322,18 @@ func _animate_sprite() -> void:
         _:
             push_warning("in _animate_sprite: Sprite is in no recognized state in _animate_sprite!")
             $AnimatedSprite2D.play("idle")
+            
+func _on_animation_finished() -> void:    
+    var anim_name = $AnimatedSprite2D.animation
+    
+    match anim_name:
+        "enter":
+            if sprite_data_new.elevator_ready:
+                on_sprite_entered_elevator()
+
+        "exit":
+            if sprite_data_new.elevator_destination_reached:
+                on_sprite_exited_elevator()      
 #endregion
 
 
@@ -521,46 +408,18 @@ func connect_to_signals():
     SignalBus.adjusted_navigation_command.connect(_on_adjusted_navigation_command)
     SignalBus.floor_area_entered.connect(_on_floor_area_entered)
     SignalBus.elevator_request_confirmed.connect(_on_elevator_request_confirmed)
-    SignalBus.elevator_ready.connect(_on_elevator_ready)
+    SignalBus.elevator_waiting_ready.connect(_on_elevator_waiting_ready_received)    
     SignalBus.elevator_arrived_at_destination.connect(_on_elevator_at_destination) ## not needed any more -> handled by elevator's waiting function
     SignalBus.elevator_position_updated.connect(_on_elevator_ride)
-    SignalBus.queue_reordered.connect(_on_queue_reordered)
-    
-    
-    SignalBus.elevator_waiting_ready.connect(_on_elevator_waiting_ready_received)
     
     $AnimatedSprite2D.animation_finished.connect(_on_animation_finished)
 
-#func _test(request_data, ready_status):
-    #print("elevator waiting ready signal received, but unchecked because test")
 
-func _on_animation_finished() -> void:    
-    var anim_name = $AnimatedSprite2D.animation
-    
-    match anim_name:
-        "enter":
-            if sprite_data_new.elevator_ready:
-                on_sprite_entered_elevator()
-
-        "exit":
-            if sprite_data_new.elevator_destination_reached:
-                on_sprite_exited_elevator()        
+  
             
-            #sprite_data_new.entered_elevator = true
-            #SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
-            ## Maybe switch to idle or next state
-            #_animate_sprite()
 
-func _on_queue_reordered(sprite_name, request_id):
-    
-    if sprite_data_new.sprite_name == sprite_name and sprite_data_new.elevator_request_id == request_id:    
-        sprite_data_new.elevator_ready = true
-        state_manager.process_state(sprite_data_new)
-        _process_elevator_actions()
-        # request_elevator_ready_status()
-    
-    else:
-        return
+
+
     
 
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
