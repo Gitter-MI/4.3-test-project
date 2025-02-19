@@ -6,39 +6,27 @@ extends Node2D
 @onready var queue_manager: Node = $Queue_Manager
 @onready var elevator_state_manager: Node = $Elevator_StateMachine
 
+
 func _ready():    
     set_up_elevator_cabin()    
     z_index = -10
-    # setup_cabin_timer(2.0)    
     add_to_group("cabin")    
 
 
-# var frame_count: int = 0
-
-func _process(delta) -> void:
-    
-    # frame_count = frame_count + 1
-    # print("frame_count: ", frame_count)
-    
+func _process(delta) -> void:    
     # elevator_state_manager.process_elevator_state()  # rename to update or check elevator state to better indicate what the responsibility is
     
     match cabin_data.elevator_state:
         cabin_data.ElevatorState.IDLE:            
             process_idle()
         cabin_data.ElevatorState.WAITING:
-            process_waiting()
-            # print("process_waiting()")
-        cabin_data.ElevatorState.DEPARTING:  # -> did sprite enter -> did door close?
-            # pass
-            
-            process_departing()            
-            # print("calling process_departing in state main elevator script")
-        cabin_data.ElevatorState.TRANSIT:      # -> until at destination 
+            process_waiting()            
+        cabin_data.ElevatorState.DEPARTING:            
+            process_departing()                        
+        cabin_data.ElevatorState.TRANSIT: 
             process_transit(delta)
-            # print("process_transit()")   
-        cabin_data.ElevatorState.ARRIVING:      # -> open door -> eject sprite -> 
+        cabin_data.ElevatorState.ARRIVING:
             process_arriving()
-            #print("process_arriving()")      
         _:
             push_warning("unknow state in process_cabin_states")                            
             pass
@@ -62,13 +50,10 @@ func process_arriving() -> void:
     elevator_state_manager.process_arriving()
 
 
+
 func process_transit(delta):
-    #update_destination_floor()
-    #set_elevator_direction()
     move_elevator(delta)
     elevator_state_manager.process_transit()
-
-
 
 
 
@@ -76,30 +61,20 @@ func process_departing():
     # print("process departing in main elevator script")
     
     if not cabin_data.cabin_timer.is_stopped():
-            stop_waiting_timer()    ## -> is this too late? could the timer time out between these steps?
-                                    ## we stop the timer immediately when switching to occupied
-                                    ## if the timer removed the last request(s) for the current floor it should already be stopped?
-                                    ## -> timer should never be running at this point in time
-                                    ## we get a 'no timer to stop' message every time we depart on no requests for the current floor and not occupied
+            stop_waiting_timer()
     
     if not cabin_data.doors_closed:  
         if (cabin_data.elevator_occupied and cabin_data.sprite_entered) or not cabin_data.elevator_occupied:        
             _close_elevator_doors()
             cabin_data.elevator_ready_emitted = false
-        
+            
+    cabin_data.blocked_sprite = ""
     elevator_state_manager.process_departing()
 
-
-# helper function
-func _on_sprite_has_entered_the_elevator(_sprite_name: String):
-    '''not used anymore'''
-    cabin_data.sprite_entered = true
     
 
 func _close_elevator_doors():
-    ## starts playing the animation to close the elevator doors
-    ## start the animation once only
-    ## when the doors are closed we receive a 
+    
         var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)
         if elevator and not cabin_data.doors_closing == true:
             elevator.set_door_state(elevator.DoorState.CLOSING)
@@ -118,13 +93,7 @@ func _on_elevator_door_state_changed(new_state):
         elevator.DoorState.OPEN:
             # print("doors are now open")
             cabin_data.doors_open = true
-            cabin_data.doors_opening = false            
-            reset_elevator_direction()      # still needed?
-            
-            #if queue_manager.elevator_queue.size() >= 2:
-                #start_waiting_timer()
-                ## print("Timer started because at least two requests are in the queue")
-                
+            cabin_data.doors_opening = false
 
         elevator.DoorState.CLOSED:
             # print("doors are now closed")
@@ -133,9 +102,6 @@ func _on_elevator_door_state_changed(new_state):
             set_elevator_direction()
             update_destination_floor()
             
-            # if cabin_data.destination_floor != cabin_data.current_floor:
-                
-                
 
 
 func update_destination_floor() -> void:
@@ -215,7 +181,7 @@ func process_idle():
 func check_elevator_queue() -> bool:
     cabin_data.elevator_busy = queue_manager.elevator_queue.size() != 0
     return cabin_data.elevator_busy
-    # print("elevator busy?: ", cabin_data.elevator_busy)    
+    
 #endregion
 
 
@@ -237,41 +203,38 @@ func process_waiting():
     ## start the timer only if we are the first request pick-up floor, else leave now. 
     ## should not matter, since we are leaving next frame
     
-    if cabin_data.cabin_timer.is_stopped():
+    if cabin_data.cabin_timer.is_stopped():    
         start_waiting_timer()
 
     # print("updating elevator state at the end of the main scripts process_waiting function")
     elevator_state_manager.process_waiting()
 
 
-func emit_ready_on_waiting():    
-    # print("emit_ready_on_waiting")    
+func emit_ready_on_waiting():
+    print("emit_ready_on_waiting")
+    
     var elevator_ready_status: bool = true
     var requests_at_floor: Array = []
+    
     for request in queue_manager.elevator_queue:
-        if request["pick_up_floor"] == cabin_data.current_floor:
+        if request["pick_up_floor"] == cabin_data.current_floor \
+            and request["sprite_name"] != cabin_data.blocked_sprite:
             requests_at_floor.append(request)
-              
     
     for request_data in requests_at_floor:
-        # print("emitting the elevator_waiting_ready signal to: ", request_data["sprite_name"])
-        if request_data["sprite_name"] != cabin_data.blocked_sprite:        
-            # print("emitting request signal with actual value to ", request_data["sprite_name"])
-            SignalBus.elevator_request_confirmed.emit(request_data, elevator_ready_status)
-        else:
-            # print("emitting request signal with false to ", request_data["sprite_name"])
-            SignalBus.elevator_request_confirmed.emit(request_data, false)
-            # we emit the ready signals to all sprites waiting on the current floor. If a sprite is waiting it will enter immediately and occupied is set to true.
-            # unless the sprite is blocked, then we proceed with the next request in the queue
+        print("emitting request signal with actual value to ", request_data["sprite_name"])
+        SignalBus.elevator_request_confirmed.emit(request_data, elevator_ready_status)
         
         if cabin_data.elevator_occupied:
             cabin_data.elevator_ready_emitted = true
             if not cabin_data.cabin_timer.is_stopped():
                 stop_waiting_timer()
-            # print("setting cabin_data.elevator_ready_emitted = true inside the loop in emit_ready_on_waiting")
             break
-    # print("setting cabin_data.elevator_ready_emitted = true at the end of emit_ready_on_waiting")
-    cabin_data.elevator_ready_emitted = true ## this doesn't need to happen twice? 
+
+    cabin_data.elevator_ready_emitted = true
+    cabin_data.blocked_sprite = ""
+
+    
 
 
 func is_at_first_request_pickup_floor() -> void:
@@ -297,6 +260,10 @@ func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     var new_request: Dictionary = elevator_request_data
     
     var sprite_name: String = elevator_request_data["sprite_name"]
+    
+    if sprite_name == cabin_data.blocked_sprite:
+        return
+    
     var sprite_elevator_request_id: int = elevator_request_data["request_id"]        
     var request_type = _categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)
     # print("request type for ", sprite_name, " is ", request_type)     
@@ -309,19 +276,6 @@ func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     else:
         # print("emitting request signal with false to ", sprite_name)
         SignalBus.elevator_request_confirmed.emit(processed_request, false)
-
-    #print("This would be the final signal: ")
-    #print("Added request with sprite_name: ", processed_request["sprite_name"])
-    #print("Added request with request_id: ", processed_request["request_id"])
-    #print("Pick-up floor of this request: ", processed_request["pick_up_floor"])
-    #print("Destination floor of this request: ", processed_request["destination_floor"])
-    #print("The elevator is ready: ", elevator_ready_on_request)    
-            
-    '''update the elevator status when the sprite has entered'''
-    '''lift the lock on the sprite / confirm if needed at all, or not, or if it remains in nav (expected case)'''
-    '''remember to lift the lock on the elevator after drop-off to emit new, intermittent ready signal''' ## maybe use busy instead?
-    '''move the request of the sprite currently inside the elevator to [0] upon entering'''
-    
             
     
 
@@ -365,21 +319,6 @@ func _check_ready_status_on_request(elevator_request_data: Dictionary) -> bool:
  
 func _categorize_incomming_elevator_request(sprite_name: String, sprite_elevator_request_id: int) -> ElevatorRequestType:
     
-    ## the final check for the elevator state will be added later
-    ## ignore for now:
-    #var current_state = cabin_data.elevator_state
-    #
-    #match current_state:
-        #cabin_data.ElevatorState.IDLE:
-            #print("Elevator is Idle: Overwrite")
-            ##cabin_data.set_elevator_state(cabin_data.ElevatorState.DEPARTING)  # for testing purposes
-            #return ElevatorRequestType.OVERWRITE                        
-        #
-        #cabin_data.ElevatorState.WAITING:
-            #print("Elevator is Waiting: Overwrite")
-            #return ElevatorRequestType.OVERWRITE
-    
-    
     # Check if the sprite already has a request in the queue.
     var sprite_already_has_a_request_in_the_queue: bool = queue_manager.does_sprite_have_a_request_in_queue(sprite_name)
     if not sprite_already_has_a_request_in_the_queue:
@@ -397,7 +336,7 @@ func _categorize_incomming_elevator_request(sprite_name: String, sprite_elevator
 #endregion
 
 func _on_sprite_entering_elevator(sprite_name: String):
-    # print("Elevator: Sprite ", sprite_name, " has begun to enter the elevator")
+    print("Elevator: Sprite ", sprite_name, " has begun to enter the elevator")
     
     if not cabin_data.cabin_timer.is_stopped():
         stop_waiting_timer()
@@ -415,14 +354,12 @@ func _on_sprite_enter_animation_finished(_sprite_name: String, _stored_target_fl
     pass
 
 func _on_sprite_exiting(sprite_name) -> void:
-
-    ## arguments are never used
-    ## add a blocker here to prevent sprites from re-entering immediately
     reset_elevator()
-    if queue_manager.elevator_queue != []:
-        cabin_data.blocked_sprite = sprite_name
+    cabin_data.blocked_sprite = sprite_name
+    
 
-func reset_elevator() -> void:    
+func reset_elevator() -> void:
+    print("resetting elevator status")
     ## arguments are never used
     cabin_data.elevator_occupied = false
     cabin_data.sprite_entered = false
@@ -445,16 +382,20 @@ func setup_cabin_timer(wait_time: float) -> void:
 
 func start_waiting_timer() -> void:
     
+    
     if not cabin_data.cabin_timer.is_stopped():
         push_warning("cabin timer already started, returning immediately.")
         return
         
     # Only start the timer if there's at least one request for the current floor.
+    
     if not queue_manager.elevator_queue.is_empty():
+        # print("starting timer")
         cabin_data.cabin_timer.start()
         # print("timer started")
 
 func stop_waiting_timer() -> void:
+    
     if cabin_data.cabin_timer == null:
         push_warning("cabin timer not set-up in stop_waiting_timer")
         return
@@ -462,7 +403,7 @@ func stop_waiting_timer() -> void:
     if cabin_data.cabin_timer.is_stopped():
         push_warning("cabin timer is not running; nothing to stop.")
         return
-
+    # print("stopping timer")
     cabin_data.cabin_timer.stop()
     # print("cabin timer stopped")
 
@@ -476,7 +417,7 @@ func _on_cabin_timer_timeout() -> void:
         push_warning("Elevator queue is empty on timer timeout.")
         return
     
-    # print("removing timer requests")
+    # print("timer timeout")
     queue_manager.remove_request_on_waiting_timer_timeout(cabin_data.current_floor)
         
 #endregion

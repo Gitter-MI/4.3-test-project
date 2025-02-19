@@ -1,7 +1,7 @@
 # cabin_data_new.gd
 extends Node
 
-enum ElevatorState { IDLE, WAITING, DEPARTING, TRANSIT, ARRIVING}
+enum ElevatorState { IDLE, WAITING, DEPARTING, TRANSIT, ARRIVING, ROOM_OCCUPIED}
 var elevator_state: ElevatorState = ElevatorState.IDLE  # initial state
 
 func set_elevator_state(new_state: ElevatorState) -> void:    
@@ -26,13 +26,13 @@ var doors_open: bool = true
 var doors_closing: bool = false
 var doors_closed: bool = false
 
-
+var room_occupied: bool = false
 var blocked_sprite: String = ""
 
 
 
-var current_floor: int = 2 ## used in the new implementation  # for spawning only.
-var destination_floor: int = 2  # for spawning only. If not used, remove
+var current_floor: int = 4 ## used in the new implementation  # for spawning only.
+var destination_floor: int = 4  # for spawning only. If not used, remove
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
 

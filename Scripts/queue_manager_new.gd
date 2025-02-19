@@ -84,13 +84,13 @@ func add_to_elevator_queue(request: Dictionary) -> Dictionary:
     # print("add to elevator queue")
     request.request_id = get_next_request_id()
     elevator_queue.append(request)
-    #var dummy_request: Dictionary = {
-        #"pick_up_floor": 3,
-        #"destination_floor": 2,
-        #"sprite_name": "Test_Sprite",
-        #"request_id": 0
-    #}
-    #elevator_queue.append(dummy_request)   
+    var dummy_request: Dictionary = {
+        "pick_up_floor": 3,
+        "destination_floor": 2,
+        "sprite_name": "Test_Sprite",
+        "request_id": 0
+    }
+    elevator_queue.append(dummy_request)   
     #var dummy_request_two: Dictionary = {
         #"pick_up_floor": 4,
         #"destination_floor": 2,
