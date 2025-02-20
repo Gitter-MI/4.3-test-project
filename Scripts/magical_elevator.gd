@@ -225,6 +225,7 @@ func emit_ready_on_waiting():
         print("emitting request signal with actual value to ", request_data["sprite_name"])
         SignalBus.elevator_request_confirmed.emit(request_data, elevator_ready_status)
         
+        
         if cabin_data.elevator_occupied:
             cabin_data.elevator_ready_emitted = true
             if not cabin_data.cabin_timer.is_stopped():
