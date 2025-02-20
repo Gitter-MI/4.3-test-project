@@ -1,4 +1,4 @@
-extends Node2D
+extends Area2D
 
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 @onready var cabin_sprite: Sprite2D = $Sprite2D
@@ -502,6 +502,14 @@ func connect_to_signals():
     SignalBus.enter_animation_finished.connect(_on_sprite_enter_animation_finished)
     SignalBus.door_state_changed.connect(_on_elevator_door_state_changed)
     SignalBus.exit_animation_finished.connect(_on_sprite_exiting)
+    
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)
+
+
+func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
+    if area == self:
+        cabin_data.current_floor = floor_number
+        print("Elevator has entered floor #%d" % [floor_number])  
 
 
 #endregion

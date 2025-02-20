@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://ddgu340ss41q8"]
+[gd_scene load_steps=7 format=3 uid="uid://ddgu340ss41q8"]
 
 [ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="1_lk3mn"]
 [ext_resource type="Script" uid="uid://bymp2i771v7a1" path="res://Scripts/magical_elevator.gd" id="1_rukfi"]
@@ -6,7 +6,10 @@
 [ext_resource type="Script" uid="uid://b5eyvmrtr4snk" path="res://Scripts/queue_manager_new.gd" id="3_e8aju"]
 [ext_resource type="Script" uid="uid://c3qahk4lhar8g" path="res://Scripts/elevator_state_machine_new.gd" id="4_ay4kc"]
 
-[node name="Magical_Elevator" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rukfi"]
+size = Vector2(40, 54)
+
+[node name="Magical_Elevator" type="Area2D"]
 script = ExtResource("1_rukfi")
 
 [node name="Cabin_Data" type="Node" parent="."]
@@ -22,3 +25,6 @@ cabin_data = NodePath("../Cabin_Data")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_lk3mn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_rukfi")

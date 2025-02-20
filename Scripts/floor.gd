@@ -33,6 +33,8 @@ func _on_floor_area_entered(area: Area2D) -> void:
     if area.get("sprite_data") or area.get("sprite_data_new"):        # # Check if the area that entered belongs to a sprite
         SignalBus.floor_area_entered.emit(area, floor_number)
         # print("Sprite '%s' entered floor %d" % [area.name, floor_number])
+    if area.get("cabin_data"):
+        SignalBus.floor_area_entered.emit(area, floor_number)
         
 
     
