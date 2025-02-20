@@ -99,7 +99,12 @@ func setup_door_instance(p_door_data, p_floor_instance):
     set_door_state(DoorState.CLOSED)
     position_door()
     update_collision_shape()
-    tooltip_background.set_text(door_data.tooltip)
+    # Replace owner in tooltip text if the placeholder exists
+    var final_tooltip = door_data.tooltip
+    if final_tooltip.find("{owner}") != -1:
+        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
+
+    tooltip_background.set_text(final_tooltip)
     connect("mouse_entered", self._on_mouse_entered)
     connect("mouse_exited", self._on_mouse_exited)
 

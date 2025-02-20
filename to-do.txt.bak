@@ -1,6 +1,0 @@
-Player input only for Player 1 sprite
-
-Set random targets for AI guy
-
-Debug Elevator
--> 2nd Sprite appears to be leaving the Waiting state when it's actually someone elses turn

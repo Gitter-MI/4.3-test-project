@@ -509,7 +509,7 @@ func connect_to_signals():
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
     if area == self:
         cabin_data.current_floor = floor_number
-        print("Elevator has entered floor #%d" % [floor_number])  
+        # print("Elevator has entered floor #%d" % [floor_number])  
 
 
 #endregion

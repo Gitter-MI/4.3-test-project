@@ -9,7 +9,7 @@ doors = Array[Dictionary]([{
 "door_type": 1,
 "floor_number": 1,
 "index": 0,
-"owner": "Player 1",
+"owner": "Player 123456",
 "tooltip": "Office of {owner}"
 }, {
 "door_slot": 1,
@@ -17,21 +17,21 @@ doors = Array[Dictionary]([{
 "floor_number": 1,
 "index": 1,
 "owner": "Player 1",
-"tooltip": "{owner}'s newsroom"
+"tooltip": "Your newsroom"
 }, {
 "door_slot": 2,
 "door_type": 3,
 "floor_number": 1,
 "index": 2,
 "owner": "Player 1",
-"tooltip": "{owner}'s boss"
+"tooltip": "Your boss' office"
 }, {
 "door_slot": 3,
 "door_type": 4,
 "floor_number": 1,
 "index": 3,
 "owner": "Player 1",
-"tooltip": "{owner}'s media archive"
+"tooltip": "Your media archive"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -45,21 +45,21 @@ doors = Array[Dictionary]([{
 "floor_number": 2,
 "index": 5,
 "owner": "Player 2",
-"tooltip": "{owner}'s newsroom"
+"tooltip": "Player 2's newsroom"
 }, {
 "door_slot": 2,
 "door_type": 3,
 "floor_number": 2,
 "index": 6,
 "owner": "Player 2",
-"tooltip": "{owner}'s boss"
+"tooltip": "Boss' office from Player 2"
 }, {
 "door_slot": 3,
 "door_type": 4,
 "floor_number": 2,
 "index": 7,
 "owner": "Player 2",
-"tooltip": "{owner}'s media archive"
+"tooltip": "Media archive from Player 2"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -73,19 +73,19 @@ doors = Array[Dictionary]([{
 "floor_number": 3,
 "index": 9,
 "owner": "Player 3",
-"tooltip": "{owner}'s newsroom"
+"tooltip": "Player 3's newsroom"
 }, {
 "door_slot": 2,
 "door_type": 3,
 "floor_number": 3,
 "index": 10,
 "owner": "Player 3",
-"tooltip": "{owner}'s boss"
+"tooltip": "Boss' office from Player 3"
 }, {
 "door_slot": 3,
 "door_type": 4,
 "floor_number": 3,
 "index": 11,
 "owner": "Player 3",
-"tooltip": "M{owner}'s media archive"
+"tooltip": "Media archive from Player 3"
 }])

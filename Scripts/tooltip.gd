@@ -49,7 +49,7 @@ func update_tooltip_size():
     # Set size of the tooltip background
     set_size(Vector2(total_width, total_height))
     
-    # Center the tooltip background above the door position
+    # Center the tooltip background just above the center of the door element
     position = Vector2(-total_width / 2, -total_height)
     
     # Position label within background
