@@ -3,66 +3,20 @@ extends Area2D
 
 @onready var navigation_controller := get_tree().get_root().get_node("Main/Navigation_Controller")
 @onready var cabin := get_tree().get_root().get_node("Main/Magical_Elevator")
-
 @export var state_manager: Node
 @export var pathfinder: Node
+@export var movement: Node
+
 const SpriteDataScript = preload("res://Data/SpriteData_new.gd")
 var sprite_data_new: Resource = SpriteDataScript.new()
 
 const SCALE_FACTOR = 2.3
-var last_elevator_request: Dictionary = {"sprite_name": "", "floor_number": -1}
-var previous_elevator_position: Vector2 = Vector2.ZERO
-
-
-'''Testing'''
-var initial_x: float
-var timer: Timer
-var prev_floor: int = -1  # Holds the previous random floor number
-
 
 
 func _ready():
-    # print("deco ready")
-    # print("sprite_data_new: ", sprite_data_new)
-    # sprite_data_new = SpriteDataScript.new()
     instantiate_sprite()
     connect_to_signals()    
     set_initial_position()
-
-  
-    '''Testing'''
-    #randomize()  # Seed the RNG
-    #
-    ## Store the initial x-coordinate from sprite_data_new
-    #initial_x = sprite_data_new.current_position.x
-    #
-    ## Create and configure the Timer node to call _on_timer_timeout every 2 seconds
-    #timer = Timer.new()
-    #timer.wait_time = 1.0  # Change to 2.0 seconds for production; was 0.05 for testing
-    #timer.one_shot = false
-    #timer.autostart = true
-    #add_child(timer)
-    #timer.timeout.connect(_on_timer_timeout)
-
-'''Testing'''
-
-func _on_timer_timeout() -> void:
-    # Calculate a new x position by adding a random offset (here between -250 and 250) to the initial x
-    var offset: float = randf_range(-250.0, 250.0)
-    var new_x: float = initial_x + offset
-    var new_position: Vector2 = Vector2(new_x, sprite_data_new.current_position.y)
-    
-    # Generate a random floor between 1 and 10.
-    var random_floor: int = randi() % 4
-    # Ensure that the new random floor is not the same as the previous one.
-    #while random_floor == prev_floor:
-        #random_floor = randi() % 3
-    # Store the current random floor for the next call.
-    prev_floor = random_floor
-    
-    # Call the navigation command with the new random floor and position.
-    navigation_controller._on_navigation_command(sprite_data_new.sprite_name, random_floor, -1, "player_input", new_position)
-
 
 
 
@@ -79,12 +33,14 @@ func _process(delta: float) -> void:
     
     if active_state == sprite_data_new.ActiveState.MOVEMENT:   
         # print("process movement")     
-        move_sprite(delta)
+        movement.move_sprite(delta, sprite_data_new, self)
         _animate_sprite()
 
     if active_state == sprite_data_new.ActiveState.ELEVATOR:
         # print("process elevator actions")
+        # elevator._process_elevator_actions(sprite_data_new, self)
         _process_elevator_actions()
+
 
 func _process_elevator_actions() -> void:
     # print(" in elevator state in player script")
@@ -350,39 +306,7 @@ func _on_animation_finished() -> void:
 #endregion
 
 
-#region Sprite Movement
 
-func move_sprite(delta: float) -> void:
-    if sprite_data_new.movement_state == sprite_data_new.MovementState.WALKING:
-        move_towards_position(sprite_data_new.target_position, delta)
-
-func move_towards_position(target_position: Vector2, delta: float) -> void:    
-    target_position.y = sprite_data_new.current_position.y # Force horizontal-only movement by locking the target's Y to current_position.y
-    
-    var direction = (target_position - sprite_data_new.current_position).normalized()
-    var distance = sprite_data_new.current_position.distance_to(target_position)
-    
-    if distance > 13.0:   # Speed / FPS
-        var new_x = sprite_data_new.current_position.x + direction.x * sprite_data_new.speed * delta
-        sprite_data_new.set_current_position(
-            Vector2(new_x, sprite_data_new.current_position.y),
-            sprite_data_new.current_floor_number,
-            sprite_data_new.current_room
-        )
-        global_position.x = new_x
-    else:
-        # print("distance: ", distance)
-        var new_x = sprite_data_new.target_position.x
-        sprite_data_new.set_current_position(
-            Vector2(new_x, sprite_data_new.target_position.y),
-            sprite_data_new.current_floor_number,
-            sprite_data_new.current_room
-        )
-        global_position.x = new_x
-    
-
-
-#endregion
 
 
 #region set_initial_position

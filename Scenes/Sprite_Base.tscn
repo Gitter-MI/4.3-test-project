@@ -1,9 +1,10 @@
-[gd_scene load_steps=19 format=3 uid="uid://cafwwxkckh345"]
+[gd_scene load_steps=20 format=3 uid="uid://cafwwxkckh345"]
 
 [ext_resource type="Script" uid="uid://bysjk40gw4iyf" path="res://Scripts/sprite_base.gd" id="1_xg5y0"]
 [ext_resource type="Texture2D" uid="uid://bfikhkmebh1ss" path="res://Sprites/Player_1.png" id="2_8d083"]
 [ext_resource type="Script" uid="uid://bdel5w2lwam25" path="res://Scripts/pathfinder_component.gd" id="3_21vma"]
 [ext_resource type="Script" uid="uid://bs44xfwkdxl5t" path="res://Scripts/state_component.gd" id="4_iuv37"]
+[ext_resource type="Script" uid="uid://cry7jqv88tijc" path="res://Scenes/movement_component.gd" id="5_8d083"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v4w6j"]
 atlas = ExtResource("2_8d083")
@@ -119,10 +120,11 @@ animations = [{
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6c7d7"]
 
-[node name="SpriteBase" type="Area2D" node_paths=PackedStringArray("state_manager", "pathfinder")]
+[node name="SpriteBase" type="Area2D" node_paths=PackedStringArray("state_manager", "pathfinder", "movement")]
 script = ExtResource("1_xg5y0")
 state_manager = NodePath("State_Component")
 pathfinder = NodePath("Pathfinder_Component")
+movement = NodePath("Movement_Component")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_snh8b")
@@ -137,3 +139,6 @@ script = ExtResource("3_21vma")
 
 [node name="State_Component" type="Node" parent="."]
 script = ExtResource("4_iuv37")
+
+[node name="Movement_Component" type="Node" parent="."]
+script = ExtResource("5_8d083")

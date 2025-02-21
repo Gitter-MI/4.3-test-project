@@ -1,141 +1,23 @@
 -> Properly define z-index for all sprites. Otherwise the engine will randomly render them on top of each other
 
 
+sprite moving "up" when entering elevator
+sprite base + different sprites for spawner
+move nav commander away from sprite base
+move animations away from sprite base
+re-order state processes
+
+remove cabin from sprite script -> elevator component vs. movement component
 
 
-
-
-
-
-
-
-
-Elevator ready should be a state not just a signal
-It's fine to emit a ready signal for immediate action but otherwise if a sprite needs an elevator it should always be able to check if the elevator is ready/available
-
-
-Re-Setting the whole elevator status every time in the pathfinder module (!)
-even if a simple update would suffice
-
-
-Queue reordered loop when all sprites on the same floor who have called the elevator are not there
--> queue manager will keep sending ready until one of the sprites enters (or hopefully the timer removes the requests)
-
-Why do the sprites get stuck in the elevator?
-
-
-
-What is the definition of the elevator being ready for anyone who just walks up to it?
-STATE IDLE
-
-Question: Does the elevator idle at least for one cycle even when the queue is not empty?
-No. If the queue is not empty the ELEVATOR is not IDLE. 
-
-Define again:
-    What are the conditions necessary to allow any sprite to use the elevator regardless of the current state of the elevator queue?
+globals:
+    1) gameplay:
+        time (speed, start, end of day)
+        player 1,2,3 etc...
+        movement speed (elevator, sprites)
     
-    - Doors are open
-    - Elevator is not occupied
+    2)  logic:
+        scale factor
+        resolution
+        language 
     
-    => WAITING
-
-If ELEVATOR is WAITING and new request with pick-up floor == elevator current floor then
-    -> add the new request at the top of the elevator queue: insert (0, request)
-    -> if there is another request that should be served (timer is on, or more general pick-up floor is the same as the current floor but the corresponding sprite is not in any ELEVATOR state) then
-        -> additionally to the insert remove the request at elevator_queue[1]
-        
-
-What is the process needed to implement this requirement?
-    - the elevator queue confirms the new request to the sprite that can skip the queue
-    -> the elevator queue needs to know if the queue can be skipped
-        - elevator doors are open
-        - elevator is not occupied
-        - if exists, the sprite from the first request in the queue is not in any ELEVATOR state
-
-What if, we recreate the ELEVATOR WAITING for SPRITE situation?
-Or if we recreate the ELEVATOR IDLE behavior
-->Treat the queue as if it was empty while the timer is on. 
-
-If elevator is busy and WAITING and timer has started then
-    set elevator to IDLE state 
-    allowing any sprite to enter
-    
-If the timer times out, the elevator will switch back to the expected flow immediately
-
-
-
-
-
-
-Sprite A is calling the elevator and walking away
-The elevator arrives, emits ready and retrieves skippable
-There is no other sprite waiting for the elevator right now on the same floor
-Timer period 
-Another sprite arrives at the waiting elevator in ready state
-Sprite is not getting the ready confirmed from the elevator because the other sprite (in timer mode) is bloking the queue
-
--> Would need to confirm: timer is on (confirms that the elevator is ready)
--> Would need to get a new request from the same floor
--> would then need to shuffle the queue to allow the new sprite to enter timely. 
-////////////////////////////////////////////////////////
-
-Unknown elevator sub state needs to be handled
-- sprites are in elevator state NONE when the warning triggers
-
-When the elevator arrives , sprite exits and another sprite is waiting BUT it's not the turn of the sprite that is already waiting in front of the open doors: it will not enter
--> sprites should enter when they are standing in front of the open doors, regardless of the queue order
-
-When the sprite arrives at open elevator doors (maybe during a timer period?) it should enter immediately, regardless of the queue order
-
-
-
-
-Shuffle and Skippable issues:
-    
-    We shuffle when the sprite walks away from the elevator, we need to shuffle only, when the sprite returns
-    We call skippable even when the sprite has used the elevator as expected
-    and we call skippable when the queue has been reshuffled
-
-
-Shuffling elevator queue for sprite:AI_SPRITE
-maybe it's working as expected, it's just that the 'AI' is completely random
-
-- it appears the function is called at the wrong moment?
-- when in elevator room the process is not properly stopped, looks like the timer is still running
-- shuffle doesn't work. but it's getting called
-- sprite is not being moved to the back when returning
-
-
-- it appears it is changing the destination floor # solved: was set to random
-- on click elevator room the sprites are moving to a random floor?  # solved was set to random
-
-
-
-- When the sprite issues a new request for the elevator room while in front of the queue, then we don't want to reshuffle
-- We call reshuffle when the request_id of the sprite is -1. 
-
-
-
-#################
-
-implement the room state thing:
-    Remember to defer inputs when entering and exiting rooms
-    Example: _on_elevator_ready    
-
-add more sprites to find out if shuffle really works as expected
-    Double check the:
-        - shuffle
-        - timer
-        - queue order
-        - crazy clicks
-        - elevator on same floor
-        - elevator on other floor
-        - waiting and walking away
-        - waiting and entering: if another sprite is already waiting
-
-find any other bug that could be in the way: 9
-
-
-
-otherwise: 
-    Congrats! You are closer than ever. 

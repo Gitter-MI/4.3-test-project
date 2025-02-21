@@ -8,6 +8,38 @@ extends Node2D
 
 # @export var deco_scene: PackedScene
 
+var deco_definitions = [
+    {
+        "texture_path": "res://Sprites/plant/gfx_building_Pflanze1.png",
+        "floor_number": 3,
+        "x_percent": 25,
+        "name": "PLANT_01"
+    },
+    {
+        "texture_path": "res://Sprites/plant/gfx_building_Pflanze2.png",
+        "floor_number": 3,
+        "x_percent": 50,
+        "name": "PLANT_02"
+    },
+    {
+        "texture_path": "res://Sprites/plant/gfx_building_Pflanze3.png",
+        "floor_number": 2,
+        "x_percent": 10,
+        "name": "SIGN_01"
+    }
+    # ... etc. Add as many as you want
+]
+
+
+
+#{
+  #"texture_path": "res://Sprites/plant/gfx_building_Pflanze1.png",
+  #"floor_number": 3,
+  #"x_percent": 25,
+  #"name": "PLANT_01",
+  #"custom_scale": 1.5,
+  #"z_index": 5
+#}
 
 
 
@@ -16,7 +48,8 @@ func _ready():
     spawn_base_sprite()
     # spawn_player()
     # spawn_ai(1)
-    # spawn_decorations(1)
+    
+    spawn_all_decorations()
     
     
     SignalBus.all_sprites_ready.emit()  
@@ -72,20 +105,26 @@ func spawn_ai(count: int):
         add_child(ai_instance)
 
 
-func spawn_decorations(count: int):
-    for i in range(count):
+
+
+func spawn_all_decorations():
+    for definition in deco_definitions:
         var deco_instance = deco_scene.instantiate()
-        deco_instance.add_to_group("sprites")
         
-        # Different or same defaults for AIs:
-        deco_instance.set_data(
-            3,     # current_floor_number
-            -1,    # current_room
-            3,     # target_floor_number
-            "DECO_SPRITE",
-            1
-        )
+        # 1) Assign the texture from the definition
+        var texture_path = definition["texture_path"]
+        deco_instance.deco_texture = load(texture_path)
         
+        # 2) Now call set_data() so the script knows floor, x percent, name, etc.
+        var floor_num = definition["floor_number"]
+        var x_percent = definition["x_percent"]
+        var sprite_name = definition["name"]
+        deco_instance.set_data(x_percent, floor_num, sprite_name)
+        
+        # 3) Finally, add to the scene
         add_child(deco_instance)
+
+
+
     
         
