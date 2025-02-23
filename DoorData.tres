@@ -12,7 +12,7 @@ doors = Array[Dictionary]([{
 "owner": "1",
 "room_name": "archive",
 "screen": "screen_archive",
-"tooltip": "ROOM_ARCHIVE_OF"
+"tooltip": "Archive"
 }, {
 "door_slot": 3,
 "door_type": 3,
@@ -21,7 +21,7 @@ doors = Array[Dictionary]([{
 "owner": "2",
 "room_name": "archive",
 "screen": "screen_archive",
-"tooltip": "ROOM_ARCHIVE_OF"
+"tooltip": "Archive"
 }, {
 "door_slot": 3,
 "door_type": 3,
@@ -30,7 +30,7 @@ doors = Array[Dictionary]([{
 "owner": "3",
 "room_name": "archive",
 "screen": "screen_archive",
-"tooltip": "ROOM_ARCHIVE_OF"
+"tooltip": "Archive"
 }, {
 "door_slot": 3,
 "door_type": 3,
@@ -39,7 +39,7 @@ doors = Array[Dictionary]([{
 "owner": "4",
 "room_name": "archive",
 "screen": "screen_archive",
-"tooltip": "ROOM_ARCHIVE_OF"
+"tooltip": "Archive"
 }, {
 "door_slot": 1,
 "door_type": 3,
@@ -48,7 +48,7 @@ doors = Array[Dictionary]([{
 "owner": "1",
 "room_name": "news",
 "screen": "screen_newsstudio",
-"tooltip": "ROOM_NEWSSTUDIO_OF"
+"tooltip": "News Studio"
 }, {
 "door_slot": 1,
 "door_type": 3,
@@ -57,7 +57,7 @@ doors = Array[Dictionary]([{
 "owner": "2",
 "room_name": "news",
 "screen": "screen_newsstudio",
-"tooltip": "ROOM_NEWSSTUDIO_OF"
+"tooltip": "News Studio"
 }, {
 "door_slot": 1,
 "door_type": 3,
@@ -66,7 +66,7 @@ doors = Array[Dictionary]([{
 "owner": "3",
 "room_name": "news",
 "screen": "screen_newsstudio",
-"tooltip": "ROOM_NEWSSTUDIO_OF"
+"tooltip": "News Studio"
 }, {
 "door_slot": 1,
 "door_type": 3,
@@ -75,7 +75,7 @@ doors = Array[Dictionary]([{
 "owner": "4",
 "room_name": "news",
 "screen": "screen_newsstudio",
-"tooltip": "ROOM_NEWSSTUDIO_OF"
+"tooltip": "News Studio"
 }, {
 "door_slot": 2,
 "door_type": 4,
@@ -84,7 +84,7 @@ doors = Array[Dictionary]([{
 "owner": "1",
 "room_name": "boss",
 "screen": "screen_boss",
-"tooltip": "ROOM_BOSS_OF"
+"tooltip": "Boss"
 }, {
 "door_slot": 2,
 "door_type": 4,
@@ -93,7 +93,7 @@ doors = Array[Dictionary]([{
 "owner": "2",
 "room_name": "boss",
 "screen": "screen_boss",
-"tooltip": "ROOM_BOSS_OF"
+"tooltip": "Boss"
 }, {
 "door_slot": 2,
 "door_type": 4,
@@ -102,7 +102,7 @@ doors = Array[Dictionary]([{
 "owner": "3",
 "room_name": "boss",
 "screen": "screen_boss",
-"tooltip": "ROOM_BOSS_OF"
+"tooltip": "Boss"
 }, {
 "door_slot": 2,
 "door_type": 4,
@@ -111,7 +111,7 @@ doors = Array[Dictionary]([{
 "owner": "4",
 "room_name": "boss",
 "screen": "screen_boss",
-"tooltip": "ROOM_BOSS_OF"
+"tooltip": "Boss"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -120,7 +120,7 @@ doors = Array[Dictionary]([{
 "owner": "1",
 "room_name": "office",
 "screen": "screen_office",
-"tooltip": "ROOM_BUREAU_OF"
+"tooltip": "Bureau"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -129,7 +129,7 @@ doors = Array[Dictionary]([{
 "owner": "2",
 "room_name": "office",
 "screen": "screen_office",
-"tooltip": "ROOM_BUREAU_OF"
+"tooltip": "Bureau"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -138,7 +138,7 @@ doors = Array[Dictionary]([{
 "owner": "3",
 "room_name": "office",
 "screen": "screen_office",
-"tooltip": "ROOM_BUREAU_OF"
+"tooltip": "Bureau"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -147,7 +147,7 @@ doors = Array[Dictionary]([{
 "owner": "4",
 "room_name": "office",
 "screen": "screen_office",
-"tooltip": "ROOM_BUREAU_OF"
+"tooltip": "Bureau"
 }, {
 "door_slot": 1,
 "door_type": 1,
@@ -156,7 +156,7 @@ doors = Array[Dictionary]([{
 "owner": "1",
 "room_name": "studio",
 "screen": "screen_studio",
-"tooltip": "ROOM_STUDIO_OF"
+"tooltip": "Studio"
 }, {
 "door_slot": 1,
 "door_type": 1,
@@ -165,7 +165,7 @@ doors = Array[Dictionary]([{
 "owner": "2",
 "room_name": "studio",
 "screen": "screen_studio",
-"tooltip": "ROOM_STUDIO_OF"
+"tooltip": "Studio"
 }, {
 "door_slot": 1,
 "door_type": 1,
@@ -174,7 +174,7 @@ doors = Array[Dictionary]([{
 "owner": "3",
 "room_name": "studio",
 "screen": "screen_studio",
-"tooltip": "ROOM_STUDIO_OF"
+"tooltip": "Studio"
 }, {
 "door_slot": 1,
 "door_type": 1,
@@ -183,7 +183,7 @@ doors = Array[Dictionary]([{
 "owner": "4",
 "room_name": "studio",
 "screen": "screen_studio",
-"tooltip": "ROOM_STUDIO_OF"
+"tooltip": "Studio"
 }, {
 "door_slot": 2,
 "door_type": 4,
@@ -191,8 +191,8 @@ doors = Array[Dictionary]([{
 "index": 20,
 "owner": "0",
 "room_name": "frduban",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_FRDUBAN"
+"screen": "1080_free_duban",
+"tooltip": "Free Republic Duban"
 }, {
 "door_slot": 2,
 "door_type": 3,
@@ -200,8 +200,8 @@ doors = Array[Dictionary]([{
 "index": 21,
 "owner": "0",
 "room_name": "vrduban",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_VRDUBAN"
+"screen": "1080_peoples_duban",
+"tooltip": "People's Republic Duban"
 }, {
 "door_slot": 3,
 "door_type": 3,
@@ -209,8 +209,8 @@ doors = Array[Dictionary]([{
 "index": 22,
 "owner": "0",
 "room_name": "gunsagency",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_GUNSAGENCY"
+"screen": "1080_rattling_agency",
+"tooltip": "Guns Agency"
 }, {
 "door_slot": 1,
 "door_type": 4,
@@ -218,8 +218,8 @@ doors = Array[Dictionary]([{
 "index": 23,
 "owner": "0",
 "room_name": "tobaccolobby",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_TOBACCOLOBBY"
+"screen": "1080_tobacco",
+"tooltip": "Tobacco Lobby"
 }, {
 "door_slot": 2,
 "door_type": 3,
@@ -227,8 +227,8 @@ doors = Array[Dictionary]([{
 "index": 24,
 "owner": "0",
 "room_name": "notobacco",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_NOTOBACCO"
+"screen": "1080_anti_nicotine",
+"tooltip": "No Tobacco"
 }, {
 "door_slot": 2,
 "door_type": 3,
@@ -236,8 +236,8 @@ doors = Array[Dictionary]([{
 "index": 25,
 "owner": "0",
 "room_name": "peacebrothers",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_PEACEBROTHERS"
+"screen": "1080_peacebrothers",
+"tooltip": "Peacebrothers"
 }, {
 "door_slot": 2,
 "door_type": 3,
@@ -246,7 +246,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "scriptagency",
 "screen": "screen_scriptagency",
-"tooltip": "ROOM_SCRIPT_OFFICE"
+"tooltip": "Script Agency"
 }, {
 "door_slot": 1,
 "door_type": 2,
@@ -255,7 +255,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "roomagency",
 "screen": "screen_roomagency",
-"tooltip": "ROOM_ROOMAGENCY"
+"tooltip": "Room Agency"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -264,7 +264,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "betty",
 "screen": "screen_betty",
-"tooltip": "ROOM_BETTY"
+"tooltip": "Betty"
 }, {
 "door_slot": 0,
 "door_type": 2,
@@ -272,8 +272,8 @@ doors = Array[Dictionary]([{
 "index": 29,
 "owner": "0",
 "room_name": "laundry",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_LAUNDRY"
+"screen": "1080_laundry",
+"tooltip": "Laundry"
 }, {
 "door_slot": 1,
 "door_type": 3,
@@ -281,17 +281,8 @@ doors = Array[Dictionary]([{
 "index": 30,
 "owner": "0",
 "room_name": "biocontrol",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_BIOCONTROL"
-}, {
-"door_slot": 3,
-"door_type": 4,
-"floor_number": 7,
-"index": 31,
-"owner": "0",
-"room_name": "computershop",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_COMPUTERSHOP"
+"screen": "1080_bio_control",
+"tooltip": "Bio-Control"
 }, {
 "door_slot": 1,
 "door_type": 4,
@@ -299,8 +290,8 @@ doors = Array[Dictionary]([{
 "index": 32,
 "owner": "0",
 "room_name": "psychiatrist",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_PSYCHIATRIST"
+"screen": "1080_psychiatrist",
+"tooltip": "Psychiatrist"
 }, {
 "door_slot": 2,
 "door_type": 3,
@@ -309,7 +300,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "supermarket",
 "screen": "screen_supermarket",
-"tooltip": "ROOM_SUPERMARKET"
+"tooltip": "Supermarket"
 }, {
 "door_slot": 0,
 "door_type": 3,
@@ -318,7 +309,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "movieagency",
 "screen": "screen_movieagency",
-"tooltip": "ROOM_MOVIEAGENCY"
+"tooltip": "MOVIE Agency"
 }, {
 "door_slot": 0,
 "door_type": 3,
@@ -327,7 +318,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "adagency",
 "screen": "screen_adagency",
-"tooltip": "ROOM_ADAGENCY"
+"tooltip": "AD Agency"
 }, {
 "door_slot": 0,
 "door_type": 1,
@@ -336,7 +327,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "roomboard",
 "screen": "screen_roomboard",
-"tooltip": "ROOM_ROOMBOARD"
+"tooltip": "Roomboard"
 }, {
 "door_slot": 3,
 "door_type": 1,
@@ -345,7 +336,7 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "credits",
 "screen": "screen_credits",
-"tooltip": "ROOM_CREDITS"
+"tooltip": "CREDITS"
 }, {
 "door_slot": 4,
 "door_type": 1,
@@ -354,5 +345,5 @@ doors = Array[Dictionary]([{
 "owner": "0",
 "room_name": "porter",
 "screen": "screen_credits",
-"tooltip": "ROOM_PORTER"
+"tooltip": "Porter"
 }])

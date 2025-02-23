@@ -191,7 +191,7 @@ doors = Array[Dictionary]([{
 "index": 20,
 "owner": "0",
 "room_name": "frduban",
-"screen": "screen_emptyroom",
+"screen": "1080_free_duban",
 "tooltip": "ROOM_FRDUBAN"
 }, {
 "door_slot": 2,
@@ -200,7 +200,7 @@ doors = Array[Dictionary]([{
 "index": 21,
 "owner": "0",
 "room_name": "vrduban",
-"screen": "screen_emptyroom",
+"screen": "1080_peoples_duban",
 "tooltip": "ROOM_VRDUBAN"
 }, {
 "door_slot": 3,
@@ -209,7 +209,7 @@ doors = Array[Dictionary]([{
 "index": 22,
 "owner": "0",
 "room_name": "gunsagency",
-"screen": "screen_emptyroom",
+"screen": "1080_rattling_agency",
 "tooltip": "ROOM_GUNSAGENCY"
 }, {
 "door_slot": 1,
@@ -218,7 +218,7 @@ doors = Array[Dictionary]([{
 "index": 23,
 "owner": "0",
 "room_name": "tobaccolobby",
-"screen": "screen_emptyroom",
+"screen": "1080_tobacco",
 "tooltip": "ROOM_TOBACCOLOBBY"
 }, {
 "door_slot": 2,
@@ -227,7 +227,7 @@ doors = Array[Dictionary]([{
 "index": 24,
 "owner": "0",
 "room_name": "notobacco",
-"screen": "screen_emptyroom",
+"screen": "1080_anti_nicotine",
 "tooltip": "ROOM_NOTOBACCO"
 }, {
 "door_slot": 2,
@@ -236,7 +236,7 @@ doors = Array[Dictionary]([{
 "index": 25,
 "owner": "0",
 "room_name": "peacebrothers",
-"screen": "screen_emptyroom",
+"screen": "1080_peacebrothers",
 "tooltip": "ROOM_PEACEBROTHERS"
 }, {
 "door_slot": 2,
@@ -272,7 +272,7 @@ doors = Array[Dictionary]([{
 "index": 29,
 "owner": "0",
 "room_name": "laundry",
-"screen": "screen_emptyroom",
+"screen": "1080_laundry",
 "tooltip": "ROOM_LAUNDRY"
 }, {
 "door_slot": 1,
@@ -281,17 +281,8 @@ doors = Array[Dictionary]([{
 "index": 30,
 "owner": "0",
 "room_name": "biocontrol",
-"screen": "screen_emptyroom",
+"screen": "1080_bio_control",
 "tooltip": "ROOM_BIOCONTROL"
-}, {
-"door_slot": 3,
-"door_type": 4,
-"floor_number": 7,
-"index": 31,
-"owner": "0",
-"room_name": "computershop",
-"screen": "screen_emptyroom",
-"tooltip": "ROOM_COMPUTERSHOP"
 }, {
 "door_slot": 1,
 "door_type": 4,
@@ -299,7 +290,7 @@ doors = Array[Dictionary]([{
 "index": 32,
 "owner": "0",
 "room_name": "psychiatrist",
-"screen": "screen_emptyroom",
+"screen": "1080_psychiatrist",
 "tooltip": "ROOM_PSYCHIATRIST"
 }, {
 "door_slot": 2,
@@ -329,7 +320,7 @@ doors = Array[Dictionary]([{
 "screen": "screen_adagency",
 "tooltip": "ROOM_ADAGENCY"
 }, {
-"door_slot": 4,
+"door_slot": 0,
 "door_type": 1,
 "floor_number": 0,
 "index": 36,

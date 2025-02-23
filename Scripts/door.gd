@@ -1,6 +1,8 @@
 # Door.gd
 extends Area2D
 
+@onready var owner_logo_sprite: Sprite2D = $Sprite2D
+
 enum DoorState { CLOSED, OPEN }
 
 var current_state: DoorState = DoorState.CLOSED
@@ -20,6 +22,9 @@ func _ready():
     add_to_group("doors")
     input_pickable = true
     connect("input_event", self._on_input_event)
+    
+
+    
 
 func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -74,6 +79,12 @@ func get_collision_edges() -> Dictionary:
     }
 
 
+'''takes in a dict with a "owner", see door_data.tres '''
+func change_owner(updated_door_data):
+    _update_owner_logo_visibility(updated_door_data)
+
+
+
 #region door setup
 func setup_door_instance(p_door_data, p_floor_instance):
     door_data = p_door_data    
@@ -82,6 +93,8 @@ func setup_door_instance(p_door_data, p_floor_instance):
     set_door_state(DoorState.CLOSED)
     position_door()
     update_collision_shape()
+    add_owner_logo(p_door_data)    
+    
     # Replace owner in tooltip text if the placeholder exists
     var final_tooltip = door_data.tooltip
     if final_tooltip.find("{owner}") != -1:
@@ -90,6 +103,40 @@ func setup_door_instance(p_door_data, p_floor_instance):
     tooltip_background.set_text(final_tooltip)
     connect("mouse_entered", self._on_mouse_entered)
     connect("mouse_exited", self._on_mouse_exited)
+    
+
+
+func add_owner_logo(p_door_data):
+    owner_logo_sprite.scale = Vector2(2.3, 2.3)
+    _update_owner_logo_visibility(p_door_data)
+    _update_owner_logo_color()
+
+
+func _update_owner_logo_color():
+    # Force the value to int
+    var owner_val = int(door_data.owner)
+    match owner_val:
+        1:
+            owner_logo_sprite.modulate = Color(0.732, 0.245, 0.262)  # Red
+        2:
+            owner_logo_sprite.modulate = Color(0.04, 0.484, 0.037)  # Green
+        3:
+            owner_logo_sprite.modulate = Color(0.219, 0.417, 0.889)  # Blue
+        4:
+            owner_logo_sprite.modulate = Color(0.227, 0.227, 0.227)  # Dark grey / Black
+        _:
+            owner_logo_sprite.modulate = Color(1, 1, 1)  # Default white
+
+
+func _update_owner_logo_visibility(p_door_data):
+    door_data = p_door_data 
+    # Owners 1,2,3,4 -> show the sprite, otherwise hide it
+    if int(door_data.owner) in [1, 2, 3, 4]:
+        owner_logo_sprite.visible = true
+    else:
+        owner_logo_sprite.visible = false
+
+
 
 func update_collision_shape() -> void:
     var animation_name = "door_type_%d" % door_type
@@ -138,7 +185,6 @@ func position_door():
     else:
         push_warning("Collision shape is not a RectangleShape2D")
 
-
 func get_door_dimensions():
     var animation_name = "door_type_%d" % door_type
     return get_frame_dimensions(animation_name)
@@ -152,4 +198,7 @@ func get_frame_dimensions(animation_name: String) -> Dictionary:
                 var height = first_frame.get_height() * animated_sprite.scale.y
                 return { "width": width, "height": height }
     return { "width": 0.0, "height": 0.0 }
+    
+
+
 #endregion
