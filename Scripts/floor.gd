@@ -7,8 +7,10 @@ var floor_sprite: Sprite2D
 var collision_edges: Dictionary = {}
 
 
-const DOOR_SCENE = preload("res://Scenes/Door.tscn")  # Preload the Door scene
+const DOOR_SCENE = preload("res://Scenes/Door.tscn")
 const ELEVATOR_SCENE = preload("res://Scenes/Elevator.tscn")
+const PORTER_SCENE = preload("res://Scenes/Porter.tscn")
+const ROOMBOARD_SCENE = preload("res://Scenes/Roomboard.tscn")
 
 const BOUNDARIES = {
     "x1": 0.0715,  # Left boundary
@@ -142,12 +144,32 @@ func set_floor_image(image_path: String):
         else:
             print("File does not exist at path: " + image_path)
 
-func setup_doors(door_data_array):    
+#func setup_doors(door_data_array):    
+    #for door_data in door_data_array:
+        #var door_instance = DOOR_SCENE.instantiate()
+        #door_instance.name = "Door_" + str(door_data.index)
+        #add_child(door_instance)        
+        #door_instance.setup_door_instance(door_data, self)
+
+func setup_doors(door_data_array):
     for door_data in door_data_array:
-        var door_instance = DOOR_SCENE.instantiate()
+        var door_instance
+        if door_data.room_name.to_lower() == "porter":
+            # Instantiate the new Porter scene
+            door_instance = PORTER_SCENE.instantiate()
+        elif door_data.room_name.to_lower() == "roomboard":
+            door_instance = ROOMBOARD_SCENE.instantiate()
+        else:
+            # Instantiate the original Door scene
+            door_instance = DOOR_SCENE.instantiate()
+        
         door_instance.name = "Door_" + str(door_data.index)
-        add_child(door_instance)        
+        add_child(door_instance)
+        
+        # Either use the same setup function (if it’s script-compatible),
+        # or create a separate setup function in the Porter scene script.
         door_instance.setup_door_instance(door_data, self)
+
 
 func setup_elevator():
     var elevator_instance = ELEVATOR_SCENE.instantiate()

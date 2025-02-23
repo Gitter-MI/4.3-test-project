@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bcchga37y853v"
-path="res://.godot/imported/Floor_0.png-d2005456bfc166cde124eaf021490611.ctex"
+uid="uid://dro8a3wt1v347"
+path="res://.godot/imported/gfx_building_standlight.png-49cb5ce3e3b3013ce45e8ff1026a1dc9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Building/Floors/Floor_0.png"
-dest_files=["res://.godot/imported/Floor_0.png-d2005456bfc166cde124eaf021490611.ctex"]
+source_file="res://Sprites/plant/gfx_building_standlight.png"
+dest_files=["res://.godot/imported/gfx_building_standlight.png-49cb5ce3e3b3013ce45e8ff1026a1dc9.ctex"]
 
 [params]
 

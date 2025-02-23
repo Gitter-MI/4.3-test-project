@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bcchga37y853v"
-path="res://.godot/imported/Floor_0.png-d2005456bfc166cde124eaf021490611.ctex"
+uid="uid://bs3lr8erwb7pk"
+path="res://.godot/imported/gfx_building_blockeddoorsign.png-433844ee3c2a3a40b3fcf6d0ae0f92ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Building/Floors/Floor_0.png"
-dest_files=["res://.godot/imported/Floor_0.png-d2005456bfc166cde124eaf021490611.ctex"]
+source_file="res://Sprites/plant/gfx_building_blockeddoorsign.png"
+dest_files=["res://.godot/imported/gfx_building_blockeddoorsign.png-433844ee3c2a3a40b3fcf6d0ae0f92ca.ctex"]
 
 [params]
 

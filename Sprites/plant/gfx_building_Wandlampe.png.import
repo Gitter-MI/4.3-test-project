@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bcchga37y853v"
-path="res://.godot/imported/Floor_0.png-d2005456bfc166cde124eaf021490611.ctex"
+uid="uid://clnjopbhxg5kh"
+path="res://.godot/imported/gfx_building_Wandlampe.png-46f2091bdf63222e1b001ff72991621e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Building/Floors/Floor_0.png"
-dest_files=["res://.godot/imported/Floor_0.png-d2005456bfc166cde124eaf021490611.ctex"]
+source_file="res://Sprites/plant/gfx_building_Wandlampe.png"
+dest_files=["res://.godot/imported/gfx_building_Wandlampe.png-46f2091bdf63222e1b001ff72991621e.ctex"]
 
 [params]
 
