@@ -34,7 +34,13 @@ func _ready():
     #tooltip_label.add_theme_font_override("font", font)
     #
     #container.add_theme_constant_override("separation", 10)
-
+    
+func _process(_delta):
+    if visible:
+        # Update position to follow mouse cursor
+        var mouse_pos = get_viewport().get_mouse_position()
+        # Offset slightly to not cover what the mouse is pointing at
+        global_position = Vector2(mouse_pos.x + 15, mouse_pos.y - size.y - 5)
 
 func set_text(new_text: String):
     tooltip_label.text = new_text if new_text else ""
@@ -70,6 +76,6 @@ func update_tooltip_size():
     var total_size = container.get_combined_minimum_size() + padding
     
     background.size = total_size
-    position = Vector2(-total_size.x / 2, -total_size.y - 10)
+    # position = Vector2(-total_size.x / 2, -total_size.y - 10)
     container.position = padding / 2
     container.size = total_size  - padding
