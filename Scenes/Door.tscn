@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="2_6tgof"]
 [ext_resource type="Texture2D" uid="uid://d3mall10gg2k5" path="res://Building/Rooms/owner_logo.png" id="3_bgsld"]
 [ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="3_guxm2"]
-[ext_resource type="Script" uid="uid://dinaquw6swogf" path="res://Scripts/tooltip.gd" id="4_xdjsd"]
+[ext_resource type="Script" uid="uid://cdeqdyakwijrd" path="res://Scenes/control.gd" id="4_1fk65"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
 atlas = ExtResource("2_6tgof")
@@ -99,29 +99,27 @@ position = Vector2(48, -58)
 texture = ExtResource("3_bgsld")
 centered = false
 
-[node name="TooltipBackground" type="NinePatchRect" parent="."]
-offset_left = 16.0
-offset_top = -37.0
-offset_right = 56.0
-offset_bottom = 3.0
-texture = ExtResource("3_guxm2")
-patch_margin_left = 4
-patch_margin_top = 4
-patch_margin_right = 4
-patch_margin_bottom = 4
-script = ExtResource("4_xdjsd")
-metadata/_edit_group_ = true
-
-[node name="TooltipLabel" type="Label" parent="TooltipBackground"]
-layout_mode = 1
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 3.0
-offset_top = 4.0
-offset_right = -3.0
-offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 20
+script = ExtResource("4_1fk65")
+
+[node name="Background" type="NinePatchRect" parent="Control"]
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("3_guxm2")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureImage" type="TextureRect" parent="Control/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/HBoxContainer"]
+layout_mode = 2

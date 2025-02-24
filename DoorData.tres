@@ -320,15 +320,6 @@ doors = Array[Dictionary]([{
 "screen": "screen_adagency",
 "tooltip": "AD Agency"
 }, {
-"door_slot": 0,
-"door_type": 1,
-"floor_number": 0,
-"index": 36,
-"owner": "0",
-"room_name": "roomboard",
-"screen": "screen_roomboard",
-"tooltip": "Roomboard"
-}, {
 "door_slot": 3,
 "door_type": 1,
 "floor_number": 13,

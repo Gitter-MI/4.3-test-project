@@ -1,7 +1,7 @@
 # Door.gd
 extends Area2D
 
-@onready var owner_logo_sprite: Sprite2D = $Sprite2D
+
 
 enum DoorState { CLOSED, OPEN }
 
@@ -15,7 +15,11 @@ const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
-@onready var tooltip_background = $TooltipBackground  # TooltipBackground node with tooltip.gd attached
+@onready var owner_logo_sprite: Sprite2D = $Sprite2D
+
+# @onready var tooltip_background = $TooltipBackground  # TooltipBackground node with tooltip.gd attached
+@onready var tooltip = $Control
+# @onready var tooltip_image: TextureRect = $TooltipImage
 
 
 func _ready():
@@ -47,10 +51,10 @@ func set_door_state(new_state: DoorState) -> void:
         push_warning("Animation %s not found!" % animation_name)
 
 func _on_mouse_entered():
-    tooltip_background.show_tooltip()
+    tooltip.show_tooltip()
 
 func _on_mouse_exited():
-    tooltip_background.hide_tooltip()
+    tooltip.hide_tooltip()
 
 
 
@@ -87,7 +91,7 @@ func change_owner(updated_door_data):
 
 #region door setup
 func setup_door_instance(p_door_data, p_floor_instance):
-    door_data = p_door_data    
+    door_data = p_door_data
     floor_instance = p_floor_instance
     door_type = door_data.door_type
     set_door_state(DoorState.CLOSED)
@@ -95,14 +99,31 @@ func setup_door_instance(p_door_data, p_floor_instance):
     update_collision_shape()
     add_owner_logo(p_door_data)    
     
-    # Replace owner in tooltip text if the placeholder exists
     var final_tooltip = door_data.tooltip
     if final_tooltip.find("{owner}") != -1:
         final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
+    tooltip.set_text(final_tooltip)
+    
+    # Decide which image to use based on door_data.room_name
+    var room_to_image = {
+        "archive": "res://Building/Rooms/tooltip_images/archive.png",
+        "news": "res://Building/Rooms/tooltip_images/news.png",
+        "boss": "res://Building/Rooms/tooltip_images/boss.png",
+        "office": "res://Building/Rooms/tooltip_images/bureau.png",
+        "studio": "res://Building/Rooms/tooltip_images/studio.png",
+        "movieagency": "res://Building/Rooms/tooltip_images/movie_agency.png",
+        "adagency": "res://Building/Rooms/tooltip_images/ad_agency.png"
+    }
+    var room_name = p_door_data.room_name
+    if room_name in room_to_image:
+        tooltip.set_image(room_to_image[room_name], 1.0)
+    else:
+        # Empty string means "no image"
+        tooltip.set_image("")
 
-    tooltip_background.set_text(final_tooltip)
     connect("mouse_entered", self._on_mouse_entered)
     connect("mouse_exited", self._on_mouse_exited)
+
     
 
 
