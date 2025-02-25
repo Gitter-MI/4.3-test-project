@@ -7,6 +7,9 @@ const SCALE_FACTOR = 2.3
 enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
 var door_state: DoorState = DoorState.CLOSED
 
+@onready var red_square = $Frame/FloorIndicatorHolder/RedSquare
+@onready var white_rectangle = $Frame/FloorIndicatorHolder/WhiteRectangle
+
 func setup_elevator_instance(p_floor_instance):
     floor_instance = p_floor_instance
     name = "Elevator_" + str(floor_instance.floor_number)    
@@ -15,6 +18,14 @@ func setup_elevator_instance(p_floor_instance):
     position_elevator()
     update_elevator_door_collision_shape()
     setup_elevator_doors_position()
+
+    SignalBus.floor_area_entered.connect(_on_floor_area_entered)
+
+
+func _on_floor_area_entered(_area: Area2D, floor_number: int) -> void:
+    # print("current elevator floor number: ", floor_number)
+    update_red_indicator_position(floor_number)
+
 
 func _ready():
     var elevator_doors = $AnimatedSprite2D
@@ -35,8 +46,17 @@ func _on_input_event(_viewport, event, _shape_idx):
         get_viewport().set_input_as_handled()
 
 
+func update_red_indicator_position(floor_number: int):
 
-
+    var rect_width = white_rectangle.texture.get_size().x
+    var half_rect_width = rect_width * 0.5
+    var left_edge_x = white_rectangle.position.x - half_rect_width
+    var floors_count = 14
+    var spacing = rect_width / float(floors_count - 1)  # distance per floor
+    var new_x = left_edge_x + floor_number * spacing
+    new_x -= (red_square.texture.get_size().x * 0.5)
+    var new_y = white_rectangle.position.y
+    red_square.position = Vector2(new_x, new_y)
 
 
 func set_door_state(new_state: DoorState):
@@ -117,6 +137,7 @@ func apply_scale_factor_to_elevator():
     var elevator_sprite = $Frame
     if elevator_sprite:
         elevator_sprite.scale *= SCALE_FACTOR
+
         # print("Applied scale factor to elevator frame.")
     else:
         push_warning("Elevator sprite node not found to apply scale factor.")
