@@ -6,7 +6,6 @@ extends Area2D
 var floor_sprite: Sprite2D
 var collision_edges: Dictionary = {}
 
-
 const DOOR_SCENE = preload("res://Scenes/Door.tscn")
 const ELEVATOR_SCENE = preload("res://Scenes/Elevator.tscn")
 const PORTER_SCENE = preload("res://Scenes/Porter.tscn")
@@ -19,7 +18,6 @@ const BOUNDARIES = {
     "y2": 1   # Bottom boundary
 }
 
-
 func _ready():
     add_to_group("floors")
     input_pickable = true    
@@ -29,17 +27,12 @@ func _ready():
     
     self.connect("area_entered", Callable(self, "_on_floor_area_entered"))
 
-
-
 func _on_floor_area_entered(area: Area2D) -> void:    
     if area.get("sprite_data_new"):        # # Check if the area that entered belongs to a sprite
         SignalBus.floor_area_entered.emit(area, floor_number)
         # print("Sprite '%s' entered floor %d" % [area.name, floor_number])
     if area.get("cabin_data"):
         SignalBus.floor_area_entered.emit(area, floor_number)
-        
-
-    
 
 func _input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:        
@@ -58,20 +51,12 @@ func _input_event(_viewport, event, _shape_idx):
             #bottom_edge_y,
             #floor_collision_edges
         #)
-
-
   
 func get_collision_edges() -> Dictionary:    
     # is called when a sprite moves to a new floor to determine the y-coordinate    
     return collision_edges
-    
-
-
 
 #region set-up methods
-############################################
-### these functions are called only once ###
-############################################
 
 func position_floor(previous_floor_top_y_position, is_first_floor):
     if not floor_sprite:
@@ -144,31 +129,23 @@ func set_floor_image(image_path: String):
         else:
             print("File does not exist at path: " + image_path)
 
-#func setup_doors(door_data_array):    
-    #for door_data in door_data_array:
-        #var door_instance = DOOR_SCENE.instantiate()
-        #door_instance.name = "Door_" + str(door_data.index)
-        #add_child(door_instance)        
-        #door_instance.setup_door_instance(door_data, self)
-
 func setup_doors(door_data_array):
     for door_data in door_data_array:
         var door_instance
         if door_data.room_name.to_lower() == "porter":
-            # Instantiate the new Porter scene
             door_instance = PORTER_SCENE.instantiate()
         elif door_data.room_name.to_lower() == "roomboard":
             door_instance = ROOMBOARD_SCENE.instantiate()
         else:
-            # Instantiate the original Door scene
             door_instance = DOOR_SCENE.instantiate()
         
         door_instance.name = "Door_" + str(door_data.index)
-        add_child(door_instance)
+        door_instance.door_data = door_data
+        door_instance.floor_instance = self
         
-        # Either use the same setup function (if it’s script-compatible),
-        # or create a separate setup function in the Porter scene script.
-        door_instance.setup_door_instance(door_data, self)
+        add_child(door_instance)
+
+
 
 
 func setup_elevator():

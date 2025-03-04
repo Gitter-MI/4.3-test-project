@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://cmkqmrc5jshg0"]
 
-[ext_resource type="Script" uid="uid://b5chqp856nrob" path="res://Scenes/porter.gd" id="1_fpw1s"]
+[ext_resource type="Script" uid="uid://b5chqp856nrob" path="res://Scripts/porter.gd" id="1_fpw1s"]
 [ext_resource type="Texture2D" uid="uid://d1pdnmk2pd0q1" path="res://Building/Rooms/1080_porter.png" id="1_gdpbf"]
 [ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="2_fpw1s"]
 [ext_resource type="Script" uid="uid://dinaquw6swogf" path="res://Scripts/tooltip.gd" id="3_c5tw5"]

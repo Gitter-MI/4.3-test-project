@@ -19,10 +19,10 @@ func generate_building():
             previous_floor_top_y_position = floor_instance.position_floor(previous_floor_top_y_position, is_first_floor)
             is_first_floor = false
 
-            var floor_doors = DOOR_DATA_RESOURCE.doors.filter(func(door):
+            var door_data_array = DOOR_DATA_RESOURCE.doors.filter(func(door):
                 return door.floor_number == floor_number
             )
-            floor_instance.setup_doors(floor_doors)
+            floor_instance.setup_doors(door_data_array)
             floor_instance.setup_elevator()
 
 func instantiate_floor(floor_number):    

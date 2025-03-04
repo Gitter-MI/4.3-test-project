@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bfikhkmebh1ss" path="res://Sprites/Player_1.png" id="2_8d083"]
 [ext_resource type="Script" uid="uid://bdel5w2lwam25" path="res://Scripts/pathfinder_component.gd" id="3_21vma"]
 [ext_resource type="Script" uid="uid://bs44xfwkdxl5t" path="res://Scripts/state_component.gd" id="4_iuv37"]
-[ext_resource type="Script" uid="uid://cry7jqv88tijc" path="res://Scenes/movement_component.gd" id="5_8d083"]
+[ext_resource type="Script" uid="uid://cry7jqv88tijc" path="res://Scripts/movement_component.gd" id="5_8d083"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_v4w6j"]
 atlas = ExtResource("2_8d083")

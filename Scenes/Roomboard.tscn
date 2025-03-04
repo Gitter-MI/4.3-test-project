@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://ddr73x8vgatbv"]
 
-[ext_resource type="Script" uid="uid://cj3x1nhc7fwvv" path="res://Scenes/roomboard.gd" id="1_y1if6"]
+[ext_resource type="Script" uid="uid://cj3x1nhc7fwvv" path="res://Scripts/roomboard.gd" id="1_y1if6"]
 [ext_resource type="Texture2D" uid="uid://c4rxmv5u32mw6" path="res://Building/Rooms/1080_roomboard.png" id="2_kqyxk"]
 [ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="3_eqwlv"]
 [ext_resource type="Script" uid="uid://dinaquw6swogf" path="res://Scripts/tooltip.gd" id="4_6i7w8"]

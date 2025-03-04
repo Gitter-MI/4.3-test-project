@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="2_6tgof"]
 [ext_resource type="Texture2D" uid="uid://d3mall10gg2k5" path="res://Building/Rooms/owner_logo.png" id="3_bgsld"]
 [ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="3_guxm2"]
-[ext_resource type="Script" uid="uid://cdeqdyakwijrd" path="res://Scenes/control.gd" id="4_1fk65"]
+[ext_resource type="Script" uid="uid://cdeqdyakwijrd" path="res://Scripts/control.gd" id="4_1fk65"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
 atlas = ExtResource("2_6tgof")
