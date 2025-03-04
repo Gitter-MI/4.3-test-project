@@ -132,10 +132,14 @@ func set_floor_image(image_path: String):
 func setup_doors(door_data_array):
     for door_data in door_data_array:
         var door_instance
-        if door_data.room_name.to_lower() == "porter":
-            door_instance = PORTER_SCENE.instantiate()
-        elif door_data.room_name.to_lower() == "roomboard":
+        # print("room name: ", door_data.room_name)
+        
+        if door_data.room_name.to_lower() == "roomboard":
             door_instance = ROOMBOARD_SCENE.instantiate()
+        
+        elif door_data.room_name.to_lower() == "porter":
+            door_instance = PORTER_SCENE.instantiate()
+        #elif 
         else:
             door_instance = DOOR_SCENE.instantiate()
         

@@ -177,9 +177,9 @@ func spawn_base_sprite():
     base_sprite_instance.add_to_group("sprites")
 
     base_sprite_instance.set_data(
-        11,    # current_floor_number
+        1,    # current_floor_number
         -1,   # current_room
-        11,    # target_floor_number
+        1,    # target_floor_number
         "Player", # sprite_name
         1     # elevator_request_id
     )

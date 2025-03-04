@@ -9,7 +9,6 @@ var door_data: Dictionary
 var floor_instance
 var door_center_x: float = 0.0 
 
-
 const SLOT_PERCENTAGES = [0.07]
 
 @onready var door_sprite: Sprite2D = $Sprite2D
@@ -20,6 +19,10 @@ func _ready():
     add_to_group("doors")
     input_pickable = true
     connect("input_event", self._on_input_event)
+    
+    # Automatically perform setup if door_data and floor_instance are already assigned.
+    if door_data != null and floor_instance != null:
+        setup_door_instance(door_data, floor_instance)
 
 func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -65,16 +68,16 @@ func setup_door_instance(p_door_data, p_floor_instance):
     floor_instance = p_floor_instance
     door_type = door_data.door_type
     
-    # Default is CLOSED (you can choose otherwise if needed)
+    # Set the door state to CLOSED by default.
     set_door_state(DoorState.CLOSED)
     
-    # Position this door
+    # Position the door based on floor collision shape.
     position_door()
     
-    # Update collision shape to match the sprite's texture
+    # Update the collision shape to match the sprite's texture.
     update_collision_shape()
     
-    # Replace {owner} in tooltip text if present
+    # Replace "{owner}" in the tooltip text if present.
     var final_tooltip = door_data.tooltip
     if final_tooltip.find("{owner}") != -1:
         final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
@@ -93,7 +96,7 @@ func update_collision_shape() -> void:
         push_warning("Cannot update collision shape: Invalid dimensions")
 
 func position_door():
-    # Retrieve the slot index from door data
+    # Retrieve the slot index from door data.
     var slot_index = door_data.door_slot
     
     var floor_collision_shape = floor_instance.get_node("CollisionShape2D")
@@ -118,7 +121,6 @@ func position_door():
         elif slot_index == 4:
             local_x = collision_left_edge + (dimensions.width / 2)
         else:
-            # If it's outside known ranges, warn and bail
             push_warning("Invalid door slot index %d" % slot_index)
             return        
 
