@@ -1,10 +1,8 @@
-[gd_scene load_steps=14 format=3 uid="uid://bqi7jxa50tfga"]
+[gd_scene load_steps=12 format=3 uid="uid://bqi7jxa50tfga"]
 
 [ext_resource type="Script" uid="uid://cteyiclnlqvq" path="res://Scripts/door.gd" id="1_ajq3l"]
 [ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="2_6tgof"]
 [ext_resource type="Texture2D" uid="uid://d3mall10gg2k5" path="res://Building/Rooms/owner_logo.png" id="3_bgsld"]
-[ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="3_guxm2"]
-[ext_resource type="Script" uid="uid://cdeqdyakwijrd" path="res://Scripts/control.gd" id="4_1fk65"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
 atlas = ExtResource("2_6tgof")
@@ -86,41 +84,15 @@ animations = [{
 [node name="Door" type="Area2D"]
 script = ExtResource("1_ajq3l")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="Door_Animation_2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_b0j2u")
 animation = &"door_open"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="Door_Collision_Shape_2D" type="CollisionShape2D" parent="."]
 visible = false
 shape = SubResource("RectangleShape2D_py5ck")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Owner_Logo" type="Sprite2D" parent="."]
 position = Vector2(48, -58)
 texture = ExtResource("3_bgsld")
 centered = false
-
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("4_1fk65")
-
-[node name="Background" type="NinePatchRect" parent="Control"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-texture = ExtResource("3_guxm2")
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="TextureImage" type="TextureRect" parent="Control/HBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/HBoxContainer"]
-layout_mode = 2

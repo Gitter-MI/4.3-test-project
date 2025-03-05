@@ -1,4 +1,4 @@
-# porter.gd
+# porter.gd (modified version)
 extends Area2D
 
 enum DoorState { CLOSED, OPEN }
@@ -11,9 +11,10 @@ var door_center_x: float = 0.0
 
 const SLOT_PERCENTAGES = [0.07]
 
-@onready var door_sprite: Sprite2D = $Sprite2D
-@onready var collision_shape: CollisionShape2D = $CollisionShape2D
-@onready var tooltip_background = $TooltipBackground
+@onready var door_sprite: Sprite2D = $Kiosk_Sprite_2D   ## we call it Kiosk because the room doesn't have a door, like a real-world kiosk.
+@onready var collision_shape: CollisionShape2D = $Kiosk_Collision_Shape_2D 
+# Remove tooltip reference:
+# @onready var tooltip_background = $TooltipBackground
 
 func _ready():
     add_to_group("doors")
@@ -37,10 +38,20 @@ func set_door_state(new_state: DoorState) -> void:
     current_state = new_state
 
 func _on_mouse_entered():
-    tooltip_background.show_tooltip()
+    # Replace the direct tooltip call with a signal emission
+    var final_tooltip = door_data.tooltip
+    if final_tooltip.find("{owner}") != -1:
+        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
+    
+    # Position the tooltip above the kiosk
+    var tooltip_position = global_position + Vector2(0, -40)
+    
+    # We don't have specific images for porter kiosks, so we're sending an empty image path
+    SignalBus.show_tooltip.emit(tooltip_position, final_tooltip, "", 1.0)
 
 func _on_mouse_exited():
-    tooltip_background.hide_tooltip()
+    # Replace direct tooltip call with signal emission
+    SignalBus.hide_tooltip.emit()
 
 func get_collision_edges() -> Dictionary:
     if not collision_shape:
@@ -77,11 +88,11 @@ func setup_door_instance(p_door_data, p_floor_instance):
     # Update the collision shape to match the sprite's texture.
     update_collision_shape()
     
-    # Replace "{owner}" in the tooltip text if present.
-    var final_tooltip = door_data.tooltip
-    if final_tooltip.find("{owner}") != -1:
-        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
-    tooltip_background.set_text(final_tooltip)
+    # Remove tooltip setup code:
+    # var final_tooltip = door_data.tooltip
+    # if final_tooltip.find("{owner}") != -1:
+    #     final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
+    # tooltip_background.set_text(final_tooltip)
     
     connect("mouse_entered", self._on_mouse_entered)
     connect("mouse_exited", self._on_mouse_exited)

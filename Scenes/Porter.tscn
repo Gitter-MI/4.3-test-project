@@ -1,52 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://cmkqmrc5jshg0"]
+[gd_scene load_steps=4 format=3 uid="uid://cmkqmrc5jshg0"]
 
 [ext_resource type="Script" uid="uid://b5chqp856nrob" path="res://Scripts/porter.gd" id="1_fpw1s"]
 [ext_resource type="Texture2D" uid="uid://d1pdnmk2pd0q1" path="res://Building/Rooms/1080_porter.png" id="1_gdpbf"]
-[ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="2_fpw1s"]
-[ext_resource type="Script" uid="uid://dinaquw6swogf" path="res://Scripts/tooltip.gd" id="3_c5tw5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ioagi"]
 
 [node name="Porter" type="Area2D"]
 script = ExtResource("1_fpw1s")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Kiosk_Sprite_2D" type="Sprite2D" parent="."]
 visible = false
 texture = ExtResource("1_gdpbf")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="Kiosk_Collision_Shape_2D" type="CollisionShape2D" parent="."]
 visible = false
 shape = SubResource("RectangleShape2D_ioagi")
-
-[node name="TooltipBackground" type="NinePatchRect" parent="."]
-offset_left = 16.0
-offset_top = -37.0
-offset_right = 56.0
-offset_bottom = 3.0
-texture = ExtResource("2_fpw1s")
-patch_margin_left = 4
-patch_margin_top = 4
-patch_margin_right = 4
-patch_margin_bottom = 4
-script = ExtResource("3_c5tw5")
-metadata/_edit_group_ = true
-
-[node name="TooltipImage" type="TextureRect" parent="TooltipBackground"]
-visible = false
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="TooltipLabel" type="Label" parent="TooltipBackground"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 3.0
-offset_top = 4.0
-offset_right = -3.0
-offset_bottom = -3.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 20

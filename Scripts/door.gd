@@ -11,16 +11,19 @@ var door_center_x: float = 0.0
 
 const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 
-@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var collision_shape: CollisionShape2D = $CollisionShape2D
-@onready var owner_logo_sprite: Sprite2D = $Sprite2D
-@onready var tooltip = $Control
+@onready var animated_sprite: AnimatedSprite2D = $Door_Animation_2D
+@onready var collision_shape: CollisionShape2D = $Door_Collision_Shape_2D
+@onready var owner_logo_sprite: Sprite2D = $Owner_Logo
+# @onready var tooltip = $Control
 
 func _ready():
     add_to_group("doors")
     input_pickable = true
     connect("input_event", self._on_input_event)
     setup_door_instance(door_data, floor_instance)
+
+    connect("mouse_entered", self._on_mouse_entered)
+    connect("mouse_exited", self._on_mouse_exited)
 
 func _on_input_event(_viewport, event, _shape_idx):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -41,13 +44,37 @@ func set_door_state(new_state: DoorState) -> void:
         push_warning("Animation %s not found!" % animation_name)
 
 func _on_mouse_entered():
-    tooltip.show_tooltip()
+    var final_tooltip = door_data.tooltip
+    if final_tooltip.find("{owner}") != -1:
+        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
+    
+    # Determine the image path
+    var room_to_image = {
+        "archive": "res://Building/Rooms/tooltip_images/archive.png",
+        "news": "res://Building/Rooms/tooltip_images/news.png",
+        "boss": "res://Building/Rooms/tooltip_images/boss.png",
+        "office": "res://Building/Rooms/tooltip_images/bureau.png",
+        "studio": "res://Building/Rooms/tooltip_images/studio.png",
+        "movieagency": "res://Building/Rooms/tooltip_images/movie_agency.png",
+        "adagency": "res://Building/Rooms/tooltip_images/ad_agency.png"
+    }
+    
+    var image_path = ""
+    var room_name = door_data.room_name
+    if room_name in room_to_image:
+        image_path = room_to_image[room_name]
+    
+    # Calculate position for tooltip (you may want to adjust this)
+    var tooltip_position = global_position + Vector2(0, -50)  # Offset above the door
+    
+    # Emit the signal with all necessary data
+    SignalBus.show_tooltip.emit(tooltip_position, final_tooltip, image_path, 1.0)
 
 func _on_mouse_exited():
-    tooltip.hide_tooltip()
+    SignalBus.hide_tooltip.emit()
 
 func get_collision_edges() -> Dictionary:
-    var door_collision_shape = $CollisionShape2D
+    var door_collision_shape = $Door_Collision_Shape_2D
     if not door_collision_shape:
         push_error("No CollisionShape2D found in door")
         return {}
@@ -80,30 +107,6 @@ func setup_door_instance(p_door_data, p_floor_instance):
     position_door()
     update_collision_shape()
     add_owner_logo(p_door_data)
-    
-    var final_tooltip = door_data.tooltip
-    if final_tooltip.find("{owner}") != -1:
-        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
-    tooltip.set_text(final_tooltip)
-    
-    # Decide which image to use based on door_data.room_name
-    var room_to_image = {
-        "archive": "res://Building/Rooms/tooltip_images/archive.png",
-        "news": "res://Building/Rooms/tooltip_images/news.png",
-        "boss": "res://Building/Rooms/tooltip_images/boss.png",
-        "office": "res://Building/Rooms/tooltip_images/bureau.png",
-        "studio": "res://Building/Rooms/tooltip_images/studio.png",
-        "movieagency": "res://Building/Rooms/tooltip_images/movie_agency.png",
-        "adagency": "res://Building/Rooms/tooltip_images/ad_agency.png"
-    }
-    var room_name = door_data.room_name
-    if room_name in room_to_image:
-        tooltip.set_image(room_to_image[room_name], 1.0)
-    else:
-        tooltip.set_image("")
-
-    connect("mouse_entered", self._on_mouse_entered)
-    connect("mouse_exited", self._on_mouse_exited)
 
 func add_owner_logo(p_door_data):
     owner_logo_sprite.scale = Vector2(2.3, 2.3)

@@ -5,6 +5,12 @@
 
 extends Node
 
+
+# In your SignalBus
+signal show_tooltip(position, text, image_path, scale)
+signal hide_tooltip()
+
+
 signal elevator_called(elevator_request_data: Dictionary) ## used in the new implementation
 signal elevator_request_confirmed(elevator_request_data: Dictionary, ready_status: bool)  ## used in the new implementation
 signal entering_elevator(sprite_name: String)  ## used in the new implementation

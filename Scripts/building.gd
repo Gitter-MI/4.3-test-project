@@ -23,6 +23,7 @@ func generate_building():
                 return door.floor_number == floor_number
             )
             floor_instance.setup_doors(door_data_array)
+            ## maybe add a setup_kiosk here?
             # print("door_data_array: ", door_data_array)
             floor_instance.setup_elevator()
 

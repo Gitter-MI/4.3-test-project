@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dauc0o8e2gap3"]
+[gd_scene load_steps=12 format=3 uid="uid://dauc0o8e2gap3"]
 
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Scenes/Building.tscn" id="1_avx81"]
 [ext_resource type="PackedScene" uid="uid://ddgu340ss41q8" path="res://Scenes/Magical_Elevator.tscn" id="4_8yijo"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" uid="uid://dg7s8upxd5tvp" path="res://Scenes/deco_new.tscn" id="6_1hb7r"]
 [ext_resource type="Script" uid="uid://x1qwp1k0do03" path="res://Scripts/spawner.gd" id="7_i7040"]
 [ext_resource type="Script" uid="uid://cvsrr031gvuuy" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
+[ext_resource type="PackedScene" uid="uid://tvmaycqsat5w" path="res://tooltip_manager.tscn" id="10_4kpch"]
+[ext_resource type="PackedScene" uid="uid://b47kwp7rlx2nu" path="res://Scenes/Tooltip_Control.tscn" id="10_bmxlf"]
 
 [node name="Main" type="Node2D"]
 
@@ -32,3 +34,7 @@ metadata/_edit_group_ = true
 
 [node name="Camera2D" type="Camera2D" parent="Camera"]
 script = ExtResource("4_a875k")
+
+[node name="TooltipManager" parent="." instance=ExtResource("10_4kpch")]
+
+[node name="Tooltip_Control" parent="TooltipManager" instance=ExtResource("10_bmxlf")]
