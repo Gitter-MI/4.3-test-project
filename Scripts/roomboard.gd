@@ -38,21 +38,9 @@ func set_door_state(new_state: DoorState) -> void:
     current_state = new_state
 
 func _on_mouse_entered():
-    # Replace the direct tooltip call with a signal emission
-    var final_tooltip = door_data.tooltip
-    if final_tooltip.find("{owner}") != -1:
-        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
-    
-    # Position the tooltip to the side of the roomboard
-    var tooltip_position = global_position + Vector2(50, 0)
-    
-    # Using an image specific to roomboard if needed
-    var image_path = "res://Building/Rooms/tooltip_images/roomboard.png" if ResourceLoader.exists("res://Building/Rooms/tooltip_images/roomboard.png") else ""
-    
-    SignalBus.show_tooltip.emit(tooltip_position, final_tooltip, image_path, 1.0)
+    SignalBus.show_tooltip.emit(door_data)
 
 func _on_mouse_exited():
-    # Replace direct tooltip call with signal emission
     SignalBus.hide_tooltip.emit()
 
 func get_collision_edges() -> Dictionary:

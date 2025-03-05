@@ -38,19 +38,9 @@ func set_door_state(new_state: DoorState) -> void:
     current_state = new_state
 
 func _on_mouse_entered():
-    # Replace the direct tooltip call with a signal emission
-    var final_tooltip = door_data.tooltip
-    if final_tooltip.find("{owner}") != -1:
-        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
-    
-    # Position the tooltip above the kiosk
-    var tooltip_position = global_position + Vector2(0, -40)
-    
-    # We don't have specific images for porter kiosks, so we're sending an empty image path
-    SignalBus.show_tooltip.emit(tooltip_position, final_tooltip, "", 1.0)
+    SignalBus.show_tooltip.emit(door_data)
 
 func _on_mouse_exited():
-    # Replace direct tooltip call with signal emission
     SignalBus.hide_tooltip.emit()
 
 func get_collision_edges() -> Dictionary:

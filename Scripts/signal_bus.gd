@@ -6,8 +6,8 @@
 extends Node
 
 
-# In your SignalBus
-signal show_tooltip(position, text, image_path, scale)
+
+signal show_tooltip(door_data)
 signal hide_tooltip()
 
 

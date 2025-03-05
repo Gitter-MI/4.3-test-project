@@ -44,31 +44,7 @@ func set_door_state(new_state: DoorState) -> void:
         push_warning("Animation %s not found!" % animation_name)
 
 func _on_mouse_entered():
-    var final_tooltip = door_data.tooltip
-    if final_tooltip.find("{owner}") != -1:
-        final_tooltip = final_tooltip.replace("{owner}", door_data.owner)
-    
-    # Determine the image path
-    var room_to_image = {
-        "archive": "res://Building/Rooms/tooltip_images/archive.png",
-        "news": "res://Building/Rooms/tooltip_images/news.png",
-        "boss": "res://Building/Rooms/tooltip_images/boss.png",
-        "office": "res://Building/Rooms/tooltip_images/bureau.png",
-        "studio": "res://Building/Rooms/tooltip_images/studio.png",
-        "movieagency": "res://Building/Rooms/tooltip_images/movie_agency.png",
-        "adagency": "res://Building/Rooms/tooltip_images/ad_agency.png"
-    }
-    
-    var image_path = ""
-    var room_name = door_data.room_name
-    if room_name in room_to_image:
-        image_path = room_to_image[room_name]
-    
-    # Calculate position for tooltip (you may want to adjust this)
-    var tooltip_position = global_position + Vector2(0, -50)  # Offset above the door
-    
-    # Emit the signal with all necessary data
-    SignalBus.show_tooltip.emit(tooltip_position, final_tooltip, image_path, 1.0)
+    SignalBus.show_tooltip.emit(door_data)
 
 func _on_mouse_exited():
     SignalBus.hide_tooltip.emit()
