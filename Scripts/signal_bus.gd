@@ -6,7 +6,7 @@
 extends Node
 
 
-
+signal cursor_size_updated(size)
 signal show_tooltip(door_data)
 signal hide_tooltip()
 

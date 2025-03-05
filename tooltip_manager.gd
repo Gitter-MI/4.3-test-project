@@ -1,8 +1,7 @@
 # TooltipManager.gd
-extends Node2D
+extends Node
 
-@onready var tooltip = $Tooltip_Control
-
+@onready var tooltip = $CanvasLayer/Tooltip_Control
 var is_tooltip_visible = false
 
 func _ready():
@@ -10,10 +9,11 @@ func _ready():
     SignalBus.show_tooltip.connect(_on_show_tooltip)
     SignalBus.hide_tooltip.connect(_on_hide_tooltip)
 
-func _process(_delta):
+func _process(delta):
     if is_tooltip_visible:
-        var mouse_pos = get_viewport().get_mouse_position()
-        tooltip.global_position = mouse_pos + Vector2(0, -100)
+        tooltip.position = get_viewport().get_mouse_position() + Vector2(10, -10)
+
+# Rest of the code remains the same
 
 # Update the function parameter to just receive door_data
 func _on_show_tooltip(door_data):
@@ -29,9 +29,8 @@ func _on_show_tooltip(door_data):
         image_path = "res://Building/Rooms/tooltip_images/" + door_data["tooltip_image"] + ".png"
     
     tooltip.set_image(image_path, 1.0)
-    var viewport_mouse_pos = get_viewport().get_mouse_position()
-    var global_mouse_pos = get_canvas_transform().affine_inverse() * viewport_mouse_pos
-    tooltip.global_position = global_mouse_pos + Vector2(10, 10)
+    
+    # Don't set position here - let _process handle it
     
     tooltip.visible = true
     is_tooltip_visible = true
