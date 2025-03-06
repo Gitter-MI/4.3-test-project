@@ -1,3 +1,4 @@
+# Tooltip_Control.gd
 extends Control
 
 @onready var tooltip_label: Label = $HBoxContainer/Label
@@ -22,19 +23,28 @@ func _ready():
     tooltip_label.add_theme_color_override("font_color", Color.BLACK)
     container.add_theme_constant_override("separation", 10)
 
+func _process(_delta):
+    if visible:
+        position = get_viewport().get_mouse_position() + Vector2(10, -10)
 
-    '''bold font looks blurry'''    
-    ## Set text bold using theme override
-    #tooltip_label.add_theme_font_size_override("font_size", 16)
-    #tooltip_label.add_theme_color_override("font_color", Color.BLACK)
-    #
-    ## Create a FontVariation for bold text
-    #var font = FontVariation.new()
-    #font.set_variation_embolden(1.0)  # Make it bold
-    #tooltip_label.add_theme_font_override("font", font)
-    #
-    #container.add_theme_constant_override("separation", 10)
-
+func show_tooltip_with_data(data: Dictionary):
+    # Process tooltip text
+    tooltip_text = data.get("tooltip", "")
+    if tooltip_text.find("{owner}") != -1:
+        tooltip_text = tooltip_text.replace("{owner}", data.get("owner", ""))
+    
+    set_text(tooltip_text)
+    
+    # Process tooltip image
+    var image_path = ""
+    if data.has("tooltip_image") and data["tooltip_image"] != "":
+        image_path = "res://Building/Rooms/tooltip_images/" + data["tooltip_image"] + ".png"
+    
+    set_image(image_path, 1.0)
+    
+    # Show the tooltip
+    mouse_inside = true
+    tooltip_timer.start()
 
 func set_text(new_text: String):
     tooltip_label.text = new_text if new_text else ""
@@ -48,10 +58,6 @@ func set_image(path: String, scaling: float = 1.0):
         tooltip_image.texture = load(path)
         tooltip_image.custom_minimum_size = DEFAULT_IMAGE_SIZE * scaling
     update_tooltip_size()
-
-func show_tooltip():
-    mouse_inside = true
-    tooltip_timer.start()
 
 func hide_tooltip():
     mouse_inside = false
@@ -72,4 +78,4 @@ func update_tooltip_size():
     background.size = total_size
     position = Vector2(-total_size.x / 2, -total_size.y - 10)
     container.position = padding / 2
-    container.size = total_size  - padding
+    container.size = total_size - padding
