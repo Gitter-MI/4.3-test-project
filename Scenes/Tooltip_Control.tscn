@@ -13,11 +13,13 @@ grow_vertical = 2
 script = ExtResource("1_yu2uj")
 
 [node name="Background" type="NinePatchRect" parent="."]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("2_18nna")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 

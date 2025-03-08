@@ -39,4 +39,4 @@ script = ExtResource("4_a875k")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="TooltipManager"]
 
-[node name="Tooltip_Control" parent="TooltipManager/CanvasLayer" instance=ExtResource("10_bmxlf")]
+[node name="Tooltip_Doors" parent="TooltipManager/CanvasLayer" instance=ExtResource("10_bmxlf")]

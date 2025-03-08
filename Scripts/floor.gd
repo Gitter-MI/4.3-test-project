@@ -148,6 +148,8 @@ func setup_doors(door_data_array):
         door_instance.floor_instance = self
         
         add_child(door_instance)
+        
+
 
 
 ## if we had a setup kiosk

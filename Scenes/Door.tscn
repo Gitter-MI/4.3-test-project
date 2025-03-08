@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cteyiclnlqvq" path="res://Scripts/door.gd" id="1_ajq3l"]
 [ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="2_6tgof"]
-[ext_resource type="Texture2D" uid="uid://d3mall10gg2k5" path="res://Building/Rooms/owner_logo.png" id="3_bgsld"]
+[ext_resource type="PackedScene" uid="uid://b7oqiwi6psc28" path="res://Scenes/door_ownership.tscn" id="3_7mbvs"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
 atlas = ExtResource("2_6tgof")
@@ -92,7 +92,4 @@ animation = &"door_open"
 visible = false
 shape = SubResource("RectangleShape2D_py5ck")
 
-[node name="Owner_Logo" type="Sprite2D" parent="."]
-position = Vector2(48, -58)
-texture = ExtResource("3_bgsld")
-centered = false
+[node name="Door_Ownership" parent="." instance=ExtResource("3_7mbvs")]

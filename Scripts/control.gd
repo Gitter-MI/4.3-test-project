@@ -1,4 +1,4 @@
-# Tooltip_Control.gd
+# Tooltip_Doors.gd
 extends Control
 
 @onready var tooltip_label: Label = $HBoxContainer/Label

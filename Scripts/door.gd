@@ -13,8 +13,7 @@ const SLOT_PERCENTAGES = [0.15, 0.35, 0.65, 0.85]
 
 @onready var animated_sprite: AnimatedSprite2D = $Door_Animation_2D
 @onready var collision_shape: CollisionShape2D = $Door_Collision_Shape_2D
-@onready var owner_logo_sprite: Sprite2D = $Owner_Logo
-# @onready var tooltip = $Control
+@onready var ownership_manager = $Door_Ownership if has_node("Door_Ownership") else null
 
 func _ready():
     add_to_group("doors")
@@ -49,6 +48,32 @@ func _on_mouse_entered():
 func _on_mouse_exited():
     SignalBus.hide_tooltip.emit()
 
+'''change owner is implemented but needs to be integrated'''
+'''- emits undefined owner changed signal'''
+'''- changeable_owner not implemented in door_data'''
+'''- needs testing if the tooltip will properly update'''
+func change_owner(new_owner: String) -> void:
+    if ownership_manager:
+        ownership_manager.change_owner(new_owner)
+        # Make sure door_data is updated so any functions that reference it have current data
+        door_data["owner"] = new_owner
+    else:
+        push_warning("This door does not have an ownership manager")
+
+
+#region Door Setup
+func setup_door_instance(p_door_data, p_floor_instance):
+    door_data = p_door_data
+    floor_instance = p_floor_instance
+    door_type = door_data.door_type
+    set_door_state(DoorState.CLOSED)
+    position_door()
+    update_collision_shape()
+    
+    # Initialize ownership manager if present
+    if ownership_manager:
+        ownership_manager.initialize(door_data)
+
 func get_collision_edges() -> Dictionary:
     var door_collision_shape = $Door_Collision_Shape_2D
     if not door_collision_shape:
@@ -69,46 +94,6 @@ func get_collision_edges() -> Dictionary:
         "top": global_pos.y - extents.y,
         "bottom": global_pos.y + extents.y
     }
-
-# Takes in a dict with an "owner" (see door_data.tres)
-func change_owner(updated_door_data):
-    _update_owner_logo_visibility(updated_door_data)
-
-#region door setup
-func setup_door_instance(p_door_data, p_floor_instance):
-    door_data = p_door_data
-    floor_instance = p_floor_instance
-    door_type = door_data.door_type
-    set_door_state(DoorState.CLOSED)
-    position_door()
-    update_collision_shape()
-    add_owner_logo(p_door_data)
-
-func add_owner_logo(p_door_data):
-    owner_logo_sprite.scale = Vector2(2.3, 2.3)
-    _update_owner_logo_visibility(p_door_data)
-    _update_owner_logo_color()
-
-func _update_owner_logo_color():
-    var owner_val = int(door_data.owner)
-    match owner_val:
-        1:
-            owner_logo_sprite.modulate = Color(0.732, 0.245, 0.262)  # Red
-        2:
-            owner_logo_sprite.modulate = Color(0.04, 0.484, 0.037)  # Green
-        3:
-            owner_logo_sprite.modulate = Color(0.219, 0.417, 0.889)  # Blue
-        4:
-            owner_logo_sprite.modulate = Color(0.227, 0.227, 0.227)  # Dark grey/Black
-        _:
-            owner_logo_sprite.modulate = Color(1, 1, 1)  # Default white
-
-func _update_owner_logo_visibility(p_door_data):
-    door_data = p_door_data 
-    if int(door_data.owner) in [1, 2, 3, 4]:
-        owner_logo_sprite.visible = true
-    else:
-        owner_logo_sprite.visible = false
 
 func update_collision_shape() -> void:
     var animation_name = "door_type_%d" % door_type
