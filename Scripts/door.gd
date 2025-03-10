@@ -48,6 +48,7 @@ func _on_mouse_entered():
 func _on_mouse_exited():
     SignalBus.hide_tooltip.emit()
 
+'''not relevant to the current re-factoring'''
 '''change owner is implemented but needs to be integrated'''
 '''- emits undefined owner changed signal'''
 '''- changeable_owner not implemented in door_data'''
@@ -55,7 +56,6 @@ func _on_mouse_exited():
 func change_owner(new_owner: String) -> void:
     if ownership_manager:
         ownership_manager.change_owner(new_owner)
-        # Make sure door_data is updated so any functions that reference it have current data
         door_data["owner"] = new_owner
     else:
         push_warning("This door does not have an ownership manager")

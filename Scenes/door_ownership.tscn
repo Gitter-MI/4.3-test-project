@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b7oqiwi6psc28"]
 
-[ext_resource type="Script" uid="uid://dwweh8i5vjvg" path="res://Scenes/door_ownership.gd" id="1_xieye"]
+[ext_resource type="Script" uid="uid://dwweh8i5vjvg" path="res://Scripts/door_ownership.gd" id="1_xieye"]
 [ext_resource type="Texture2D" uid="uid://d3mall10gg2k5" path="res://Building/Rooms/owner_logo.png" id="2_htejq"]
 
 [node name="Door_Ownership" type="Node2D"]

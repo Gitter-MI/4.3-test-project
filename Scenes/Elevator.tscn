@@ -166,6 +166,7 @@ texture = ExtResource("2_3tirm")
 [node name="FloorIndicatorHolder" type="Node2D" parent="Frame"]
 
 [node name="WhiteRectangle" type="Sprite2D" parent="Frame/FloorIndicatorHolder"]
+modulate = Color(0.87186, 0.87186, 0.87186, 1)
 position = Vector2(0, -25)
 texture = ExtResource("4_3geoe")
 

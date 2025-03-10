@@ -1,5 +1,14 @@
-# floor.gd -> do not remove this comment!
+# floor.gd
 extends Area2D
+
+var original_modulate: Color
+var time: float = 0.0
+@export var enable_color_variation: bool = true
+@export var color_variation_speed: float = 0.5
+@export var color_variation_amount: float = 0.01
+@export var randomize_phase: bool = true
+
+
 
 @export var floor_number: int = 0
 @export var floor_image_path: String
@@ -7,6 +16,7 @@ var floor_sprite: Sprite2D
 var collision_edges: Dictionary = {}
 
 const DOOR_SCENE = preload("res://Scenes/Door.tscn")
+const KIOSK_SCENE = preload("res://Scenes/Kiosk.tscn")
 const ELEVATOR_SCENE = preload("res://Scenes/Elevator.tscn")
 const PORTER_SCENE = preload("res://Scenes/Porter.tscn")
 const ROOMBOARD_SCENE = preload("res://Scenes/Roomboard.tscn")
@@ -23,9 +33,34 @@ func _ready():
     input_pickable = true    
     floor_sprite = $FloorSprite
     set_floor_image(floor_image_path)    
-    collision_layer = 1    
-    
-    self.connect("area_entered", Callable(self, "_on_floor_area_entered"))
+    collision_layer = 1        
+    self.connect("area_entered", Callable(self, "_on_floor_area_entered"))    
+    initialize_color_modulation()
+
+
+func _process(delta):
+    modulate_floor_background_color(delta)
+
+
+func modulate_floor_background_color(delta):
+     if enable_color_variation and floor_sprite:
+        time += delta * color_variation_speed        
+        var variation = sin(time) * color_variation_amount        
+        floor_sprite.modulate = Color(
+            original_modulate.r + variation,
+            original_modulate.g + variation,
+            original_modulate.b + variation,
+            original_modulate.a
+        )   
+
+
+func initialize_color_modulation():
+    if floor_sprite:
+        original_modulate = floor_sprite.modulate
+        if randomize_phase:
+            time = randf() * 10.0
+
+
 
 func _on_floor_area_entered(area: Area2D) -> void:    
     if area.get("sprite_data_new"):        # # Check if the area that entered belongs to a sprite

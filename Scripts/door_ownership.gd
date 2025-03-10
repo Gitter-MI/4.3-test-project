@@ -26,15 +26,19 @@ func initialize(p_door_data: Dictionary) -> void:
     update_logo_color()
 
 func change_owner(new_owner: String) -> void:
+    '''change ownership not implemented in door data file'''
+    ''' can_change_owner is always true'''
+    
     if not can_change_owner:
         push_warning("This door cannot change owners")
         return
         
-    var old_owner = door_data["owner"]
+    # var old_owner = door_data["owner"]
     door_data["owner"] = new_owner    
     update_logo_visibility()
     update_logo_color()    
-    emit_signal("owner_changed", old_owner, new_owner)
+    '''owner changed signal not implemented'''
+    ## emit_signal("owner_changed", old_owner, new_owner) 
 
 func update_logo_visibility() -> void:
     var owner_val = int(door_data.owner)

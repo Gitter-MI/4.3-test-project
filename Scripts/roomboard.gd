@@ -1,4 +1,4 @@
-# roomboard.gd (modified version)
+# kiosk.gd (based on roomboard.gd)
 extends Area2D
 
 enum DoorState { CLOSED, OPEN }
@@ -9,7 +9,7 @@ var door_data: Dictionary
 var floor_instance
 var door_center_x: float = 0.0 
 
-const SLOT_PERCENTAGES = [0.85]
+const SLOT_PERCENTAGES = [0.85]  ## this is an arti
 
 @onready var door_sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D

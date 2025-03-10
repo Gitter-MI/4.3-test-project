@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://tvhyupped1eb"]
+
+[ext_resource type="Script" uid="uid://cj3x1nhc7fwvv" path="res://Scripts/roomboard.gd" id="1_amaf6"]
+[ext_resource type="Texture2D" uid="uid://c4rxmv5u32mw6" path="res://Building/Rooms/1080_roomboard.png" id="2_ephfx"]
+[ext_resource type="PackedScene" uid="uid://b7oqiwi6psc28" path="res://Scenes/door_ownership.tscn" id="3_ephfx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hxbgb"]
+
+[node name="Kiosk" type="Area2D"]
+script = ExtResource("1_amaf6")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_ephfx")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_hxbgb")
+
+[node name="Kiosk_Ownership" parent="." instance=ExtResource("3_ephfx")]
