@@ -1,13 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://b47kwp7rlx2nu"]
+[gd_scene load_steps=3 format=3 uid="uid://b47kwp7rlx2nu"]
 
 [ext_resource type="Script" uid="uid://cdeqdyakwijrd" path="res://Scripts/control.gd" id="1_yu2uj"]
 [ext_resource type="Texture2D" uid="uid://cilggntchon47" path="res://Building/Rooms/tooltipheader.png" id="2_18nna"]
-[ext_resource type="Shader" uid="uid://80kpu1j6vei8" path="res://tooltip_shadow.gdshader" id="2_tgfv6"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_d6ir3"]
-shader = ExtResource("2_tgfv6")
-shader_parameter/shadow_offset = 2.0
-shader_parameter/shadow_color = Color(0, 0, 0, 1)
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -19,7 +13,6 @@ grow_vertical = 2
 script = ExtResource("1_yu2uj")
 
 [node name="Background" type="NinePatchRect" parent="."]
-material = SubResource("ShaderMaterial_d6ir3")
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
