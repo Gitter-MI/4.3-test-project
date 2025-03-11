@@ -88,17 +88,17 @@ func call_elevator() -> void:
     sprite_data_new.elevator_requested = true
 
 func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_ready_status: bool) -> void:
-    print("elevator request confirmed signal received by: ", sprite_data_new.sprite_name)
+    # print("elevator request confirmed signal received by: ", sprite_data_new.sprite_name)
     var incoming_sprite_name = elevator_request_data["sprite_name"]    
     var incoming_request_id = elevator_request_data["request_id"]
     
     if not incoming_sprite_name == sprite_data_new.sprite_name: # or incoming_request_id != sprite_data_new.elevator_request_id:
         # print("not my sprite name: ", sprite_data_new.sprite_name)
-        print("the incomming sprite name ", incoming_sprite_name, " is not my sprite name: ", sprite_data_new.sprite_name)
+        # print("the incomming sprite name ", incoming_sprite_name, " is not my sprite name: ", sprite_data_new.sprite_name)
         # print("the incomming incoming_request_id ", incoming_request_id, " is not my request_id: ", sprite_data_new.elevator_request_id)
         return
     
-    print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")    
+    # print("Sprite ", sprite_data_new.sprite_name, " received the request confirmation.")    
     sprite_data_new.elevator_request_id = incoming_request_id
     sprite_data_new.elevator_request_confirmed = true
     
@@ -106,24 +106,24 @@ func _on_elevator_request_confirmed(elevator_request_data: Dictionary, elevator_
         if sprite_data_new.elevator_state == sprite_data_new.ElevatorState.CALLING_ELEVATOR \
             or sprite_data_new.elevator_state == sprite_data_new.ElevatorState.WAITING_FOR_ELEVATOR:
 
-            print("The elevator is ready for ", sprite_data_new.sprite_name)
+            # print("The elevator is ready for ", sprite_data_new.sprite_name)
             sprite_data_new.elevator_ready = true
             sprite_data_new.defer_input = true            
             
             state_manager._process_elevator_state(sprite_data_new)
 
-            print("emitting entering elevator in _on_elevator_request_confirmed for: ", sprite_data_new.sprite_name)
+            # print("emitting entering elevator in _on_elevator_request_confirmed for: ", sprite_data_new.sprite_name)
             SignalBus.entering_elevator.emit(sprite_data_new.sprite_name)
             # You might lock down movement here or do any other UI updates as needed
             
-        else:
+        else:            
             # If the sprite isn't in the CALLING or WAITING state, do not let it enter
-            print("Elevator is ready, but sprite ", sprite_data_new.sprite_name, 
-                  " is not waiting or calling. Current elevator_state =", sprite_data_new.elevator_state)
+            # print("Elevator is ready, but sprite ", sprite_data_new.sprite_name, 
+                  # " is not waiting or calling. Current elevator_state =", sprite_data_new.elevator_state)
             return
 
     else:
-        print("Not entering because the elevator is blocked or not ready.")
+        # print("Not entering because the elevator is blocked or not ready.")
         return
 
 
@@ -131,7 +131,7 @@ func _on_elevator_waiting_ready_received(elevator_request_data: Dictionary, elev
     
     ### case of the DRY here and in the _on_elevator_request_confirmed function
     
-    print("elevator_waiting_ready signal received: ", sprite_data_new.sprite_name)
+    # print("elevator_waiting_ready signal received: ", sprite_data_new.sprite_name)
     var incoming_sprite_name = elevator_request_data["sprite_name"]
     var incoming_request_id = elevator_request_data["request_id"]
     

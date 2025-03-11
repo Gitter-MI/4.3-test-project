@@ -212,7 +212,7 @@ func process_waiting():
 
 
 func emit_ready_on_waiting():
-    print("emit_ready_on_waiting")
+    # print("emit_ready_on_waiting")
     
     var elevator_ready_status: bool = true
     var requests_at_floor: Array = []
@@ -223,7 +223,7 @@ func emit_ready_on_waiting():
             requests_at_floor.append(request)
     
     for request_data in requests_at_floor:
-        print("emitting request signal with actual value to ", request_data["sprite_name"])
+        # print("emitting request signal with actual value to ", request_data["sprite_name"])
         SignalBus.elevator_request_confirmed.emit(request_data, elevator_ready_status)
         
         
@@ -338,7 +338,7 @@ func _categorize_incomming_elevator_request(sprite_name: String, sprite_elevator
 #endregion
 
 func _on_sprite_entering_elevator(sprite_name: String):
-    print("Elevator: Sprite ", sprite_name, " has begun to enter the elevator")
+    # print("Elevator: Sprite ", sprite_name, " has begun to enter the elevator")
     
     if not cabin_data.cabin_timer.is_stopped():
         stop_waiting_timer()
@@ -361,7 +361,7 @@ func _on_sprite_exiting(sprite_name) -> void:
     
 
 func reset_elevator() -> void:
-    print("resetting elevator status")
+    # print("resetting elevator status")
     ## arguments are never used
     cabin_data.elevator_occupied = false
     cabin_data.sprite_entered = false
