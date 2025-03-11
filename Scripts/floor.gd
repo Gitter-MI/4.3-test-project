@@ -112,7 +112,7 @@ func position_floor(previous_floor_top_y_position, is_first_floor):
         # Stack the floor above the previous floor
         y_position = previous_floor_top_y_position - floor_height
     
-    position = Vector2(x_position, y_position)    
+    position = Vector2(round(x_position), round(y_position))  
     configure_collision_shape()
     # Return the y position of the top of this floor for the next calculation
     return y_position

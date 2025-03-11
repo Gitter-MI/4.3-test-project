@@ -264,7 +264,12 @@ func _on_elevator_request(elevator_request_data: Dictionary) -> void:
     var sprite_name: String = elevator_request_data["sprite_name"]
     
     if sprite_name == cabin_data.blocked_sprite:
-        return
+        # Check if queue is empty or only contains this sprite's request
+        if queue_manager.elevator_queue.is_empty() or (queue_manager.elevator_queue.size() == 1 and queue_manager.elevator_queue[0]["sprite_name"] == sprite_name):
+            cabin_data.blocked_sprite = ""  # Unblock the sprite
+        else:
+            print("sprite blocked")
+            return
     
     var sprite_elevator_request_id: int = elevator_request_data["request_id"]        
     var request_type = _categorize_incomming_elevator_request(sprite_name, sprite_elevator_request_id)
