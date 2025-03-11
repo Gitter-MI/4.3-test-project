@@ -10,8 +10,6 @@ extends Area2D
 const SpriteDataScript = preload("res://Data/SpriteData_new.gd")
 var sprite_data_new: Resource = SpriteDataScript.new()
 
-# Removed SCALE_FACTOR constant
-
 func _ready():
     instantiate_sprite()
     connect_to_signals()    
@@ -401,7 +399,6 @@ func instantiate_sprite():
 func update_sprite_dimensions():
     var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
     if idle_texture:
-        # Remove scale multiplication since sprites are pre-scaled
         sprite_data_new.sprite_width = idle_texture.get_width()
         sprite_data_new.sprite_height = idle_texture.get_height()
     else:

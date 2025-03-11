@@ -4,7 +4,6 @@ extends Node2D
 signal owner_changed(old_owner, new_owner)
 
 @export var can_change_owner: bool = true
-@export var default_logo_scale: Vector2 = Vector2(2.3, 2.3)
 @onready var logo_sprite: Sprite2D = $Owner_Logo
 
 var door_data: Dictionary
@@ -16,8 +15,7 @@ var owner_colors = {
     4: Color(0.227, 0.227, 0.227),  # Dark grey/Black
 }
 
-func _ready():
-    logo_sprite.scale = default_logo_scale
+# func _ready():
     # pass
     
 func initialize(p_door_data: Dictionary) -> void:

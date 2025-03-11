@@ -454,7 +454,6 @@ func position_cabin():
 func get_cabin_height():
     var sprite = get_node("Sprite2D")
     if sprite and sprite.texture:
-        # Removed scale.y multiplication since sprites are pre-scaled
         return sprite.texture.get_height()
     else:
         return 0

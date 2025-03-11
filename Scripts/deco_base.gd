@@ -4,7 +4,6 @@ extends Node2D
 @export var deco_texture: Texture2D
 const SpriteDataScript = preload("res://Data/SpriteData_new.gd")
 var sprite_data_new: Resource = SpriteDataScript.new()
-const SCALE_FACTOR = 2.3
 var x_placement: int
 var element_name: String
 
@@ -65,7 +64,6 @@ func set_initial_position() -> void:
 
 func instantiate_sprite():
     add_to_group("deco_sprites")
-    apply_scale_factor_to_sprite()
     update_sprite_dimensions()
 
 func update_sprite_dimensions():
@@ -73,9 +71,3 @@ func update_sprite_dimensions():
     if tex:
         sprite_data_new.sprite_width  = tex.get_width() * $Sprite2D.scale.x
         sprite_data_new.sprite_height = tex.get_height() * $Sprite2D.scale.y
-
-func apply_scale_factor_to_sprite():
-    if $Sprite2D:
-        $Sprite2D.scale *= SCALE_FACTOR
-    else:
-        push_warning("Sprite2D node not found for scaling.")

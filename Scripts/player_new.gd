@@ -1,4 +1,5 @@
 # player_new.gd
+# deprecated? please confirm!
 extends Area2D
 
 @onready var navigation_controller := get_tree().get_root().get_node("Main/Navigation_Controller")
@@ -23,7 +24,7 @@ var prev_floor: int = -1  # Holds the previous random floor number
 
 func _ready():
     # print("deco ready")
-    # print("sprite_data_new: ", sprite_data_new)
+    print("sprite_data_new: ", sprite_data_new)
     # sprite_data_new = SpriteDataScript.new()
     instantiate_sprite()
     connect_to_signals()    

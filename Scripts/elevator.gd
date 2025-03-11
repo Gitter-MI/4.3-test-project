@@ -12,7 +12,6 @@ func setup_elevator_instance(p_floor_instance):
     floor_instance = p_floor_instance
     name = "Elevator_" + str(floor_instance.floor_number)    
     add_to_group("elevators")
-    # Remove the apply_scale_factor_to_elevator() call
     position_elevator()
     update_elevator_door_collision_shape()
     setup_elevator_doors_position()
@@ -146,7 +145,6 @@ func position_elevator():
 func get_elevator_height():
     var elevator_sprite = $Frame
     if elevator_sprite and elevator_sprite.texture:
-        # Just use the texture height directly, since scale is now 1
         return elevator_sprite.texture.get_height()
     else:
         push_warning("Elevator sprite node not found or has no texture.")
@@ -170,9 +168,6 @@ func setup_elevator_doors_position():
     if not elevator_doors:
         push_warning("AnimatedSprite2D node not found in Elevator scene.")
         return
-
-    # Ensure scale is 1,1 (no scaling)
-    elevator_doors.scale = Vector2(1, 1)
     
     var door_texture = elevator_doors.sprite_frames.get_frame_texture("closed", 0)
     var door_height = 0
