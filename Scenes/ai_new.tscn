@@ -1,8 +1,8 @@
-[gd_scene load_steps=20 format=3 uid="uid://d34esq11ri6sa"]
+[gd_scene load_steps=20 format=3 uid="uid://c8fyvj6n3g3ie"]
 
 [ext_resource type="Script" uid="uid://bysjk40gw4iyf" path="res://Scripts/sprite_base.gd" id="1_oxrmg"]
 [ext_resource type="Script" uid="uid://bdel5w2lwam25" path="res://Scripts/pathfinder_component.gd" id="1_qsrug"]
-[ext_resource type="Texture2D" uid="uid://brljunjwagarj" path="res://Sprites/Arab_man_white.png" id="2_1k5yn"]
+[ext_resource type="Texture2D" uid="uid://cqnl5l2s0w6pc" path="res://Sprites/Arab_man_white.png" id="2_1k5yn"]
 [ext_resource type="Script" uid="uid://bs44xfwkdxl5t" path="res://Scripts/state_component.gd" id="2_uqh0m"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eujd1"]
