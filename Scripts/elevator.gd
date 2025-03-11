@@ -1,8 +1,6 @@
-# elevator.gd
 extends Area2D
 
 var floor_instance
-const SCALE_FACTOR = 2.3
 
 enum DoorState { CLOSED, OPENING, OPEN, CLOSING }
 var door_state: DoorState = DoorState.CLOSED
@@ -14,7 +12,7 @@ func setup_elevator_instance(p_floor_instance):
     floor_instance = p_floor_instance
     name = "Elevator_" + str(floor_instance.floor_number)    
     add_to_group("elevators")
-    apply_scale_factor_to_elevator()
+    # Remove the apply_scale_factor_to_elevator() call
     position_elevator()
     update_elevator_door_collision_shape()
     setup_elevator_doors_position()
@@ -133,21 +131,11 @@ func _on_doors_animation_finished():
         push_warning("AnimatedSprite2D node not found when handling animation finished.")
 
 #region Elevator Door Set-Up
-func apply_scale_factor_to_elevator():
-    var elevator_sprite = $Frame
-    if elevator_sprite:
-        elevator_sprite.scale *= SCALE_FACTOR
-
-        # print("Applied scale factor to elevator frame.")
-    else:
-        push_warning("Elevator sprite node not found to apply scale factor.")
-
 func position_elevator():    
     var edges_global = floor_instance.collision_edges
     var left_edge_local   = edges_global["left"]   - floor_instance.global_position.x
     var right_edge_local  = edges_global["right"]  - floor_instance.global_position.x
     var bottom_edge_local = edges_global["bottom"] - floor_instance.global_position.y
-    # var top_edge_local = edges_global["top"] -  - floor_instance.global_position.y
     
     var floor_center_x_local = (left_edge_local + right_edge_local) * 0.5
     var elevator_height = get_elevator_height()
@@ -155,12 +143,11 @@ func position_elevator():
     var elevator_bottom_aligned_y = bottom_edge_local - (elevator_height / 2)
     position = Vector2(floor_center_x_local, elevator_bottom_aligned_y)
 
-
-
 func get_elevator_height():
     var elevator_sprite = $Frame
     if elevator_sprite and elevator_sprite.texture:
-        return elevator_sprite.texture.get_height() * elevator_sprite.scale.y
+        # Just use the texture height directly, since scale is now 1
+        return elevator_sprite.texture.get_height()
     else:
         push_warning("Elevator sprite node not found or has no texture.")
         return 0
@@ -169,12 +156,12 @@ func update_elevator_door_collision_shape():
     var elevator_sprite = $Frame
     var collision_shape = $CollisionShape2D
     if elevator_sprite and collision_shape:
-        var width = elevator_sprite.texture.get_width() * elevator_sprite.scale.x
-        var height = elevator_sprite.texture.get_height() * elevator_sprite.scale.y
+        # Use texture dimensions directly
+        var width = elevator_sprite.texture.get_width()
+        var height = elevator_sprite.texture.get_height()
         var rectangle_shape = RectangleShape2D.new()
         rectangle_shape.extents = Vector2(width / 2, height / 2)
         collision_shape.shape = rectangle_shape
-        # print("Updated elevator door collision shape.")
     else:
         push_warning("Cannot update collision shape: Missing nodes or textures")
 
@@ -184,16 +171,18 @@ func setup_elevator_doors_position():
         push_warning("AnimatedSprite2D node not found in Elevator scene.")
         return
 
-    elevator_doors.scale = Vector2(SCALE_FACTOR, SCALE_FACTOR)
+    # Ensure scale is 1,1 (no scaling)
+    elevator_doors.scale = Vector2(1, 1)
+    
     var door_texture = elevator_doors.sprite_frames.get_frame_texture("closed", 0)
     var door_height = 0
     if door_texture:
-        door_height = door_texture.get_height() * elevator_doors.scale.y
+        door_height = door_texture.get_height()
     var elevator_height = get_elevator_height()
     var door_y_offset = (elevator_height - door_height) / 2
+    
     elevator_doors.position = Vector2(0, door_y_offset)
 
     # Initially show doors closed
     set_door_state(DoorState.CLOSED)
-    # print("Elevator doors set up and initially closed.")
 #endregion

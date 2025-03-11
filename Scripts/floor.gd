@@ -43,6 +43,7 @@ func _process(delta):
 
 
 func modulate_floor_background_color(delta):
+    # can be used to display 'dark' floors. Currently adds a little bit of 'noise' to the plain background of the floors. 
      if enable_color_variation and floor_sprite:
         time += delta * color_variation_speed        
         var variation = sin(time) * color_variation_amount        
@@ -57,6 +58,7 @@ func modulate_floor_background_color(delta):
 func initialize_color_modulation():
     if floor_sprite:
         original_modulate = floor_sprite.modulate
+        # color modulates randomly for each floor, not in sync
         if randomize_phase:
             time = randf() * 10.0
 

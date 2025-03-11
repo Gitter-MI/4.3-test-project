@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6q7gdalj10v"
-path="res://.godot/imported/white_rectangle.png-7aa97c069259d4ef5856eb966de96d56.ctex"
+uid="uid://3557rygoda40"
+path="res://.godot/imported/elevator_doors_spritesheet_8_frames.png-7dbd3c74c66541aa1fc5f1b249f3ac63.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Building/Elevators/white_rectangle.png"
-dest_files=["res://.godot/imported/white_rectangle.png-7aa97c069259d4ef5856eb966de96d56.ctex"]
+source_file="res://Building/Elevators/old/elevator_doors_spritesheet_8_frames.png"
+dest_files=["res://.godot/imported/elevator_doors_spritesheet_8_frames.png-7dbd3c74c66541aa1fc5f1b249f3ac63.ctex"]
 
 [params]
 

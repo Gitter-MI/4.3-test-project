@@ -12,6 +12,12 @@ func _ready():
     $Sprite2D.texture = deco_texture
     instantiate_sprite()
     set_initial_position()
+    
+    if sprite_data_new.sprite_name == "WallLamp":
+        z_index = 2
+    else:
+        z_index = 0
+        
 
 func set_data(x_percent: int, current_floor_number: int, sprite_name: String):
     sprite_data_new.current_floor_number = current_floor_number

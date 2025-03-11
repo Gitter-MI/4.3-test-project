@@ -5,6 +5,8 @@
 
 extends Node
 
+# In SignalBus.gd
+signal test_teleport(target_floor, target_position)
 
 signal cursor_size_updated(size)
 signal show_tooltip(door_data)

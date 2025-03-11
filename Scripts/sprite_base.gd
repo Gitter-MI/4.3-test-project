@@ -17,6 +17,7 @@ func _ready():
     instantiate_sprite()
     connect_to_signals()    
     set_initial_position()
+    z_index = 1
 
 
 
@@ -225,7 +226,7 @@ func exit_elevator():
 
 func on_sprite_exited_elevator():
     # print("on_sprite_exited_elevator in sprite base")
-    z_index = 0
+    z_index = 1
     SignalBus.exit_animation_finished.emit(sprite_data_new.sprite_name)
     sprite_data_new.exited_elevator = true
     sprite_data_new.set_target_position(

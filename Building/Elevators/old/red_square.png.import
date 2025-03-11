@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6q7gdalj10v"
-path="res://.godot/imported/white_rectangle.png-7aa97c069259d4ef5856eb966de96d56.ctex"
+uid="uid://clci8p25k3mvy"
+path="res://.godot/imported/red_square.png-f87e4fedd7a23f89a0ce6f972179acad.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Building/Elevators/white_rectangle.png"
-dest_files=["res://.godot/imported/white_rectangle.png-7aa97c069259d4ef5856eb966de96d56.ctex"]
+source_file="res://Building/Elevators/old/red_square.png"
+dest_files=["res://.godot/imported/red_square.png-f87e4fedd7a23f89a0ce6f972179acad.ctex"]
 
 [params]
 

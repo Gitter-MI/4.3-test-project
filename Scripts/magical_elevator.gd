@@ -1,3 +1,4 @@
+# magical_elevator.gd
 extends Area2D
 
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
@@ -10,7 +11,7 @@ extends Area2D
 func _ready():    
     set_up_elevator_cabin()    
     z_index = -10
-    add_to_group("cabin")    
+    add_to_group("cabin")   
 
 
 func _process(delta) -> void:    
@@ -427,7 +428,6 @@ func _on_cabin_timer_timeout() -> void:
 
 func set_up_elevator_cabin(): 
     add_to_group("cabin")
-    apply_scale_factor()
     position_cabin()
     connect_to_signals()
     cache_elevators()
@@ -437,16 +437,13 @@ func set_up_elevator_cabin():
     var elevator = get_elevator_for_current_floor()
     elevator.set_door_state(elevator.DoorState.OPEN)
 
-func apply_scale_factor():
-    # Instead of referencing a local constant, use the child node’s data:
-    scale = Vector2.ONE * cabin_data.SCALE_FACTOR
 
 func position_cabin():    
     var viewport_size = get_viewport().size
     var x_position = viewport_size.x / 2
 
     var floors_dict: Dictionary = navigation_controller.floors
-    var floor_data = floors_dict[cabin_data.current_floor]  # Moved from local var to cabin_data
+    var floor_data = floors_dict[cabin_data.current_floor]
     var collision_edges = floor_data["edges"] 
     var bottom_edge_y = collision_edges["bottom"]
     var cabin_height = get_cabin_height()
@@ -455,11 +452,10 @@ func position_cabin():
     global_position = Vector2(x_position, y_position)
 
 func get_cabin_height():
-    var sprite = get_node("Sprite2D")  # Adjust if needed
+    var sprite = get_node("Sprite2D")
     if sprite and sprite.texture:
-        # Use cabin_data.scale.y if you are scaling from cabin_data, 
-        # or continue using `scale.y` if the node’s actual scale is correct
-        return sprite.texture.get_height() * scale.y
+        # Removed scale.y multiplication since sprites are pre-scaled
+        return sprite.texture.get_height()
     else:
         return 0
 

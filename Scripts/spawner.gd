@@ -161,11 +161,12 @@ var deco_definitions = [
 
 func _ready():
     
+    spawn_all_decorations()
     spawn_base_sprite()
     # spawn_player()
     # spawn_ai(1)
     
-    spawn_all_decorations()
+    
     
     
     SignalBus.all_sprites_ready.emit()  
