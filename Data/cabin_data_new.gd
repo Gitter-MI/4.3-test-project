@@ -41,7 +41,6 @@ var floor_to_elevator = {} ## used in the new implementation
 var floor_to_target_position = {} ## used in the new implementation
 var target_position: Vector2 = Vector2.ZERO
 
-const SCALE_FACTOR: float = 1
 const SPEED: float = 800.0  # Pixels per second 800
 
 

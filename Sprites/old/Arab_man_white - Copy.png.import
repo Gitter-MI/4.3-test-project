@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://clkusls1lpmf2"
-path="res://.godot/imported/figures_original_reorganized.png-60d8bf74cba476e37e5cd11626772804.ctex"
+uid="uid://cya0m6aj1cotg"
+path="res://.godot/imported/Arab_man_white - Copy.png-b04205afdbdabd14b55d92ef25a179fe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/figures_original_reorganized.png"
-dest_files=["res://.godot/imported/figures_original_reorganized.png-60d8bf74cba476e37e5cd11626772804.ctex"]
+source_file="res://Sprites/old/Arab_man_white - Copy.png"
+dest_files=["res://.godot/imported/Arab_man_white - Copy.png-b04205afdbdabd14b55d92ef25a179fe.ctex"]
 
 [params]
 

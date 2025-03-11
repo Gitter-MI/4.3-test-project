@@ -10,8 +10,7 @@ extends Area2D
 const SpriteDataScript = preload("res://Data/SpriteData_new.gd")
 var sprite_data_new: Resource = SpriteDataScript.new()
 
-const SCALE_FACTOR = 2.3
-
+# Removed SCALE_FACTOR constant
 
 func _ready():
     instantiate_sprite()
@@ -394,9 +393,6 @@ func _on_adjusted_navigation_command(_commander: String, sprite_name: String, fl
 func instantiate_sprite():
     add_to_group("player_sprite")   # for other nodes explicitly referencing this player sprite
     add_to_group("sprites")
-    # print("player is in group player_sprites")
-    # sprite_data_new = SpriteDataNew.new()    
-    apply_scale_factor_to_sprite()
     update_sprite_dimensions()
     update_collision_shape()    
     
@@ -405,11 +401,11 @@ func instantiate_sprite():
 func update_sprite_dimensions():
     var idle_texture = $AnimatedSprite2D.sprite_frames.get_frame_texture("idle", 0)
     if idle_texture:
-        sprite_data_new.sprite_width = idle_texture.get_width() * $AnimatedSprite2D.scale.x
-        sprite_data_new.sprite_height = idle_texture.get_height() * $AnimatedSprite2D.scale.y
+        # Remove scale multiplication since sprites are pre-scaled
+        sprite_data_new.sprite_width = idle_texture.get_width()
+        sprite_data_new.sprite_height = idle_texture.get_height()
     else:
         print("Warning: 'idle' animation (frame 0) not found.")
-
 
 func update_collision_shape():    
     var collision_shape = $CollisionShape2D
@@ -422,13 +418,6 @@ func update_collision_shape():
         print("Warning: CollisionShape2D not found.")
 
 
-func apply_scale_factor_to_sprite():
-    var sprite = $AnimatedSprite2D
-    if sprite:
-        sprite.scale *= SCALE_FACTOR
-        # print("Applied scale factor to player sprite.")
-    else:
-        push_warning("AnimatedSprite2D node not found for scaling.")
 
 func set_data(
     current_floor_number: int,
