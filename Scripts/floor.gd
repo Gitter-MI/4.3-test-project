@@ -18,8 +18,7 @@ var collision_edges: Dictionary = {}
 const DOOR_SCENE = preload("res://Scenes/Door.tscn")
 const KIOSK_SCENE = preload("res://Scenes/Kiosk.tscn")
 const ELEVATOR_SCENE = preload("res://Scenes/Elevator.tscn")
-const PORTER_SCENE = preload("res://Scenes/Porter.tscn")
-const ROOMBOARD_SCENE = preload("res://Scenes/Roomboard.tscn")
+
 
 const BOUNDARIES = {
     "x1": 0.0715,  # Left boundary
@@ -166,25 +165,29 @@ func set_floor_image(image_path: String):
         else:
             print("File does not exist at path: " + image_path)
 
+
 func setup_doors(door_data_array):
     for door_data in door_data_array:
-        var door_instance
-        # print("room name: ", door_data.room_name)
+        var instance
         
-        if door_data.room_name.to_lower() == "roomboard":
-            door_instance = ROOMBOARD_SCENE.instantiate()
-        
-        elif door_data.room_name.to_lower() == "porter":
-            door_instance = PORTER_SCENE.instantiate()
-        #elif 
+        if door_data.object_type == "kiosk":
+            instance = KIOSK_SCENE.instantiate()
         else:
-            door_instance = DOOR_SCENE.instantiate()
+            instance = DOOR_SCENE.instantiate()
+            
+        instance.name = "Door_" + str(door_data.index)
+        instance.door_data = door_data
+        instance.floor_instance = self
+        add_child(instance)
         
-        door_instance.name = "Door_" + str(door_data.index)
-        door_instance.door_data = door_data
-        door_instance.floor_instance = self
+        # Explicitly call setup
+        instance.setup(door_data, self)
         
-        add_child(door_instance)
+        # Debug info
+        print("Created:", door_data.object_type, " - ", door_data.room_name, 
+              " - Visible:", door_data.get("is_visible", true),
+              " - Position:", instance.global_position)
+
         
 
 

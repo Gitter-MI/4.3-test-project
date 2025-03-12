@@ -70,9 +70,9 @@ func setup_door_instance(p_door_data, p_floor_instance):
     position_door()
     update_collision_shape()
     
-    # Initialize ownership manager if present
-    if ownership_manager:
-        ownership_manager.initialize(door_data)
+    ## Initialize ownership manager if present
+    #if ownership_manager:
+        #ownership_manager.initialize(door_data)
 
 func get_collision_edges() -> Dictionary:
     var door_collision_shape = $Door_Collision_Shape_2D

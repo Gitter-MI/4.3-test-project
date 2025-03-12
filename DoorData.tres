@@ -454,10 +454,11 @@ doors = Array[Dictionary]([{
 "info": "door_slot_must_be_0",
 "is_animated": false,
 "is_visible": true,
-"object_type": "door",
+"object_type": "kiosk",
 "owner": 0,
 "room_name": "roomboard",
-"screen": "screen_roomboard",
+"screen": "1080_roomboard",
+"slot_percentage": 0.85,
 "tooltip": "Roomboard"
 }, {
 "door_slot": 3,
@@ -479,9 +480,10 @@ doors = Array[Dictionary]([{
 "info": "door_slot_must_be_0",
 "is_animated": false,
 "is_visible": false,
-"object_type": "door",
+"object_type": "kiosk",
 "owner": 0,
 "room_name": "porter",
 "screen": "1080_porter",
+"slot_percentage": 0.07,
 "tooltip": "Porter"
 }])
