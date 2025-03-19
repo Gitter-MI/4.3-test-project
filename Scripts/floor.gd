@@ -184,9 +184,9 @@ func setup_doors(door_data_array):
         instance.setup(door_data, self)
         
         # Debug info
-        print("Created:", door_data.object_type, " - ", door_data.room_name, 
-              " - Visible:", door_data.get("is_visible", true),
-              " - Position:", instance.global_position)
+        #print("Created:", door_data.object_type, " - ", door_data.room_name, 
+              #" - Visible:", door_data.get("is_visible", true),
+              #" - Position:", instance.global_position)
 
         
 

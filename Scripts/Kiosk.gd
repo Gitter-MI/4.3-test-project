@@ -83,4 +83,4 @@ func position_element():
     global_position = Vector2(local_x, local_y)
     door_center_x = local_x
     
-    print("Positioned kiosk:", door_data.room_name, " at:", global_position)
+    # print("Positioned kiosk:", door_data.room_name, " at:", global_position)

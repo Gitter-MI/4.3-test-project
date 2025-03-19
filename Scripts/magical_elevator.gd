@@ -11,7 +11,8 @@ extends Area2D
 func _ready():    
     set_up_elevator_cabin()    
     z_index = -10
-    add_to_group("cabin")   
+    add_to_group("cabin")
+    SignalBus.floor_area_entered.emit(self, cabin_data.current_floor)    
 
 
 func _process(delta) -> void:    
