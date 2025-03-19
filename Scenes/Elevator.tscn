@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://cy6lj0x2yoi8h"]
+[gd_scene load_steps=20 format=3 uid="uid://cy6lj0x2yoi8h"]
 
 [ext_resource type="Script" uid="uid://cfmumctvjeg5j" path="res://Scripts/elevator.gd" id="1_g5yyx"]
 [ext_resource type="Texture2D" uid="uid://bx8wvp0ufymii" path="res://Building/Elevators/elevator_doors_open.png" id="2_3tirm"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://c521exhjck1mi" path="res://Scripts/floor_indicator.gd" id="4_2i6s8"]
 [ext_resource type="Texture2D" uid="uid://6q7gdalj10v" path="res://Building/Elevators/white_rectangle.png" id="4_3geoe"]
 [ext_resource type="Texture2D" uid="uid://cxx0el0oc1nm1" path="res://Building/Elevators/red_square.png" id="5_57077"]
+[ext_resource type="Script" uid="uid://niqtl26xonjp" path="res://Scripts/elevator_door_animation.gd" id="7_rd3yl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tyhfd"]
 
@@ -151,5 +152,6 @@ shape = SubResource("RectangleShape2D_tyhfd")
 [node name="Elevator_Door_Animation" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ilsis")
 animation = &"opening"
+script = ExtResource("7_rd3yl")
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]

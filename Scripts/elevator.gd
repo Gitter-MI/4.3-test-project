@@ -7,16 +7,11 @@ var door_state: DoorState = DoorState.CLOSED
 
 @onready var floor_indicator = $Frame/FloorIndicatorHolder
 @onready var elevator_doors = $Elevator_Door_Animation
-@onready var door_animation_controller = Node.new()
+@onready var door_animation_controller = $Elevator_Door_Animation
 
 func _ready():
-    # Add the door animation controller as a child
-    add_child(door_animation_controller)
-    door_animation_controller.set_script(load("res://Scripts/elevator_door_animation.gd"))
-    door_animation_controller.initialize(self, elevator_doors)
-
-    # Initially show doors closed
-    set_door_state(DoorState.CLOSED)
+    pass
+    # set_door_state(DoorState.CLOSED)
 
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
     # Only update floor indicator if the area is from the elevator cabin
