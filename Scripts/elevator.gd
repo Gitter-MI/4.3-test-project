@@ -11,12 +11,9 @@ var door_state: DoorState = DoorState.CLOSED
 
 func _ready():
     pass
-    # set_door_state(DoorState.CLOSED)
 
 func _on_floor_area_entered(area: Area2D, floor_number: int) -> void:
-    # Only update floor indicator if the area is from the elevator cabin
     if area.is_in_group("cabin"):
-        # print("current elevator floor number: ", floor_number)
         floor_indicator.update_indicator_position(floor_number)
 
 func _on_input_event(_viewport, event, _shape_idx):
@@ -108,7 +105,6 @@ func update_elevator_door_collision_shape():
     var elevator_sprite = $Frame
     var collision_shape = $CollisionShape2D
     if elevator_sprite and collision_shape:
-        # Use texture dimensions directly
         var width = elevator_sprite.texture.get_width()
         var height = elevator_sprite.texture.get_height()
         var rectangle_shape = RectangleShape2D.new()

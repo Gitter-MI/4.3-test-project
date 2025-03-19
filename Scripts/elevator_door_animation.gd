@@ -1,22 +1,12 @@
 extends AnimatedSprite2D
 
 # This script handles the elevator door animations
-
-# Reference to the elevator object (parent Area2D node)
 @onready var elevator: Area2D = get_parent()
 
 func _ready():
     animation_finished.connect(_on_doors_animation_finished)
     setup_doors_position()
 
-# Initialize method kept for backwards compatibility
-# This can be safely removed once all references to it are updated
-func initialize(p_elevator: Area2D, _p_animated_sprite: AnimatedSprite2D):
-    # Override the auto-detected parent if a specific elevator is provided
-    if p_elevator:
-        elevator = p_elevator
-
-# Animation finished callback
 func _on_doors_animation_finished():
     if not elevator:
         push_warning("Missing elevator reference when handling animation finished.")
