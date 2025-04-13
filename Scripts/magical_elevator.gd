@@ -6,13 +6,16 @@ extends Area2D
 @onready var cabin_data: Node = $Cabin_Data
 @onready var queue_manager: Node = $Queue_Manager
 @onready var elevator_state_manager: Node = $Elevator_StateMachine
-
+@onready var cabin_timer: Node = $Cabin_Timer
+@onready var elevator_movement: Node = $Elevator_Movement_Component
 
 func _ready():    
     set_up_elevator_cabin()    
     z_index = -10
     add_to_group("cabin")
     SignalBus.floor_area_entered.emit(self, cabin_data.current_floor)    
+    
+
 
 
 func _process(delta) -> void:    
@@ -54,7 +57,7 @@ func process_arriving() -> void:
 
 
 func process_transit(delta):
-    move_elevator(delta)
+    elevator_movement.move_elevator(delta)
     elevator_state_manager.process_transit()
 
 
@@ -62,8 +65,8 @@ func process_transit(delta):
 func process_departing():
     # print("process departing in main elevator script")
     
-    if not cabin_data.cabin_timer.is_stopped():
-            stop_waiting_timer()
+    if not cabin_timer.is_timer_running():
+            cabin_timer.stop_waiting_timer()
     
     if not cabin_data.doors_closed:  
         if (cabin_data.elevator_occupied and cabin_data.sprite_entered) or not cabin_data.elevator_occupied:        
@@ -86,92 +89,24 @@ func _close_elevator_doors():
 
 
 func _on_elevator_door_state_changed(new_state):
-
     var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)
     if elevator == null:
         return
 
     match new_state:
         elevator.DoorState.OPEN:
-            # print("doors are now open")
             cabin_data.doors_open = true
             cabin_data.doors_opening = false
 
         elevator.DoorState.CLOSED:
-            # print("doors are now closed")
             cabin_data.doors_closed = true
             cabin_data.doors_closing = false
-            set_elevator_direction()
-            update_destination_floor()
+            elevator_movement.set_elevator_direction()
+            elevator_movement.update_destination_floor()
             
 
 
-func update_destination_floor() -> void:
-    # print("update destination floor")
 
-    if not queue_manager.elevator_queue[0]:
-        push_warning("queue is empty when trying to update the destination floor. func update_destination_floor() in cabin_new")
-        return
-    var current_request = queue_manager.elevator_queue[0]
-    
-    if cabin_data.elevator_occupied:
-        cabin_data.destination_floor = current_request["destination_floor"]
-    else:
-        cabin_data.destination_floor = current_request["pick_up_floor"]        
-    cabin_data.target_position = cabin_data.floor_to_target_position[cabin_data.destination_floor]
-    
-
-func set_elevator_direction() -> void:
-    var new_direction: int = 0
-    
-    if queue_manager.elevator_queue.size() > 0:
-        var next_floor: int
-        if cabin_data.elevator_occupied:
-            next_floor = queue_manager.elevator_queue[0]["destination_floor"]
-        else:
-            next_floor = queue_manager.elevator_queue[0]["pick_up_floor"]        
-        if next_floor > cabin_data.current_floor:
-            new_direction = 1   # going up
-        elif next_floor < cabin_data.current_floor:
-            new_direction = -1  # going down
-        else:
-            new_direction = 0   # same floor
-    else:
-        new_direction = 0      # no requests => no movement
-    
-    cabin_data.elevator_direction = new_direction
-
-func move_elevator(delta: float) -> void:
-    if cabin_data.target_position == Vector2.ZERO:        
-        return  # Elevator doesn't have a target different from it's current position, so just return
-
-    # Only stop if it's actually running:
-    if not cabin_data.cabin_timer.is_stopped():
-        # push_warning("Cabin timer is running while cabin is moving. Stopping it now.")
-        cabin_data.cabin_timer.stop() # prevent the timer from removing requests while the current request is being processed, which could lead to an out-of-bounds error in on_arrival
-
-    var elevator = cabin_data.floor_to_elevator.get(cabin_data.current_floor, null)    
-    if elevator.door_state != elevator.DoorState.CLOSED:
-        return
-    
-    var direction = sign(cabin_data.target_position.y - global_position.y)
-    var movement = cabin_data.SPEED * delta * direction
-    var new_y = global_position.y + movement
-    
-    if (direction > 0 and new_y >= cabin_data.target_position.y) or (direction < 0 and new_y <= cabin_data.target_position.y): # on arrival
-        global_position.y = cabin_data.target_position.y
-        reset_elevator_direction()        
-    
-    else: # keep moving towards destination
-        global_position.y = new_y
-    
-    if cabin_data.elevator_occupied: 
-        SignalBus.elevator_position_updated.emit(global_position, queue_manager.elevator_queue[0]["sprite_name"])
-
-func reset_elevator_direction() -> void:
-    if cabin_data.elevator_direction != 0:
-        cabin_data.elevator_direction = 0
-        # _print_elevator_direction()
 
 
 #region Process Idle State
@@ -205,8 +140,8 @@ func process_waiting():
     ## start the timer only if we are the first request pick-up floor, else leave now. 
     ## should not matter, since we are leaving next frame
     
-    if cabin_data.cabin_timer.is_stopped():    
-        start_waiting_timer()
+    if cabin_timer.is_timer_running():    
+        cabin_timer.start_waiting_timer()
 
     # print("updating elevator state at the end of the main scripts process_waiting function")
     elevator_state_manager.process_waiting()
@@ -230,8 +165,8 @@ func emit_ready_on_waiting():
         
         if cabin_data.elevator_occupied:
             cabin_data.elevator_ready_emitted = true
-            if not cabin_data.cabin_timer.is_stopped():
-                stop_waiting_timer()
+            if not cabin_timer.is_timer_running():
+                cabin_timer.stop_waiting_timer()
             break
 
     cabin_data.elevator_ready_emitted = true
@@ -346,8 +281,8 @@ func _categorize_incomming_elevator_request(sprite_name: String, sprite_elevator
 func _on_sprite_entering_elevator(sprite_name: String):
     # print("Elevator: Sprite ", sprite_name, " has begun to enter the elevator")
     
-    if not cabin_data.cabin_timer.is_stopped():
-        stop_waiting_timer()
+    if cabin_timer.is_timer_running():
+        cabin_timer.stop_waiting_timer()
     
     var first_request = queue_manager.elevator_queue[0]
     if first_request["sprite_name"] != sprite_name:        
@@ -376,59 +311,6 @@ func reset_elevator() -> void:
     cabin_data.pick_up_on_current_floor = false
     cabin_data.elevator_ready = false    
     cabin_data.elevator_direction = false
-  
-#region CabinTimer
-func setup_cabin_timer(wait_time: float) -> void:
-    var new_timer = Timer.new()
-    new_timer.one_shot = true
-    new_timer.wait_time = wait_time
-    new_timer.timeout.connect(_on_cabin_timer_timeout)    
-    add_child(new_timer)
-    cabin_data.cabin_timer = new_timer
-    # print("In timer setup: cabin_data.cabin_timer: ", cabin_data.cabin_timer)
-
-
-func start_waiting_timer() -> void:
-    
-    
-    if not cabin_data.cabin_timer.is_stopped():
-        push_warning("cabin timer already started, returning immediately.")
-        return
-        
-    # Only start the timer if there's at least one request for the current floor.
-    
-    if not queue_manager.elevator_queue.is_empty():
-        # print("starting timer")
-        cabin_data.cabin_timer.start()
-        # print("timer started")
-
-func stop_waiting_timer() -> void:
-    
-    if cabin_data.cabin_timer == null:
-        push_warning("cabin timer not set-up in stop_waiting_timer")
-        return
-
-    if cabin_data.cabin_timer.is_stopped():
-        push_warning("cabin timer is not running; nothing to stop.")
-        return
-    # print("stopping timer")
-    cabin_data.cabin_timer.stop()
-    # print("cabin timer stopped")
-
-func _on_cabin_timer_timeout() -> void:    
-    
-    if cabin_data.elevator_state != cabin_data.ElevatorState.WAITING and cabin_data.elevator_state != cabin_data.ElevatorState.DEPARTING:
-        push_warning("Timer timed out but elevator state is neither WAITING nor DEPARTING.")
-        return
-
-    if queue_manager.elevator_queue.is_empty():
-        push_warning("Elevator queue is empty on timer timeout.")
-        return
-    
-    # print("timer timeout")
-    queue_manager.remove_request_on_waiting_timer_timeout(cabin_data.current_floor)
-        
-#endregion
 
 #region Set-Up
 
@@ -438,11 +320,21 @@ func set_up_elevator_cabin():
     connect_to_signals()
     cache_elevators()
     cache_floor_positions()
-    setup_cabin_timer(2.0)  # setup_cabin_timer(cabin_data.cabin_timer_timeout)
+    
+    # Initialize the timer references
+    cabin_timer.cabin_data = cabin_data
+    cabin_timer.queue_manager = queue_manager
+    
+    # Connect timer timeout signal
+    cabin_timer.timeout_expired.connect(_on_cabin_timer_timeout)
 
     var elevator = get_elevator_for_current_floor()
     elevator.set_door_state(elevator.DoorState.OPEN)
 
+func _on_cabin_timer_timeout() -> void:
+    # This function is connected to the timeout_expired signal from cabin_timer
+    # It can be used to handle any additional logic when the timer expires
+    pass
 
 func position_cabin():    
     var viewport_size = get_viewport().size

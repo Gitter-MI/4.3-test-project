@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://ddgu340ss41q8"]
+[gd_scene load_steps=9 format=3 uid="uid://ddgu340ss41q8"]
 
 [ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="1_lk3mn"]
 [ext_resource type="Script" uid="uid://bymp2i771v7a1" path="res://Scripts/magical_elevator.gd" id="1_rukfi"]
 [ext_resource type="Script" uid="uid://bvrk10jisiuvq" path="res://Data/cabin_data_new.gd" id="2_rukfi"]
 [ext_resource type="Script" uid="uid://b5eyvmrtr4snk" path="res://Scripts/queue_manager_new.gd" id="3_e8aju"]
 [ext_resource type="Script" uid="uid://c3qahk4lhar8g" path="res://Scripts/elevator_state_machine_new.gd" id="4_ay4kc"]
+[ext_resource type="Script" uid="uid://cdno27ldc7xmo" path="res://Scripts/cabin_timer.gd" id="6_nxcqw"]
+[ext_resource type="Script" uid="uid://b7sj3u0km6wu2" path="res://Scripts/elevator_movement_component.gd" id="7_ay4kc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rukfi"]
 size = Vector2(40, 54)
@@ -23,8 +25,17 @@ script = ExtResource("4_ay4kc")
 queue_manager = NodePath("../Queue_Manager")
 cabin_data = NodePath("../Cabin_Data")
 
+[node name="Cabin_Timer" type="Node" parent="."]
+script = ExtResource("6_nxcqw")
+
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_lk3mn")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_rukfi")
+
+[node name="Elevator_Movement_Component" type="Node" parent="." node_paths=PackedStringArray("cabin_data", "queue_manager", "cabin_timer")]
+script = ExtResource("7_ay4kc")
+cabin_data = NodePath("../Cabin_Data")
+queue_manager = NodePath("../Queue_Manager")
+cabin_timer = NodePath("../Cabin_Timer")

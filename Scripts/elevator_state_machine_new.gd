@@ -1,4 +1,4 @@
-# elevator_state_machine.gd
+# elevator_state_machine_new.gd
 extends Node
 const CabinData = preload("res://Data/cabin_data_new.gd")
 
