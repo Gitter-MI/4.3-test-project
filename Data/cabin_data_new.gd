@@ -40,8 +40,8 @@ var blocked_sprite: String = "" ## indicates which sprite can currently is not e
 
 
 
-var current_floor: int = 3 # for spawning only.
-var destination_floor: int = 3  # for spawning only. initial value irrelevant
+var current_floor: int = 1 # for spawning only.
+var destination_floor: int = 1  # for spawning only. initial value irrelevant
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
 

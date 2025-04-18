@@ -7,7 +7,7 @@ enum ActiveState { NONE, MOVEMENT, ROOM, ELEVATOR }
 
 var movement_state: MovementState = MovementState.NONE
 var room_state: RoomState = RoomState.NONE
-var elevator_state: ElevatorState = ElevatorState.WAITING_FOR_ELEVATOR
+var elevator_state: ElevatorState = ElevatorState.WAITING_FOR_ELEVATOR  ## is this correct? shouldn't it be move-idle? 
 
 var sprite_name: String = ""
 var sprite_height: int = -1
@@ -69,7 +69,7 @@ func reset_elevator_status() -> void:
     elevator_ready = false
     entering_elevator = false
     entered_elevator = false
-    # entered_elevator_room = false  ## needs to be tested first but should be fine here
+    entered_elevator_room = false  ## needs to be tested first but should be fine here
     elevator_destination_reached = false
     exiting_elevator = false
     exited_elevator = false

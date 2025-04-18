@@ -1,5 +1,6 @@
 # cabin_timer.gd
-# This component handles the elevator waiting timer functionality
+# This component handles the "elevator waiting for sprite to enter" timer functionality
+''' to-do: The timer for "sprite in elevator room" hasn't been implemented, yet. '''
 # Responsibilities:
 # - Manages the elevator waiting timer
 # - Emits a signal when the timer expires
@@ -21,6 +22,7 @@ var cabin_data
 var queue_manager
 
 func _ready():
+    # print("settting up cabin timer")
     setup_cabin_timer(wait_time)
 
 # Sets up the timer with the specified wait time
@@ -35,7 +37,7 @@ func setup_cabin_timer(timer_wait_time: float) -> void:
 
 # Starts the waiting timer if there are requests in the queue
 func start_waiting_timer() -> void:
-    print("starting timer")
+    # print("starting timer")
     if not cabin_timer.is_stopped():
         push_warning("cabin timer already started, returning immediately.")
         return
@@ -53,7 +55,8 @@ func stop_waiting_timer() -> void:
     if cabin_timer.is_stopped():
         # push_warning("cabin timer is not running; nothing to stop.")
         return
-        
+    
+    # print("stopping timer")
     cabin_timer.stop()
 
 # Returns whether the timer is currently running
@@ -64,6 +67,10 @@ func is_timer_running() -> bool:
 
 # Called when the timer expires
 func _on_cabin_timer_timeout() -> void:    
+    
+    ## to-do: stop timer when the sprite enters the elevator_room (if elevator is in state room occupied)
+    
+    
     # Check if the elevator is in a valid state for the timer to expire
     if cabin_data.elevator_state != cabin_data.ElevatorState.WAITING and cabin_data.elevator_state != cabin_data.ElevatorState.DEPARTING:
         push_warning("Timer timed out but elevator state is neither WAITING nor DEPARTING.")

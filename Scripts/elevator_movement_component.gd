@@ -17,10 +17,11 @@ func update_destination_floor() -> void:
     var current_request = queue_manager.elevator_queue[0]
     
     if cabin_data.elevator_occupied:
-        print("in the if statement")
+        # print("in the if statement")
         cabin_data.destination_floor = current_request["destination_floor"]
-        if cabin_data.destination_floor == -1:
-            print("sprite is now in elevator room")
+        if cabin_data.destination_floor == -1:  ## to-do: do we already know that the elevator room is occupied? if yes, check that condition / flag instead
+            ## prevent the elevator from leaving before the sprite has selected a new destination floor. 
+            # print("sprite is now in elevator room")
             return
     else:
         print("in the else statement")

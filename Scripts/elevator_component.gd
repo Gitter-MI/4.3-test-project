@@ -92,7 +92,12 @@ func enter_elevator():
 
 func on_sprite_entered_elevator():    
     sprite_data_new.entered_elevator = true
-    print("enter animation finished with: ", sprite_data_new.sprite_name, " and ", sprite_data_new.stored_target_floor)
+    # print("enter animation finished with: ", sprite_data_new.sprite_name, " and ", sprite_data_new.stored_target_floor)
+    
+    '''set sprite flag for in elevator room'''
+    if sprite_data_new.stored_target_floor == -1:
+        sprite_data_new.entered_elevator_room = true
+    
     SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
     animation_controller.animate(sprite_data_new)
 
@@ -154,8 +159,11 @@ func process_elevator_actions() -> void:
                 enter_elevator()                            
         sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT:      
             animation_controller.animate(sprite_data_new)
-        sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:      
-            animation_controller.animate(sprite_data_new)
+            
+        sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM:
+            ## question: show the elevator room interface for as long as the sprite is in the elevator room state? if yes, do it here                      
+            animation_controller.animate(sprite_data_new) ## plays the idle animation
+            
         sprite_data_new.ElevatorState.EXITING_ELEVATOR:
             exit_elevator()        
         _:

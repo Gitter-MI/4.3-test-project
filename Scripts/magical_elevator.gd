@@ -27,7 +27,9 @@ func _process(delta) -> void:
         cabin_data.ElevatorState.WAITING:
             process_waiting()            
         cabin_data.ElevatorState.DEPARTING:            
-            process_departing()                        
+            process_departing()      
+        cabin_data.ElevatorState.ROOM_OCCUPIED:
+            process_room_occupied()                  
         cabin_data.ElevatorState.TRANSIT: 
             process_transit(delta)
         cabin_data.ElevatorState.ARRIVING:
@@ -35,6 +37,23 @@ func _process(delta) -> void:
         _:
             push_warning("unknow state in process_cabin_states")                            
             pass
+
+
+func process_room_occupied() -> void:
+    # print("process room occupied")
+    ## to-do: everything below
+    '''if cabin timer is not running start it'''
+    
+    
+    '''check if the destination floor is changing'''
+    '''-> should be the request being updated, right?'''
+    
+    '''if it is not the current floor then switch to transit via setting elevator room occupied to false'''
+    '''if it is the current floor OR the elevator room timer times out -> set elevator to arriving by setting direction to 0''' 
+    ## actually the sprite should only be ejected by timer if there is another sprite that wants to use the elevator. Start the timer anyways but let it go should no other sprite need the elevator
+    return
+    
+
 
 
 func process_arriving() -> void:
@@ -140,7 +159,7 @@ func process_waiting():
     ## start the timer only if we are the first request pick-up floor, else leave now. 
     ## should not matter, since we are leaving next frame
     
-    if cabin_timer.is_timer_running():    
+    if cabin_data.pick_up_on_current_floor and not cabin_timer.is_timer_running():    
         cabin_timer.start_waiting_timer()
 
     # print("updating elevator state at the end of the main scripts process_waiting function")
@@ -291,9 +310,13 @@ func _on_sprite_entering_elevator(sprite_name: String):
     cabin_data.elevator_occupied = true    
 
 func _on_sprite_enter_animation_finished(_sprite_name: String, _stored_target_floor: int):
+    '''first moment to learn that the sprite is in the room and does not want to transit immediately?'''
     ## arguments are never used    
     cabin_data.sprite_entered = true
-    print("enter animation finished from sprite: ", _sprite_name, " with target floor: ", _stored_target_floor)    
+    if _stored_target_floor == -1:
+        cabin_data.elevator_room_occupied = true
+        print("Sprite: ", _sprite_name, " has entered the elevator room, because stored target floor is ", _stored_target_floor)
+    # print("enter animation finished from sprite: ", _sprite_name, " with target floor: ", _stored_target_floor)    
     pass
 
 func _on_sprite_exiting(sprite_name) -> void:

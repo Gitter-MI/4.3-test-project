@@ -97,9 +97,11 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
     
     if sprite_data_new.entered_elevator:
         # print("sprite has entered the elevator")    
-        if sprite_data_new.target_room == -2:
+        if sprite_data_new.entered_elevator_room:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM)
             print("Sprite is now in Elevator Room: 2 second timeout before exiting") # switch to idle animation if needed
+            
+            ## actions below need to be handled by the process state functions of the sprite itself
             # await get_tree().create_timer(2.0).timeout  ## not working
             # sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)  ## placeholder, needs to be replaced with actual logic
         else:            

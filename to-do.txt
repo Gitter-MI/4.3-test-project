@@ -1,14 +1,30 @@
 Room Logic:
     - Prepare clear cut-off points when entering rooms, kiosks and elevator room
+        - for elevator: in process elevator states for elevator room in SpriteBase
+        - for rooms: in new to implemnt process room states for CHECKING_ROOM_STATE
+        
     - implement state switch to room enter logic
     - check availability, etc...
     - implement entering the rooms
     - add the actual room scenes
     
-    - tasks marked with to-do:
+    
+    
+      
+    
+    - tasks marked with "to-do:"
+        to-do: stop timer when the sprite enters the elevator_room (if elevator is in state room occupied)
+        
+        
+        
+        optional to-do: prevent the door from closing when entering the elevator room and not leaving? maybe unnnecessary
 
 
-Bug: cabin timer is not starting
+
+
+Open: Can't be sure if the cabin_floor timer is working as expected
+
+Bug: animation glitch when moving to an elevator on another floor (click on elevator on another floor)
     
 
 

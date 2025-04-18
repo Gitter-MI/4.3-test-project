@@ -14,7 +14,6 @@ const CabinData = preload("res://Data/cabin_data_new.gd")
 func _ready() -> void:
     pass
     
-    
 #func process_elevator_state() -> void:    
     #match cabin_data.elevator_state:
     #
@@ -34,7 +33,6 @@ func _ready() -> void:
             #push_warning("unknow state in process_cabin_states")                            
             #pass
 
-
 func process_idle() -> void:        
     if not cabin_data.elevator_busy:
         return
@@ -43,8 +41,6 @@ func process_idle() -> void:
         cabin_data.set_elevator_state(CabinData.ElevatorState.WAITING)
         return
         # process_waiting()
-
-    
     
 func process_waiting() -> void:
     # print("process_waiting in elevator state machine")
@@ -77,14 +73,14 @@ func process_waiting() -> void:
         process_departing()
         return
 
+
+
     ## 5) If the next pickup IS on this floor, but no one has entered yet, we wait (timer running).
     # print("timer is running")
     return
 
 
-    
-    
-    
+ 
 func process_departing() -> void:
     # print("process_departing in state elevator state machine")
     '''we must wait for the sprite to finish entering before closing the doors, if occupied'''
@@ -93,16 +89,31 @@ func process_departing() -> void:
     #print("Elevator is DEPARTING")
     #print("cabin_data.elevator_occupied: ", cabin_data.elevator_occupied)
     #print("cabin_data.doors_closed: ", cabin_data.doors_closed)
+
+    if cabin_data.elevator_room_occupied:
+        cabin_data.set_elevator_state(CabinData.ElevatorState.ROOM_OCCUPIED)    
+    
     if cabin_data.doors_closed:
         cabin_data.set_elevator_state(CabinData.ElevatorState.TRANSIT)
 
+
+
+func process_elevator_room_occupied():
+    if cabin_data.elevator_room_occupied == false: 
+        cabin_data.set_elevator_state(CabinData.ElevatorState.DEPARTING)
+
+    if cabin_data.elevator_direction == 0:
+        # print("switching to arriving because sprite is exiting elevator room on the same floor")
+        cabin_data.set_elevator_state(CabinData.ElevatorState.ARRIVING)
+
+
 func process_transit() -> void:
     # print("elevator is now in transit")
+    # print("cabin_data.elevator_direction: ", cabin_data.elevator_direction)
     
     if cabin_data.elevator_direction == 0:
         # print("switching to arriving")
         cabin_data.set_elevator_state(CabinData.ElevatorState.ARRIVING)
-
 
 func process_arriving() -> void:
     
