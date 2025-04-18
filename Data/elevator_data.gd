@@ -11,7 +11,9 @@ var elevator_busy: bool = false
 var pick_up_on_current_floor: bool = false    
 var elevator_ready: bool = false
 var elevator_occupied: bool = false
-var timer_started: bool = false
+var elevator_room_occupied: bool = false  ## to-do: needs to be reset when sprite is exiting
+var timer_started: bool = false  ## is the elevator waiting on floor for sprite to enter timer, not the sprite in elevator room timer
+var elevator_room_timer_started: bool = false ## to-do: is not implemented at all
 
 
 var re_emit_ready_signal: bool = false
@@ -43,3 +45,6 @@ const SPEED: float = 500.0  # Pixels per second
 
 var cabin_timer: Timer
 var cabin_timer_timeout: int = 2
+
+var elevator_room_timer: Timer  ## is this another instance of the same timer or is this actually a different timer of the same type? needs one shot then stop
+var elevator_room_timer_timeout: int = 5

@@ -1,3 +1,18 @@
+Room Logic:
+    - Prepare clear cut-off points when entering rooms, kiosks and elevator room
+    - implement state switch to room enter logic
+    - check availability, etc...
+    - implement entering the rooms
+    - add the actual room scenes
+    
+    - tasks marked with to-do:
+    
+
+
+
+
+
+
 -> Properly define z-index for all sprites. Otherwise the engine will randomly render them on top of each other
 
 # is there a change in this file? This is my second attempt already!

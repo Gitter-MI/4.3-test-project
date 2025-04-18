@@ -99,9 +99,9 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
         # print("sprite has entered the elevator")    
         if sprite_data_new.target_room == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM)
-            push_warning("Sprite is now in Elevator Room: 2 second timeout before exiting") # switch to idle animation if needed
-            await get_tree().create_timer(2.0).timeout  ## not working
-            sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)  ## placeholder, needs to be replaced with actual logic
+            print("Sprite is now in Elevator Room: 2 second timeout before exiting") # switch to idle animation if needed
+            # await get_tree().create_timer(2.0).timeout  ## not working
+            # sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)  ## placeholder, needs to be replaced with actual logic
         else:            
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
             # print("Sprite is switching to Transit State")

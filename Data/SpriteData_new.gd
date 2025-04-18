@@ -50,6 +50,9 @@ var elevator_request_confirmed: bool = false
 var elevator_ready: bool = false
 var entering_elevator: bool = false
 var entered_elevator: bool = false
+
+var entered_elevator_room: bool = false  ## to-do: needs to be reset when exiting
+
 var elevator_destination_reached = false
 var exiting_elevator: bool = false
 var exited_elevator: bool = false 
@@ -66,6 +69,7 @@ func reset_elevator_status() -> void:
     elevator_ready = false
     entering_elevator = false
     entered_elevator = false
+    # entered_elevator_room = false  ## needs to be tested first but should be fine here
     elevator_destination_reached = false
     exiting_elevator = false
     exited_elevator = false
