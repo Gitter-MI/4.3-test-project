@@ -6,6 +6,9 @@ Room Logic:
     - add the actual room scenes
     
     - tasks marked with to-do:
+
+
+Bug: cabin timer is not starting
     
 
 

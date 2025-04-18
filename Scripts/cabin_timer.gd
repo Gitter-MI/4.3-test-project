@@ -35,6 +35,7 @@ func setup_cabin_timer(timer_wait_time: float) -> void:
 
 # Starts the waiting timer if there are requests in the queue
 func start_waiting_timer() -> void:
+    print("starting timer")
     if not cabin_timer.is_stopped():
         push_warning("cabin timer already started, returning immediately.")
         return

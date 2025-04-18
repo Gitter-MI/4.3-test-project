@@ -15,24 +15,33 @@ var sprite_entered: bool = false
 
 
 var elevator_ready_emitted: bool = false # used in WAITING state
-
+var elevator_ready: bool = false # is used?
 
 var elevator_queue_reordered: bool = false
 
-var elevator_ready: bool = false # is used?
+
+var elevator_room_occupied: bool = false  ## to-do: needs to be reset when sprite is exiting
+var timer_started: bool = false  ## is the elevator waiting on floor for sprite to enter timer, not the sprite in elevator room timer
+var elevator_room_timer_started: bool = false ## to-do: is not implemented at all
+
+## the timer vars have been moved to the timer component of the magival elevator. 
+## to consider when implementing the elevator room timer
+#var cabin_timer: Timer
+#var cabin_timer_timeout: int = 2
+
+
 
 var doors_opening: bool = false
 var doors_open: bool = true
 var doors_closing: bool = false
 var doors_closed: bool = false
 
-var room_occupied: bool = false
-var blocked_sprite: String = ""
+var blocked_sprite: String = "" ## indicates which sprite can currently is not enter - is blocked from entering
 
 
 
-var current_floor: int = 1 # for spawning only.
-var destination_floor: int = 2  # for spawning only. initial value irrelevant
+var current_floor: int = 3 # for spawning only.
+var destination_floor: int = 3  # for spawning only. initial value irrelevant
 
 var elevator_direction: int = 0  # 1 = up, -1 = down, 0 = idle
 
