@@ -291,9 +291,9 @@ func _on_sprite_entering_elevator(sprite_name: String):
     cabin_data.elevator_occupied = true    
 
 func _on_sprite_enter_animation_finished(_sprite_name: String, _stored_target_floor: int):
-    ## arguments are never used
+    ## arguments are never used    
     cabin_data.sprite_entered = true
-    # print("enter animation finished from sprite: ", sprite_name)    
+    print("enter animation finished from sprite: ", _sprite_name, " with target floor: ", _stored_target_floor)    
     pass
 
 func _on_sprite_exiting(sprite_name) -> void:

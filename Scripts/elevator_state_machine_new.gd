@@ -56,6 +56,10 @@ func process_waiting() -> void:
         cabin_data.set_elevator_state(CabinData.ElevatorState.IDLE)
         return
 
+    ''' no need to depart if the sprite wants to enter the room'''
+    ''' make sure the sprite also enters the room state'''
+
+
     # 2) If the elevator is already occupied, we need to depart next.
     if cabin_data.elevator_occupied:
         # print("in elevator state machine: occupied")

@@ -100,8 +100,8 @@ func _process_entering_elevator(sprite_data_new: Resource) -> void:
         if sprite_data_new.target_room == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_ROOM)
             push_warning("Sprite is now in Elevator Room: 2 second timeout before exiting") # switch to idle animation if needed
-            await get_tree().create_timer(2.0).timeout
-            sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)
+            await get_tree().create_timer(2.0).timeout  ## not working
+            sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.EXITING_ELEVATOR)  ## placeholder, needs to be replaced with actual logic
         else:            
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.IN_ELEVATOR_TRANSIT)            
             # print("Sprite is switching to Transit State")
@@ -176,7 +176,7 @@ func _update_movement_state(sprite_data_new: Resource) -> void:
             sprite_data_new.set_room_state(sprite_data_new.RoomState.CHECKING_ROOM_STATE)            
         elif room_index == -2:
             sprite_data_new.set_elevator_state(sprite_data_new.ElevatorState.CALLING_ELEVATOR)
-            print("sprite ", sprite_data_new.sprite_name, " is switching to CALLING_ELEVATOR-Elevator ROOM")
+            # print("sprite ", sprite_data_new.sprite_name, " is switching to CALLING_ELEVATOR-Elevator ROOM")
         else:
             push_warning("_update_movement_state: Unhandled target_room value: %d" % room_index)
 

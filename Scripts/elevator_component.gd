@@ -92,6 +92,7 @@ func enter_elevator():
 
 func on_sprite_entered_elevator():    
     sprite_data_new.entered_elevator = true
+    print("enter animation finished with: ", sprite_data_new.sprite_name, " and ", sprite_data_new.stored_target_floor)
     SignalBus.enter_animation_finished.emit(sprite_data_new.sprite_name, sprite_data_new.stored_target_floor)
     animation_controller.animate(sprite_data_new)
 

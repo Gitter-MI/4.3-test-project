@@ -17,8 +17,13 @@ func update_destination_floor() -> void:
     var current_request = queue_manager.elevator_queue[0]
     
     if cabin_data.elevator_occupied:
+        print("in the if statement")
         cabin_data.destination_floor = current_request["destination_floor"]
+        if cabin_data.destination_floor == -1:
+            print("sprite is now in elevator room")
+            return
     else:
+        print("in the else statement")
         cabin_data.destination_floor = current_request["pick_up_floor"]
         ## switch to elevator room
         ## make sure to call update destination floor if the user selects a floor, or allow the sprite to exit on the same floor
