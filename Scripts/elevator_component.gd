@@ -77,12 +77,16 @@ func enter_elevator():
         sprite_data_new.entering_elevator = true
         animation_controller.animate(sprite_data_new)
            
-        var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
+        #.var elevator_data = navigation_controller.elevators.get(sprite_data_new.current_floor_number, null)
+        var cabin_pos = cabin.global_position
         var cabin_height = cabin.get_cabin_height()
-        var cabin_bottom_y = elevator_data["position"].y + (cabin_height * 0.5)
+        # var cabin_bottom_y = elevator_data["position"].y + (cabin_height * 0.5)
+        var cabin_bottom_y = cabin_pos.y + cabin_height * 0.5
         var new_position = Vector2(
-            elevator_data["position"].x,
-            cabin_bottom_y - (sprite_data_new.sprite_height * 0.5)
+            # elevator_data["position"].x,
+            # cabin_bottom_y - (sprite_data_new.sprite_height * 0.5)
+            cabin_pos.x,
+            cabin_bottom_y - sprite_data_new.sprite_height * 0.5
         )
         sprite_data_new.set_current_position(new_position,sprite_data_new.current_floor_number,sprite_data_new.current_room)
         sprite_base.global_position = sprite_data_new.current_position
