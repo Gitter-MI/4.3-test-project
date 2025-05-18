@@ -1,0 +1,8 @@
+res://Scenes/Main.tscn
+res://Scripts/control.gd
+res://Scenes/Building.tscn
+res://Scenes/Floor.tscn
+res://Scenes/Door.tscn
+res://Scenes/Kiosk.tscn
+res://Scenes/Sprite_Base.tscn
+res://Scenes/Magical_Elevator.tscn
