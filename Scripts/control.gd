@@ -22,6 +22,7 @@ func _ready():
     
     tooltip_label.add_theme_color_override("font_color", Color.BLACK)
     container.add_theme_constant_override("separation", 10)
+    print("control.gd ready")
 
 func _process(_delta):
     if visible:

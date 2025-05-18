@@ -2,10 +2,10 @@
 
 [ext_resource type="PackedScene" uid="uid://w0gcr70gjsy3" path="res://Scenes/Building.tscn" id="1_avx81"]
 [ext_resource type="PackedScene" uid="uid://ddgu340ss41q8" path="res://Scenes/Magical_Elevator.tscn" id="4_8yijo"]
-[ext_resource type="Script" path="res://Scripts/camera_2d.gd" id="4_a875k"]
+[ext_resource type="Script" uid="uid://bwmxgeb5gc88s" path="res://Scripts/camera_2d.gd" id="4_a875k"]
 [ext_resource type="PackedScene" uid="uid://cafwwxkckh345" path="res://Scenes/Sprite_Base.tscn" id="5_vy5pj"]
 [ext_resource type="PackedScene" uid="uid://dg7s8upxd5tvp" path="res://Scenes/deco_new.tscn" id="6_1hb7r"]
-[ext_resource type="Script" path="res://Scripts/spawner.gd" id="7_i7040"]
+[ext_resource type="Script" uid="uid://x1qwp1k0do03" path="res://Scripts/spawner.gd" id="7_i7040"]
 [ext_resource type="Script" uid="uid://cvsrr031gvuuy" path="res://Scripts/navigation_controller.gd" id="8_7c7ne"]
 [ext_resource type="PackedScene" uid="uid://tvmaycqsat5w" path="res://tooltip_manager.tscn" id="10_4kpch"]
 [ext_resource type="PackedScene" uid="uid://b47kwp7rlx2nu" path="res://Scenes/Tooltip_Control.tscn" id="10_bmxlf"]
