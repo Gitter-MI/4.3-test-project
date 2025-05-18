@@ -5,3 +5,8 @@ res://Scenes/Kiosk.tscn
 res://Scenes/Sprite_Base.tscn
 res://Scenes/Magical_Elevator.tscn
 res://Scenes/Main.tscn
+res://Scripts/elevator_component.gd
+res://Scripts/movement_component.gd
+res://Scripts/sprite_base.gd
+res://Scripts/pathfinder_component.gd
+res://Scripts/state_component.gd

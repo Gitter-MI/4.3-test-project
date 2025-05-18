@@ -1,5 +1,7 @@
 # Pathfinder.gd
 extends Node
+class_name PathfinderComponent
+
 const SpriteDataNew = preload("res://Data/SpriteData_new.gd")
 @onready var navigation_controller: Node = get_tree().get_root().get_node("Main/Navigation_Controller")
 

@@ -1,3 +1,4 @@
+# elevator_component.gd
 extends Node
 class_name ElevatorComponent
 

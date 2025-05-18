@@ -1,4 +1,5 @@
 extends Node
+class_name MovementComponent
 
 func move_sprite(delta: float, sprite_data_new: Resource, owner_node: Node) -> void:
     # Only move if the sprite is in a walking state

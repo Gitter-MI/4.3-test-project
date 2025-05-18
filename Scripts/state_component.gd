@@ -1,5 +1,7 @@
 # state_component.gd
 extends Node
+class_name StateComponent
+
 const SpriteDataNew = preload("res://Data/SpriteData_new.gd")
 
 

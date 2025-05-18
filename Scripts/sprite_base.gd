@@ -4,10 +4,11 @@ extends Area2D
 @onready var navigation_controller := get_tree().get_root().get_node("Main/Navigation_Controller")
 @onready var cabin := get_tree().get_root().get_node("Main/Magical_Elevator")
 @onready var animation_controller := $AnimatedSprite2D
-@export var state_manager: Node
-@export var pathfinder: Node
-@export var movement: Node
-@export var elevator_movement: ElevatorComponent
+@onready var state_manager : StateComponent = $State_Component
+@onready var pathfinder : PathfinderComponent = $Pathfinder_Component
+@onready var movement : MovementComponent = $Movement_Component
+@onready var elevator_movement : ElevatorComponent = $Elevator_Movement
+# @export var elevator_movement: ElevatorComponent
 
 const SpriteDataScript = preload("res://Data/SpriteData_new.gd")
 var sprite_data_new: Resource = SpriteDataScript.new()
@@ -17,6 +18,7 @@ func _ready():
     connect_to_signals()    
     set_initial_position()
     z_index = 1
+
     elevator_movement.setup(self, sprite_data_new)
 
 
