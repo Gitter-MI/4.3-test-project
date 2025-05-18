@@ -1,9 +1,9 @@
 [gd_scene load_steps=13 format=3 uid="uid://bqi7jxa50tfga"]
 
-[ext_resource type="Script" path="res://Scripts/floor_element.gd" id="1_1fk65"]
+[ext_resource type="Script" uid="uid://daqewtb4fs1c3" path="res://Scripts/floor_element.gd" id="1_1fk65"]
 [ext_resource type="Texture2D" uid="uid://bdsnfxcl7vm83" path="res://Building/Rooms/1080_doors.png" id="2_6tgof"]
 [ext_resource type="PackedScene" uid="uid://b7oqiwi6psc28" path="res://Scenes/door_ownership.tscn" id="3_7mbvs"]
-[ext_resource type="Script" path="res://Scripts/DoorState.gd" id="4_1fk65"]
+[ext_resource type="Script" uid="uid://c2wj6ykgryvw1" path="res://Scripts/DoorState.gd" id="4_1fk65"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cb3p"]
 atlas = ExtResource("2_6tgof")

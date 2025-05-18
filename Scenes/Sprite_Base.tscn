@@ -1,12 +1,12 @@
 [gd_scene load_steps=24 format=3 uid="uid://cafwwxkckh345"]
 
-[ext_resource type="Script" path="res://Scripts/sprite_base.gd" id="1_xg5y0"]
+[ext_resource type="Script" uid="uid://bysjk40gw4iyf" path="res://Scripts/sprite_base.gd" id="1_xg5y0"]
 [ext_resource type="Texture2D" uid="uid://b1unl5ecg724x" path="res://Sprites/Player_1.png" id="2_8d083"]
 [ext_resource type="Script" uid="uid://bdel5w2lwam25" path="res://Scripts/pathfinder_component.gd" id="3_21vma"]
 [ext_resource type="Texture2D" uid="uid://2d6xwfjnooup" path="res://Sprites/Player_1_idle.png" id="3_iuv37"]
 [ext_resource type="Script" uid="uid://bs44xfwkdxl5t" path="res://Scripts/state_component.gd" id="4_iuv37"]
 [ext_resource type="Script" uid="uid://h1f5vx8kcb3v" path="res://Scripts/sprite_animation.gd" id="4_snh8b"]
-[ext_resource type="Script" path="res://Scripts/movement_component.gd" id="5_8d083"]
+[ext_resource type="Script" uid="uid://cry7jqv88tijc" path="res://Scripts/movement_component.gd" id="5_8d083"]
 [ext_resource type="Script" uid="uid://dmhk14331f56t" path="res://Scripts/elevator_component.gd" id="8_snh8b"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8d083"]

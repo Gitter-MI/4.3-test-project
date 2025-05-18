@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://gkywonwd2djl" path="res://Building/Elevators/elevator_cabin.png" id="1_lk3mn"]
 [ext_resource type="Script" uid="uid://bymp2i771v7a1" path="res://Scripts/magical_elevator.gd" id="1_rukfi"]
 [ext_resource type="Script" uid="uid://bvrk10jisiuvq" path="res://Data/cabin_data_new.gd" id="2_rukfi"]
-[ext_resource type="Script" path="res://Scripts/queue_manager_new.gd" id="3_e8aju"]
+[ext_resource type="Script" uid="uid://b5eyvmrtr4snk" path="res://Scripts/queue_manager_new.gd" id="3_e8aju"]
 [ext_resource type="Script" uid="uid://c3qahk4lhar8g" path="res://Scripts/elevator_state_machine_new.gd" id="4_ay4kc"]
 [ext_resource type="Script" uid="uid://cdno27ldc7xmo" path="res://Scripts/cabin_timer.gd" id="6_nxcqw"]
 [ext_resource type="Script" uid="uid://b7sj3u0km6wu2" path="res://Scripts/elevator_movement_component.gd" id="7_ay4kc"]

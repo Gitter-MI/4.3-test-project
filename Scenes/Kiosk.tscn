@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://tvhyupped1eb"]
 
-[ext_resource type="Script" path="res://Scripts/Kiosk.gd" id="1_ephfx"]
+[ext_resource type="Script" uid="uid://dv15hulgenj28" path="res://Scripts/Kiosk.gd" id="1_ephfx"]
 [ext_resource type="Texture2D" uid="uid://c4rxmv5u32mw6" path="res://Building/Rooms/1080_roomboard.png" id="2_ephfx"]
 [ext_resource type="PackedScene" uid="uid://b7oqiwi6psc28" path="res://Scenes/door_ownership.tscn" id="3_ephfx"]
 
